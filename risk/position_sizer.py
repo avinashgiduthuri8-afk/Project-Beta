@@ -1,69 +1,49 @@
-"""
-Position Sizer for Indian Equities & Derivatives.
-Calculates position size based on capital, risk per trade, stop-loss distance in ₹, and lot size.
-"""
+"""Position Sizer based on Risk per Trade, Capital, and Lot Size Quantization."""
 
 from __future__ import annotations
 
 import math
 from typing import Optional
-from core.enums import ProductType
 
 
 class PositionSizer:
-    """
-    Calculates appropriate order quantity respecting risk parameters and lot sizes.
-    """
+    """Calculates optimal share/contract quantity according to risk rules."""
 
     @staticmethod
-    def calculate_quantity_by_risk(
+    def calculate_quantity(
         capital: float,
-        risk_pct: float,
+        risk_per_trade_pct: float,
         entry_price: float,
         stop_loss_price: float,
         lot_size: int = 1,
-        product: ProductType = ProductType.MIS,
-        max_capital_allocation_pct: float = 20.0,
+        max_capital_allocation_pct: float = 25.0,
     ) -> int:
         """
-        Calculate quantity based on fixed risk per trade.
-
-        Risk Amount = Capital * (risk_pct / 100)
-        Stop Loss Distance (₹) = abs(entry_price - stop_loss_price)
-        Raw Quantity = Risk Amount / Stop Loss Distance
-
-        Args:
-            capital: Available trading capital (₹).
-            risk_pct: Percentage of capital to risk (e.g. 1.0 = 1%).
-            entry_price: Planned entry price (₹).
-            stop_loss_price: Planned stop loss price (₹).
-            lot_size: Instrument lot size (1 for stocks, 50 for NIFTY, etc.).
-            product: MIS (intraday) or CNC / NRML.
-            max_capital_allocation_pct: Max percentage of capital for this single trade.
-
-        Returns:
-            Calculated and lot-adjusted quantity (minimum 0 or 1 lot).
+        Calculate quantity:
+        - Risk Amount = Capital * (Risk % / 100)
+        - Risk per share = abs(Entry - SL)
+        - Raw Qty = Risk Amount / Risk per share
+        - Clamped by max allocation % of total capital
+        - Rounded down to multiple of lot_size
         """
         if entry_price <= 0 or stop_loss_price <= 0:
             return 0
 
-        sl_distance = abs(entry_price - stop_loss_price)
-        if sl_distance <= 0.01:
+        risk_per_share = abs(entry_price - stop_loss_price)
+        if risk_per_share <= 0:
             return 0
 
-        risk_amount = capital * (risk_pct / 100.0)
-        raw_quantity = risk_amount / sl_distance
+        max_risk_amount = capital * (risk_per_trade_pct / 100.0)
+        raw_qty = max_risk_amount / risk_per_share
 
-        # Capital cap check
-        max_allocation = capital * (max_capital_allocation_pct / 100.0)
-        leverage = 5.0 if product == ProductType.MIS else 1.0
-        max_qty_by_capital = (max_allocation * leverage) / entry_price
+        # Capital allocation cap
+        max_capital_for_trade = capital * (max_capital_allocation_pct / 100.0)
+        max_qty_by_capital = max_capital_for_trade / entry_price
+        final_qty = min(raw_qty, max_qty_by_capital)
 
-        final_qty = min(raw_quantity, max_qty_by_capital)
-
-        # Quantize to lot size
+        # Lot size quantization
         if lot_size > 1:
-            lots = max(1, math.floor(final_qty / lot_size))
-            return int(lots * lot_size)
-        else:
-            return max(1, math.floor(final_qty))
+            lots = math.floor(final_qty / lot_size)
+            return max(lot_size if lots == 0 and final_qty >= (lot_size * 0.5) else 0, lots * lot_size)
+
+        return max(1, math.floor(final_qty))

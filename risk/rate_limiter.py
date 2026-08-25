@@ -1,51 +1,38 @@
-"""
-Token Bucket Rate Limiter for Broker Order Throttling.
-Prevents API bans by ensuring order requests comply with per-second and per-minute rate limits.
-"""
+"""Token-bucket rate limiter for broker API order throttling."""
 
 from __future__ import annotations
 
-import threading
 import time
+import threading
 
 
 class RateLimiter:
-    """
-    Thread-safe token bucket rate limiter.
-    """
+    """Thread-safe Token Bucket Rate Limiter (e.g. 5 orders per second)."""
 
-    def __init__(self, rate: float = 5.0, burst: int = 10) -> None:
-        """
-        Args:
-            rate: Token generation rate per second.
-            burst: Maximum burst capacity of bucket.
-        """
-        self.rate = rate
-        self.burst = burst
-        self.tokens = float(burst)
+    def __init__(self, rate: float = 5.0, capacity: float = 5.0):
+        self.rate = rate              # Tokens added per second
+        self.capacity = capacity      # Max bucket capacity
+        self.tokens = capacity
         self.last_update = time.monotonic()
-        self._lock = threading.Lock()
+        self.lock = threading.Lock()
 
-    def acquire(self, tokens: int = 1, blocking: bool = True, timeout: float = 2.0) -> bool:
-        """
-        Acquire tokens to proceed with an order.
-        """
+    def acquire(self, tokens: float = 1.0, blocking: bool = True, timeout: float = 2.0) -> bool:
+        """Attempt to consume tokens. Blocks if rate limit is reached."""
         start_time = time.monotonic()
-        while True:
-            with self._lock:
+        with self.lock:
+            while True:
                 now = time.monotonic()
                 elapsed = now - self.last_update
                 self.last_update = now
-                self.tokens = min(self.burst, self.tokens + elapsed * self.rate)
+                self.tokens = min(self.capacity, self.tokens + elapsed * self.rate)
 
                 if self.tokens >= tokens:
                     self.tokens -= tokens
                     return True
 
-            if not blocking:
-                return False
+                if not blocking or (time.monotonic() - start_time) >= timeout:
+                    return False
 
-            if time.monotonic() - start_time > timeout:
-                return False
-
-            time.sleep(0.05)
+                # Sleep needed time for remaining tokens
+                sleep_time = (tokens - self.tokens) / self.rate
+                time.sleep(min(sleep_time, 0.05))

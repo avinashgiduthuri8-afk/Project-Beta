@@ -1,77 +1,64 @@
-"""
-Indian Market Session & Market Clock Guard (IST Timezone).
-Tracks NSE/BSE trading sessions: Pre-open, Normal trading, Auto-square-off, and Market close.
-"""
+"""Indian Stock Market Clock (IST Session Guard & Trading Windows)."""
 
 from __future__ import annotations
 
 from datetime import datetime, time
+from zoneinfo import ZoneInfo
 from typing import Optional
-import pytz
 from core.enums import MarketSession
-
-IST = pytz.timezone("Asia/Kolkata")
 
 
 class MarketClock:
-    """
-    Guards execution against out-of-hours trades and triggers intraday square-off at 15:15 IST.
-    """
+    """Manages Indian Market (NSE/BSE) trading sessions in Asia/Kolkata timezone."""
 
     def __init__(
         self,
-        pre_market_start: str = "09:00:00",
-        market_open: str = "09:15:00",
-        auto_square_off: str = "15:15:00",
-        market_close: str = "15:30:00",
-    ) -> None:
-        self.t_pre_market = self._parse_time(pre_market_start)
-        self.t_open = self._parse_time(market_open)
-        self.t_square_off = self._parse_time(auto_square_off)
-        self.t_close = self._parse_time(market_close)
+        timezone_str: str = "Asia/Kolkata",
+        pre_open_str: str = "09:00:00",
+        market_open_str: str = "09:15:00",
+        square_off_str: str = "15:15:00",
+        market_close_str: str = "15:30:00",
+    ):
+        self.tz = ZoneInfo(timezone_str)
+        self.pre_open_time = time.fromisoformat(pre_open_str)
+        self.market_open_time = time.fromisoformat(market_open_str)
+        self.square_off_time = time.fromisoformat(square_off_str)
+        self.market_close_time = time.fromisoformat(market_close_str)
 
-    @staticmethod
-    def _parse_time(t_str: str) -> time:
-        parts = [int(p) for p in t_str.split(":")]
-        return time(hour=parts[0], minute=parts[1], second=parts[2] if len(parts) > 2 else 0)
+    def now_ist(self) -> datetime:
+        """Current datetime in Indian Standard Time (IST)."""
+        return datetime.now(self.tz)
 
-    @staticmethod
-    def get_ist_now() -> datetime:
-        """Get current datetime in Indian Standard Time (IST)."""
-        return datetime.now(IST)
+    def is_trading_day(self, dt: Optional[datetime] = None) -> bool:
+        """Check if today is Monday - Friday (excluding weekends)."""
+        check_dt = dt or self.now_ist()
+        # 0 = Monday, 4 = Friday, 5 = Saturday, 6 = Sunday
+        return check_dt.weekday() < 5
 
-    def get_session(self, dt: Optional[datetime] = None) -> MarketSession:
-        """Determine current market session state in IST."""
-        now = dt or self.get_ist_now()
-        if now.tzinfo is None:
-            now = IST.localize(now)
-        else:
-            now = now.astimezone(IST)
-
-        # Check weekend
-        if now.weekday() in (5, 6):  # Saturday=5, Sunday=6
-            return MarketSession.WEEKEND
-
-        curr_time = now.time()
-
-        if curr_time < self.t_pre_market:
+    def get_current_session(self, dt: Optional[datetime] = None) -> MarketSession:
+        """Determine current trading session phase."""
+        check_dt = dt or self.now_ist()
+        if not self.is_trading_day(check_dt):
             return MarketSession.CLOSED
-        elif self.t_pre_market <= curr_time < time(9, 8):
+
+        current_time = check_dt.time()
+
+        if current_time < self.pre_open_time:
+            return MarketSession.CLOSED
+        elif self.pre_open_time <= current_time < self.market_open_time:
             return MarketSession.PRE_OPEN
-        elif time(9, 8) <= curr_time < self.t_open:
-            return MarketSession.PRE_OPEN_BUFFER
-        elif self.t_open <= curr_time < self.t_square_off:
-            return MarketSession.TRADING
-        elif self.t_square_off <= curr_time < self.t_close:
-            return MarketSession.AUTO_SQUARE_OFF
+        elif self.market_open_time <= current_time < self.square_off_time:
+            return MarketSession.NORMAL
+        elif self.square_off_time <= current_time < self.market_close_time:
+            return MarketSession.SQUARE_OFF_WINDOW
         else:
             return MarketSession.POST_CLOSE
 
-    def is_trading_allowed(self, dt: Optional[datetime] = None) -> bool:
-        """Returns True only during normal trading hours (09:15 - 15:15 IST)."""
-        return self.get_session(dt) == MarketSession.TRADING
+    def is_normal_trading_active(self, dt: Optional[datetime] = None) -> bool:
+        """Check if trading is allowed for regular new positions (09:15 - 15:15 IST)."""
+        return self.get_current_session(dt) == MarketSession.NORMAL
 
-    def is_square_off_time(self, dt: Optional[datetime] = None) -> bool:
-        """Returns True if at or past auto-square-off threshold (15:15 IST)."""
-        session = self.get_session(dt)
-        return session in (MarketSession.AUTO_SQUARE_OFF, MarketSession.POST_CLOSE)
+    def is_auto_square_off_time(self, dt: Optional[datetime] = None) -> bool:
+        """Check if intraday positions must be squared off (>= 15:15 IST)."""
+        session = self.get_current_session(dt)
+        return session in (MarketSession.SQUARE_OFF_WINDOW, MarketSession.POST_CLOSE)

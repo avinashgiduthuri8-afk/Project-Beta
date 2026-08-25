@@ -1,285 +1,202 @@
-"""
-Paper Trading Simulation Broker.
-Provides zero-risk, realistic local execution simulation for Indian Equities and F&O.
-"""
+"""Simulated Paper Broker for Indian Equities and Derivatives."""
 
 from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
-from core.enums import Exchange, OrderSide, OrderStatus, OrderType, ProductType
+from datetime import datetime
+from typing import Dict, List, Any, Optional
+
 from core.interfaces import BaseBroker
-from core.models import AccountBalance, Order, OrderRequest, Position, Trade
+from core.enums import OrderStatus, OrderSide, OrderType, ProductType, Exchange
+from core.models import OrderRequest, Order, Position, AccountBalance, Trade
 
 logger = logging.getLogger(__name__)
 
 
 class PaperBroker(BaseBroker):
-    """
-    In-memory simulation broker.
-    Maintains orders, fills, virtual positions, and margin balances.
-    """
+    """High-fidelity simulated broker with realistic margin, slippage, and P&L tracking."""
 
-    def __init__(self, initial_capital: float = 100000.0) -> None:
+    def __init__(self, initial_capital: float = 100000.0, slippage_pct: float = 0.05):
         self.initial_capital = initial_capital
-        self.available_cash = initial_capital
         self.available_margin = initial_capital
-        self.utilized_margin = 0.0
-
-        self._orders: Dict[str, Order] = {}
-        self._trades: List[Trade] = []
-        self._positions: Dict[str, Position] = {}
-        self._market_prices: Dict[str, float] = {
-            "RELIANCE": 2950.0,
-            "TCS": 4200.0,
-            "INFY": 1850.0,
-            "HDFCBANK": 1650.0,
-            "NIFTY26AUG24500CE": 125.0,
+        self.slippage_pct = slippage_pct
+        self.orders: Dict[str, Order] = {}
+        self.positions: Dict[str, Position] = {}
+        self.trades: List[Trade] = []
+        self.market_prices: Dict[str, float] = {
+            "RELIANCE": 2850.00,
+            "INFY": 1820.00,
+            "TCS": 4150.00,
+            "NIFTY26AUGFUT": 24500.00,
         }
-        self._authenticated = True
         logger.info(f"Initialized PaperBroker with ₹{initial_capital:,.2f} virtual margin.")
 
     def set_market_price(self, symbol: str, price: float) -> None:
-        """Update current simulated price for a symbol."""
-        self._market_prices[symbol] = price
-        # Recalculate unrealized P&L for open positions
-        for pos in self._positions.values():
-            if pos.symbol == symbol:
-                pos.last_price = price
-                if pos.quantity > 0:
-                    pos.unrealized_pnl = (price - pos.buy_price) * pos.quantity
-                elif pos.quantity < 0:
-                    pos.unrealized_pnl = (pos.sell_price - price) * abs(pos.quantity)
-                else:
-                    pos.unrealized_pnl = 0.0
-                pos.pnl = pos.realized_pnl + pos.unrealized_pnl
+        """Update simulated market price for execution and position valuation."""
+        self.market_prices[symbol] = price
+        self._update_position_pnls()
 
     def authenticate(self) -> bool:
-        self._authenticated = True
         logger.info("PaperBroker: Simulated authentication successful.")
         return True
 
-    def is_authenticated(self) -> bool:
-        return self._authenticated
-
     def get_profile(self) -> Dict[str, Any]:
         return {
-            "user_id": "PAPER_TRADER_001",
-            "user_name": "Project Beta Paper Account",
-            "email": "paper@projectbeta.internal",
+            "user_id": "PAPER_TRADER_01",
+            "user_name": "Project Beta Paper Trader",
             "broker": "PaperBroker",
-            "exchanges": ["NSE", "BSE", "NFO"],
-            "products": ["MIS", "CNC", "NRML"],
+            "status": "ACTIVE",
         }
 
     def get_funds(self) -> AccountBalance:
+        self._update_position_pnls()
+        realized_pnl = sum(p.realized_pnl for p in self.positions.values())
+        unrealized_pnl = sum(p.unrealized_pnl for p in self.positions.values())
+        total_pnl = realized_pnl + unrealized_pnl
+
         return AccountBalance(
-            available_cash=self.available_cash,
+            total_capital=self.initial_capital + total_pnl,
             available_margin=self.available_margin,
-            utilized_margin=self.utilized_margin,
-            collateral=0.0,
-            currency="INR",
-            updated_at=datetime.now(timezone.utc),
+            utilized_margin=self.initial_capital - self.available_margin,
+            realized_pnl=realized_pnl,
+            unrealized_pnl=unrealized_pnl,
         )
 
     def get_positions(self) -> List[Position]:
-        return list(self._positions.values())
+        self._update_position_pnls()
+        return list(self.positions.values())
 
-    def get_order_book(self) -> List[Order]:
-        return list(self._orders.values())
+    def get_orders(self) -> List[Order]:
+        return list(self.orders.values())
 
     def place_order(self, request: OrderRequest) -> Order:
-        """Simulate order placement with immediate or pending fill logic."""
-        order_id = f"PB_{uuid.uuid4().hex[:8].upper()}"
-        exchange_order_id = f"EXCH_{uuid.uuid4().hex[:10].upper()}"
+        order_id = f"PB-{uuid.uuid4().hex[:8].upper()}"
+        current_ltp = self.market_prices.get(request.symbol, request.price or 100.0)
 
-        current_price = self._market_prices.get(request.symbol, request.price or 100.0)
-        exec_price = request.price if request.order_type == OrderType.LIMIT else current_price
-
-        # Check margin
-        required_margin = (exec_price or current_price) * request.quantity
-        if request.product == ProductType.MIS:
-            required_margin *= 0.20  # 5x intraday leverage
-
-        if required_margin > self.available_margin and request.side == OrderSide.BUY:
-            order = Order(
-                order_id=order_id,
-                symbol=request.symbol,
-                exchange=request.exchange,
-                instrument_token=request.instrument_token,
-                side=request.side,
-                order_type=request.order_type,
-                product=request.product,
-                quantity=request.quantity,
-                filled_quantity=0,
-                pending_quantity=request.quantity,
-                price=request.price,
-                trigger_price=request.trigger_price,
-                status=OrderStatus.REJECTED,
-                status_message=f"Insufficient margin. Required: ₹{required_margin:,.2f}, Available: ₹{self.available_margin:,.2f}",
-                tag=request.tag,
-            )
-            self._orders[order_id] = order
-            logger.warning(f"PaperBroker order rejected: {order.status_message}")
-            return order
-
-        # Determine execution
-        if request.order_type == OrderType.MARKET:
-            fill_price = current_price
-            status = OrderStatus.COMPLETE
-            filled_qty = request.quantity
-            pending_qty = 0
-        elif request.order_type == OrderType.LIMIT:
-            # If buy limit is >= current price or sell limit is <= current price, fill immediately
-            if (request.side == OrderSide.BUY and (request.price or 0) >= current_price) or \
-               (request.side == OrderSide.SELL and (request.price or 0) <= current_price):
-                fill_price = request.price or current_price
-                status = OrderStatus.COMPLETE
-                filled_qty = request.quantity
-                pending_qty = 0
-            else:
-                fill_price = 0.0
-                status = OrderStatus.OPEN
-                filled_qty = 0
-                pending_qty = request.quantity
-        elif request.order_type in (OrderType.SL, OrderType.SL_M):
-            fill_price = 0.0
-            status = OrderStatus.TRIGGER_PENDING
-            filled_qty = 0
-            pending_qty = request.quantity
+        # Apply slippage simulation
+        slippage_factor = (self.slippage_pct / 100.0) if request.order_type == OrderType.MARKET else 0.0
+        if request.side == OrderSide.BUY:
+            fill_price = round(current_ltp * (1.0 + slippage_factor), 2)
         else:
-            fill_price = current_price
-            status = OrderStatus.COMPLETE
-            filled_qty = request.quantity
-            pending_qty = 0
+            fill_price = round(current_ltp * (1.0 - slippage_factor), 2)
+
+        if request.price is not None and request.order_type == OrderType.LIMIT:
+            fill_price = request.price
 
         order = Order(
             order_id=order_id,
-            exchange_order_id=exchange_order_id,
+            client_order_id=request.client_order_id,
             symbol=request.symbol,
             exchange=request.exchange,
-            instrument_token=request.instrument_token,
             side=request.side,
             order_type=request.order_type,
-            product=request.product,
+            product_type=request.product_type,
             quantity=request.quantity,
-            filled_quantity=filled_qty,
-            pending_quantity=pending_qty,
+            filled_quantity=request.quantity,
+            pending_quantity=0,
             price=request.price,
+            average_price=fill_price,
             trigger_price=request.trigger_price,
-            average_price=fill_price if status == OrderStatus.COMPLETE else 0.0,
-            status=status,
-            status_message="Executed successfully" if status == OrderStatus.COMPLETE else "Order open in simulated exchange",
-            tag=request.tag,
+            status=OrderStatus.COMPLETE,
+            status_message="Filled by PaperBroker",
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
         )
-        self._orders[order_id] = order
 
-        if status == OrderStatus.COMPLETE:
-            self._record_fill(order, fill_price, request.quantity)
+        self.orders[order_id] = order
 
-        logger.info(f"PaperBroker placed order {order_id}: {order.side} {order.quantity} {order.symbol} @ {order.price or 'MKT'} -> {order.status}")
-        return order
-
-    def _record_fill(self, order: Order, fill_price: float, fill_qty: int) -> None:
-        """Update positions, trade history and account margins upon a fill."""
+        # Create Trade execution
         trade = Trade(
-            trade_id=f"TRD_{uuid.uuid4().hex[:8].upper()}",
-            order_id=order.order_id,
-            exchange_order_id=order.exchange_order_id,
-            symbol=order.symbol,
-            exchange=order.exchange,
-            side=order.side,
-            product=order.product,
+            trade_id=f"TRD-{uuid.uuid4().hex[:8].upper()}",
+            order_id=order_id,
+            symbol=request.symbol,
+            side=request.side,
+            quantity=request.quantity,
             price=fill_price,
-            quantity=fill_qty,
-            timestamp=datetime.now(timezone.utc),
+            value=fill_price * request.quantity,
+            timestamp=datetime.now(),
         )
-        self._trades.append(trade)
+        self.trades.append(trade)
 
-        pos_key = f"{order.symbol}_{order.product.value}"
-        pos = self._positions.get(pos_key)
-        if not pos:
-            pos = Position(
-                symbol=order.symbol,
-                exchange=order.exchange,
-                product=order.product,
-                quantity=0,
-                last_price=fill_price,
-            )
-            self._positions[pos_key] = pos
-
-        if order.side == OrderSide.BUY:
-            # Buying
-            total_cost = (pos.buy_price * pos.buy_quantity) + (fill_price * fill_qty)
-            pos.buy_quantity += fill_qty
-            pos.buy_price = total_cost / pos.buy_quantity
-            pos.quantity += fill_qty
-            pos.buy_value += fill_price * fill_qty
-            # Update margin
-            margin_used = (fill_price * fill_qty) * (0.20 if order.product == ProductType.MIS else 1.0)
-            self.utilized_margin += margin_used
-            self.available_margin = max(0.0, self.available_margin - margin_used)
-        else:
-            # Selling
-            total_sell_val = (pos.sell_price * pos.sell_quantity) + (fill_price * fill_qty)
-            pos.sell_quantity += fill_qty
-            pos.sell_price = total_sell_val / pos.sell_quantity
-            pos.quantity -= fill_qty
-            pos.sell_value += fill_price * fill_qty
-
-            if pos.buy_quantity > 0:
-                # Realizing P&L for long exit
-                realized = (fill_price - pos.buy_price) * min(fill_qty, pos.buy_quantity)
-                pos.realized_pnl += realized
-                self.available_cash += realized
-                self.available_margin += realized
-                margin_released = (pos.buy_price * fill_qty) * (0.20 if order.product == ProductType.MIS else 1.0)
-                self.utilized_margin = max(0.0, self.utilized_margin - margin_released)
-                self.available_margin += margin_released
-
-        pos.last_price = fill_price
-        pos.pnl = pos.realized_pnl + pos.unrealized_pnl
-        pos.updated_at = datetime.now(timezone.utc)
-
-    def modify_order(
-        self,
-        order_id: str,
-        price: Optional[float] = None,
-        trigger_price: Optional[float] = None,
-        quantity: Optional[int] = None,
-    ) -> Order:
-        order = self._orders.get(order_id)
-        if not order:
-            raise ValueError(f"Order {order_id} not found in PaperBroker")
-        if order.status not in (OrderStatus.OPEN, OrderStatus.TRIGGER_PENDING):
-            raise ValueError(f"Cannot modify order in status {order.status}")
-
-        if price is not None:
-            order.price = price
-        if trigger_price is not None:
-            order.trigger_price = trigger_price
-        if quantity is not None:
-            order.quantity = quantity
-            order.pending_quantity = quantity - order.filled_quantity
-
-        order.updated_at = datetime.now(timezone.utc)
-        logger.info(f"PaperBroker modified order {order_id}: Price={order.price}, Qty={order.quantity}")
+        # Update in-memory positions
+        self._record_trade(trade, request.exchange, request.product_type)
+        logger.info(f"PaperBroker Executed: {request.side.value} {request.quantity}x {request.symbol} @ ₹{fill_price:.2f}")
         return order
 
     def cancel_order(self, order_id: str) -> bool:
-        order = self._orders.get(order_id)
-        if not order:
-            logger.warning(f"Order {order_id} not found to cancel")
-            return False
-        if order.status in (OrderStatus.COMPLETE, OrderStatus.CANCELLED, OrderStatus.REJECTED):
-            logger.warning(f"Order {order_id} already in terminal state {order.status}")
-            return False
+        if order_id in self.orders:
+            order = self.orders[order_id]
+            if order.status in (OrderStatus.PENDING, OrderStatus.OPEN, OrderStatus.TRIGGER_PENDING):
+                order.status = OrderStatus.CANCELLED
+                order.updated_at = datetime.now()
+                return True
+        return False
 
-        order.status = OrderStatus.CANCELLED
-        order.pending_quantity = 0
-        order.status_message = "Cancelled by user/system"
-        order.updated_at = datetime.now(timezone.utc)
-        logger.info(f"PaperBroker cancelled order {order_id}")
-        return True
+    def modify_order(self, order_id: str, quantity: Optional[int] = None, price: Optional[float] = None, trigger_price: Optional[float] = None) -> Order:
+        if order_id not in self.orders:
+            raise ValueError(f"Order {order_id} not found.")
+        order = self.orders[order_id]
+        if quantity:
+            order.quantity = quantity
+        if price:
+            order.price = price
+        if trigger_price:
+            order.trigger_price = trigger_price
+        order.updated_at = datetime.now()
+        return order
+
+    def _record_trade(self, trade: Trade, exchange: Exchange, product_type: ProductType) -> None:
+        pos_key = f"{trade.symbol}_{product_type.value}"
+        if pos_key not in self.positions:
+            self.positions[pos_key] = Position(
+                symbol=trade.symbol,
+                exchange=exchange,
+                product_type=product_type,
+                quantity=0,
+                ltp=trade.price,
+            )
+
+        pos = self.positions[pos_key]
+        pos.ltp = trade.price
+
+        if trade.side == OrderSide.BUY:
+            new_qty = pos.quantity + trade.quantity
+            pos.buy_quantity += trade.quantity
+            pos.buy_value += trade.value
+            pos.average_buy_price = pos.buy_value / pos.buy_quantity if pos.buy_quantity > 0 else 0.0
+
+            # Margin deduction
+            margin_required = trade.value if product_type == ProductType.CNC else (trade.value * 0.20)
+            self.available_margin -= margin_required
+
+            # Realized PnL if closing short
+            if pos.quantity < 0:
+                closed_qty = min(abs(pos.quantity), trade.quantity)
+                pos.realized_pnl += (pos.average_sell_price - trade.price) * closed_qty
+            pos.quantity = new_qty
+        else:
+            new_qty = pos.quantity - trade.quantity
+            pos.sell_quantity += trade.quantity
+            pos.sell_value += trade.value
+            pos.average_sell_price = pos.sell_value / pos.sell_quantity if pos.sell_quantity > 0 else 0.0
+
+            # Realized PnL if closing long
+            if pos.quantity > 0:
+                closed_qty = min(pos.quantity, trade.quantity)
+                pos.realized_pnl += (trade.price - pos.average_buy_price) * closed_qty
+            pos.quantity = new_qty
+
+        self._update_position_pnls()
+
+    def _update_position_pnls(self) -> None:
+        for pos in self.positions.values():
+            ltp = self.market_prices.get(pos.symbol, pos.ltp)
+            pos.ltp = ltp
+            if pos.quantity > 0:
+                pos.unrealized_pnl = (ltp - pos.average_buy_price) * pos.quantity
+            elif pos.quantity < 0:
+                pos.unrealized_pnl = (pos.average_sell_price - ltp) * abs(pos.quantity)
+            else:
+                pos.unrealized_pnl = 0.0
+            pos.total_pnl = pos.realized_pnl + pos.unrealized_pnl

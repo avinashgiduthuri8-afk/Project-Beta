@@ -1,6 +1,4 @@
-"""
-Base Broker abstract class and exceptions.
-"""
+"""Base broker abstract class."""
 
 from core.interfaces import BaseBroker
 

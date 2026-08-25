@@ -1,0 +1,56 @@
+# Project-Beta Configuration for Indian Markets
+
+trading:
+  mode: "paper"                  # Options: "paper" | "live"
+  broker: "paper"                # Options: "paper" | "zerodha" | "angel_one" | "dhan"
+  timezone: "Asia/Kolkata"
+  symbols:
+    - exchange: "NSE"
+      tradingsymbol: "RELIANCE"
+      token: "738561"
+      lot_size: 1
+      tick_size: 0.05
+    - exchange: "NSE"
+      tradingsymbol: "INFY"
+      token: "408065"
+      lot_size: 1
+      tick_size: 0.05
+    - exchange: "NSE"
+      tradingsymbol: "TCS"
+      token: "2953217"
+      lot_size: 1
+      tick_size: 0.05
+    - exchange: "NFO"
+      tradingsymbol: "NIFTY26AUGFUT"
+      token: "123456"
+      lot_size: 50
+      tick_size: 0.05
+
+market_hours:
+  pre_open_time: "09:00:00"
+  market_open_time: "09:15:00"
+  auto_square_off_time: "15:15:00"
+  market_close_time: "15:30:00"
+
+risk:
+  initial_capital: 100000.0
+  max_daily_loss: 3000.0         # Hard stop circuit breaker in INR
+  max_risk_per_trade_pct: 1.0    # 1% risk per trade
+  max_open_positions: 3
+  max_orders_per_second: 5
+  slippage_pct: 0.05             # 0.05% estimated slippage in simulation
+
+strategy:
+  name: "VWAP_Momentum"
+  timeframe_minutes: 5
+  lookback_periods: 20
+  target_rr_ratio: 2.0           # 1:2 Risk to Reward
+  stop_loss_pct: 0.8             # 0.8% stop-loss from entry
+
+storage:
+  database_path: "storage/trades.db"
+  journal_csv_path: "storage/trade_journal.csv"
+
+notifications:
+  telegram_enabled: false
+  discord_enabled: false

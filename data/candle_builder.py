@@ -1,97 +1,95 @@
-"""
-Live Tick to OHLCV Candle Aggregator / Resampler.
-Builds real-time 1m, 3m, 5m, and 15m candles from incoming live ticks.
-"""
+"""Real-time Tick-to-Candle Resampler (1m / 5m / 15m OHLCV + Real-time VWAP)."""
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta
-from typing import Callable, Dict, List, Optional
-from core.models import Candle, Tick
+from typing import Dict, List, Optional, Callable
+from core.models import Tick, Candle
+
+logger = logging.getLogger(__name__)
 
 
 class CandleBuilder:
-    """
-    Maintains active in-progress candles per symbol and dispatches completed candles.
-    """
+    """Aggregates streaming ticks into completed multi-timeframe OHLCV candles."""
 
-    def __init__(
-        self,
-        timeframe_minutes: int = 1,
-        on_candle_closed: Optional[Callable[[Candle], None]] = None,
-        on_candle_update: Optional[Callable[[Candle], None]] = None,
-    ) -> None:
+    def __init__(self, timeframe_minutes: int = 5, on_candle_close: Optional[Callable[[Candle], None]] = None):
         self.timeframe_minutes = timeframe_minutes
-        self.timeframe_str = f"{timeframe_minutes}m"
-        self.on_candle_closed = on_candle_closed
-        self.on_candle_update = on_candle_update
-        self._active_candles: Dict[str, Candle] = {}
-        self._history: Dict[str, List[Candle]] = {}
+        self.on_candle_close = on_candle_close
+        self.active_candles: Dict[str, Candle] = {}
+        self.candle_history: Dict[str, List[Candle]] = {}
+        self.cumulative_pv: Dict[str, float] = {}   # Price * Volume for VWAP
+        self.cumulative_vol: Dict[str, int] = {}    # Cumulative Volume for VWAP
 
-    def _get_candle_interval(self, dt: datetime) -> tuple[datetime, datetime]:
-        """Align timestamp to the start of current timeframe block."""
+    def _get_candle_slot(self, dt: datetime) -> datetime:
+        """Align timestamp to the start of the timeframe period."""
         minute = (dt.minute // self.timeframe_minutes) * self.timeframe_minutes
-        start = dt.replace(minute=minute, second=0, microsecond=0)
-        end = start + timedelta(minutes=self.timeframe_minutes)
-        return start, end
+        return dt.replace(minute=minute, second=0, microsecond=0)
 
-    def process_tick(self, tick: Tick) -> None:
-        """
-        Process an incoming live tick and update or close the current candle.
-        """
+    def process_tick(self, tick: Tick) -> Optional[Candle]:
+        """Process incoming tick and return closed candle if period completed."""
         symbol = tick.symbol
-        price = tick.last_price
-        volume = tick.last_quantity or 1
-        tick_time = tick.timestamp
+        slot = self._get_candle_slot(tick.timestamp)
 
-        start_time, end_time = self._get_candle_interval(tick_time)
+        # Update VWAP accumulators
+        self.cumulative_pv[symbol] = self.cumulative_pv.get(symbol, 0.0) + (tick.ltp * tick.volume)
+        self.cumulative_vol[symbol] = self.cumulative_vol.get(symbol, 0) + tick.volume
+        total_vol = self.cumulative_vol[symbol]
+        current_vwap = (self.cumulative_pv[symbol] / total_vol) if total_vol > 0 else tick.ltp
 
-        active = self._active_candles.get(symbol)
+        closed_candle = None
 
-        # Check if active candle needs closing (time elapsed into next bucket)
-        if active and tick_time >= active.end_time:
-            active.is_closed = True
-            if symbol not in self._history:
-                self._history[symbol] = []
-            self._history[symbol].append(active)
+        if symbol in self.active_candles:
+            current_candle = self.active_candles[symbol]
 
-            if self.on_candle_closed:
-                self.on_candle_closed(active)
+            # Check if active candle interval has finished
+            if slot > current_candle.timestamp:
+                current_candle.is_closed = True
+                closed_candle = current_candle
 
-            # Start fresh candle
-            active = None
+                if symbol not in self.candle_history:
+                    self.candle_history[symbol] = []
+                self.candle_history[symbol].append(current_candle)
 
-        if active is None:
-            # Create new candle
-            active = Candle(
+                if self.on_candle_close:
+                    self.on_candle_close(current_candle)
+
+                # Initialize new candle
+                self.active_candles[symbol] = Candle(
+                    symbol=symbol,
+                    timeframe_minutes=self.timeframe_minutes,
+                    timestamp=slot,
+                    open=tick.ltp,
+                    high=tick.ltp,
+                    low=tick.ltp,
+                    close=tick.ltp,
+                    volume=tick.volume,
+                    vwap=current_vwap,
+                    is_closed=False,
+                )
+            else:
+                # Update existing candle
+                current_candle.high = max(current_candle.high, tick.ltp)
+                current_candle.low = min(current_candle.low, tick.ltp)
+                current_candle.close = tick.ltp
+                current_candle.volume += tick.volume
+                current_candle.vwap = current_vwap
+        else:
+            # Initialize first candle
+            self.active_candles[symbol] = Candle(
                 symbol=symbol,
-                exchange=tick.exchange,
-                instrument_token=tick.instrument_token,
-                timeframe=self.timeframe_str,
-                open=price,
-                high=price,
-                low=price,
-                close=price,
-                volume=volume,
-                start_time=start_time,
-                end_time=end_time,
+                timeframe_minutes=self.timeframe_minutes,
+                timestamp=slot,
+                open=tick.ltp,
+                high=tick.ltp,
+                low=tick.ltp,
+                close=tick.ltp,
+                volume=tick.volume,
+                vwap=current_vwap,
                 is_closed=False,
             )
-            self._active_candles[symbol] = active
-        else:
-            # Update existing active candle
-            active.high = max(active.high, price)
-            active.low = min(active.low, price)
-            active.close = price
-            active.volume += volume
 
-        if self.on_candle_update:
-            self.on_candle_update(active)
+        return closed_candle
 
     def get_history(self, symbol: str) -> List[Candle]:
-        """Get closed candle history for a symbol."""
-        return self._history.get(symbol, [])
-
-    def get_active_candle(self, symbol: str) -> Optional[Candle]:
-        """Get currently forming active candle."""
-        return self._active_candles.get(symbol)
+        return self.candle_history.get(symbol, [])

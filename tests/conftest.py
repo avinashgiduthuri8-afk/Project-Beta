@@ -1,44 +1,46 @@
-"""
-Shared pytest fixtures for Project-Beta test suite.
-"""
-
-from __future__ import annotations
+"""Pytest fixtures and configuration."""
 
 import pytest
-from config.config_loader import BotSettings, load_settings
+import tempfile
+from pathlib import Path
+from config.config_loader import AppConfig
 from brokers.paper_broker import PaperBroker
-from data.event_bus import EventBus
-from risk.market_clock import MarketClock
-from risk.risk_engine import RiskEngine
 from oms.order_manager import OrderManager
+from oms.execution_router import ExecutionRouter
+from data.event_bus import EventBus
 
 
 @pytest.fixture
-def mock_settings() -> BotSettings:
-    settings = load_settings()
-    settings.env.trading_mode = "PAPER"
-    settings.env.active_broker = "PAPER"
-    settings.storage.session_cache_path = ".test_session_cache.json"
-    settings.storage.db_path = "data/test_project_beta.db"
-    settings.storage.journal_csv_path = "data/test_trade_journal.csv"
-    return settings
+def mock_app_config():
+    config = AppConfig()
+    config.trading.mode = "paper"
+    config.trading.broker = "paper"
+    return config
 
 
 @pytest.fixture
-def paper_broker() -> PaperBroker:
-    return PaperBroker(initial_capital=100000.0)
+def paper_broker():
+    return PaperBroker(initial_capital=100000.0, slippage_pct=0.0)
 
 
 @pytest.fixture
-def event_bus() -> EventBus:
+def order_manager():
+    return OrderManager()
+
+
+@pytest.fixture
+def execution_router(paper_broker):
+    return ExecutionRouter(broker=paper_broker, default_tick_size=0.05)
+
+
+@pytest.fixture
+def event_bus():
     return EventBus()
 
 
 @pytest.fixture
-def risk_engine(mock_settings: BotSettings) -> RiskEngine:
-    return RiskEngine(mock_settings)
-
-
-@pytest.fixture
-def order_manager(paper_broker: PaperBroker, mock_settings: BotSettings) -> OrderManager:
-    return OrderManager(broker=paper_broker, settings=mock_settings)
+def temp_cache_file():
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
+        path = f.name
+    yield path
+    Path(path).unlink(missing_ok=True)

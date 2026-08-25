@@ -1,35 +1,35 @@
-"""
-Project-Beta: Master Orchestrator & Execution Supervisor for Indian Stocks (NSE/BSE).
-Manages authentication, market clock scheduling, OMS, RMS, live streaming, and auto-square-off.
-"""
+"""Master Orchestrator and Indian Market Trading Bot Lifecycle Supervisor."""
 
 from __future__ import annotations
 
+import argparse
 import logging
 import signal
 import sys
 import time
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import datetime
 
-from config.config_loader import BotSettings, load_settings
-from core.enums import MarketSession, OrderSide, OrderStatus, OrderType, ProductType
-from core.models import Candle, Order, OrderRequest, Tick, Trade
-from brokers import get_broker
+from config.config_loader import load_config, AppConfig
+from core.enums import MarketSession, OrderSide, ProductType, OrderType
+from core.models import Tick, OrderRequest
+from brokers import get_broker, PaperBroker
+from oms.execution_router import ExecutionRouter
+from oms.order_manager import OrderManager
+from oms.order_book_syncer import OrderBookSyncer
+from risk.market_clock import MarketClock
+from risk.risk_engine import RiskEngine
+from risk.rate_limiter import RateLimiter
+from risk.position_sizer import PositionSizer
 from data.event_bus import EventBus
 from data.candle_builder import CandleBuilder
 from data.ticker import WebSocketTicker
-from oms.order_manager import OrderManager
-from oms.order_book_syncer import OrderBookSyncer
-from risk.risk_engine import RiskEngine
-from risk.market_clock import MarketClock
 from storage.database import Database
-from storage.journal import TradeJournal
+from storage.journal import Journal
 from notifications.telegram import TelegramNotifier
 from notifications.discord import DiscordNotifier
 from strategies.sample_vwap_momentum import VWAPMomentumStrategy
 
-# Configure Logging
+# Configure standard logging format
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
@@ -38,275 +38,193 @@ logging.basicConfig(
 logger = logging.getLogger("ProjectBeta.Main")
 
 
-class ExecutionBotOrchestrator:
-    """
-    Main supervisor managing the full lifecycle of the execution bot across Indian market hours.
-    """
+class ExecutionBot:
+    """Master Supervisor managing daily market lifecycle, RMS, and event loops."""
 
-    def __init__(self, settings: Optional[BotSettings] = None) -> None:
-        self.settings = settings or load_settings()
-        self.running = False
-        self.market_clock = MarketClock(
-            pre_market_start=self.settings.market_clock.pre_market_start,
-            market_open=self.settings.market_clock.market_open,
-            auto_square_off=self.settings.market_clock.auto_square_off,
-            market_close=self.settings.market_clock.market_close,
-        )
+    def __init__(self, config: AppConfig):
+        self.config = config
+        self.is_running = False
 
-        # Storage & Notifiers
-        self.db = Database(self.settings.storage.db_path)
-        self.journal = TradeJournal(self.settings.storage.journal_csv_path)
-        self.tg_notifier = TelegramNotifier(self.settings.notifications.telegram)
-        self.dc_notifier = DiscordNotifier(self.settings.notifications.discord)
-
-        # Broker
-        self.broker = get_broker(self.settings)
-
-        # Risk & OMS
-        self.risk_engine = RiskEngine(self.settings)
-        self.order_manager = OrderManager(
-            broker=self.broker,
-            settings=self.settings,
-            on_order_update=self._handle_order_update,
-        )
-        self.order_syncer = OrderBookSyncer(
-            broker=self.broker,
-            order_manager=self.order_manager,
-            interval_sec=self.settings.execution.order_book_sync_interval_sec,
-        )
-
-        # Data Pipeline
+        # 1. Infrastructure & Storage
         self.event_bus = EventBus()
+        self.db = Database(config.storage.database_path)
+        self.journal = Journal(config.storage.journal_csv_path)
+
+        # 2. Broker & Adapters
+        self.broker = get_broker(config)
+
+        # 3. OMS & Execution Router
+        self.order_manager = OrderManager()
+        self.execution_router = ExecutionRouter(self.broker)
+        self.order_syncer = OrderBookSyncer(self.broker, self.order_manager)
+
+        # 4. RMS & Market Clock
+        self.market_clock = MarketClock(
+            timezone_str=config.trading.timezone,
+            pre_open_str=config.market_hours.pre_open_time,
+            market_open_str=config.market_hours.market_open_time,
+            square_off_str=config.market_hours.auto_square_off_time,
+            market_close_str=config.market_hours.market_close_time,
+        )
+        self.rate_limiter = RateLimiter(rate=float(config.risk.max_orders_per_second))
+        self.risk_engine = RiskEngine(
+            max_daily_loss=config.risk.max_daily_loss,
+            max_open_positions=config.risk.max_open_positions,
+            rate_limiter=self.rate_limiter,
+            market_clock=self.market_clock,
+        )
+
+        # 5. Data Feed & Resampler
         self.candle_builder = CandleBuilder(
-            timeframe_minutes=1,
-            on_candle_closed=self._handle_candle_closed,
-            on_candle_update=self._handle_candle_update,
+            timeframe_minutes=config.strategy.timeframe_minutes,
+            on_candle_close=self._on_candle_close,
         )
-        self.ticker = WebSocketTicker(
-            settings=self.settings,
-            event_bus=self.event_bus,
-            symbols=self.settings.symbols,
-        )
+        tokens = [s.token for s in config.trading.symbols]
+        self.ticker = WebSocketTicker(self.event_bus, tokens=tokens)
 
-        # Strategy
-        symbols_list = [s.symbol for s in self.settings.symbols]
+        # 6. Notifications
+        self.telegram = TelegramNotifier(enabled=config.notifications.telegram_enabled)
+        self.discord = DiscordNotifier(enabled=config.notifications.discord_enabled)
+
+        # 7. Strategy
         self.strategy = VWAPMomentumStrategy(
-            symbols=symbols_list,
-            submit_order_fn=self.submit_strategy_order,
-            quantity_per_trade=10,
+            router=self.execution_router,
+            order_manager=self.order_manager,
+            stop_loss_pct=config.strategy.stop_loss_pct,
+            target_rr=config.strategy.target_rr_ratio,
         )
 
-        self._squared_off_today = False
-        self._reported_today = False
+        # Register event handlers
+        self._setup_event_subscriptions()
 
-        # Setup event bus subscribers
-        self.event_bus.subscribe("tick", self._handle_tick)
+    def _setup_event_subscriptions(self) -> None:
+        self.event_bus.subscribe("market.tick", self._handle_market_tick)
+        self.order_manager.add_listener(self._handle_order_update)
 
-    def _handle_tick(self, tick: Tick) -> None:
-        """Process incoming tick."""
+    def _handle_market_tick(self, tick: Tick) -> None:
+        if isinstance(self.broker, PaperBroker):
+            self.broker.set_market_price(tick.symbol, tick.ltp)
         self.candle_builder.process_tick(tick)
         self.strategy.on_tick(tick)
 
-    def _handle_candle_closed(self, candle: Candle) -> None:
-        """Process closed candle."""
+    def _on_candle_close(self, candle) -> None:
         self.strategy.on_candle(candle)
 
-    def _handle_candle_update(self, candle: Candle) -> None:
-        pass
-
-    def _handle_order_update(self, order: Order) -> None:
-        """Callback on order status transition."""
+    def _handle_order_update(self, order) -> None:
         self.db.save_order(order)
-        self.tg_notifier.send_order_alert(order)
-        self.dc_notifier.send_order_alert(order)
-
-        if order.status == OrderStatus.COMPLETE:
-            trade = Trade(
-                trade_id=f"TRD_{order.order_id}",
-                order_id=order.order_id,
-                exchange_order_id=order.exchange_order_id,
-                symbol=order.symbol,
-                exchange=order.exchange,
-                side=order.side,
-                product=order.product,
-                price=order.average_price or order.price or 0.0,
-                quantity=order.filled_quantity or order.quantity,
-                timestamp=datetime.now(timezone.utc),
-            )
-            self.db.save_trade(trade)
-            self.journal.log_trade(trade)
-            self.risk_engine.record_trade(trade)
-
         self.strategy.on_order_update(order)
-
-    def submit_strategy_order(self, request: OrderRequest) -> Optional[Order]:
-        """
-        Risk-guarded order submission entrypoint for strategies.
-        """
-        funds = self.broker.get_funds()
-
-        # Step 1: RMS Pre-trade Evaluation
-        risk_result = self.risk_engine.evaluate_order(request, funds)
-        if not risk_result.allowed:
-            logger.warning(f"🚫 Order blocked by RMS: {risk_result.reason}")
-            self.tg_notifier.send_rms_alert(f"Order for {request.symbol} blocked: {risk_result.reason}")
-            self.dc_notifier.send_rms_alert(f"Order for {request.symbol} blocked: {risk_result.reason}")
-            return None
-
-        # Step 2: Route via OMS
-        symbol_cfg = next((s for s in self.settings.symbols if s.symbol == request.symbol), None)
-        lot_size = symbol_cfg.lot_size if symbol_cfg else 1
-        tick_size = symbol_cfg.tick_size if symbol_cfg else 0.05
-
-        order = self.order_manager.submit_order(request, lot_size=lot_size, tick_size=tick_size)
-        return order
-
-    def auto_square_off_intraday(self) -> None:
-        """
-        Square off all open MIS positions and cancel pending MIS orders at 15:15 IST.
-        """
-        if self._squared_off_today:
-            return
-
-        logger.warning("⏰ 15:15 IST REACHED — INITIATING AUTOMATED MIS INTRADAY AUTO-SQUARE-OFF...")
-        self.tg_notifier.send_message("⏰ *15:15 IST Auto-Square-Off Activated.* Squaring off open MIS positions...")
-        self.dc_notifier.send_message("⏰ **15:15 IST Auto-Square-Off Activated.** Squaring off open MIS positions...")
-
-        # 1. Cancel pending open orders
-        cancelled = self.order_manager.cancel_all_open_orders()
-        logger.info(f"Cancelled {cancelled} open pending orders before square-off.")
-
-        # 2. Close open positions
-        positions = self.broker.get_positions()
-        for pos in positions:
-            if pos.product == ProductType.MIS and pos.quantity != 0:
-                side = OrderSide.SELL if pos.quantity > 0 else OrderSide.BUY
-                close_qty = abs(pos.quantity)
-                logger.info(f"Squaring off {pos.symbol} [{pos.product.value}]: {side.value} {close_qty}")
-
-                req = OrderRequest(
-                    symbol=pos.symbol,
-                    exchange=pos.exchange,
-                    side=side,
-                    order_type=OrderType.MARKET,
-                    product=ProductType.MIS,
-                    quantity=close_qty,
-                    tag="AutoSquareOff_1515",
-                )
-                self.broker.place_order(req)
-
-        self._squared_off_today = True
-        logger.info("Auto-square-off routine completed.")
-
-    def generate_daily_report(self) -> None:
-        """Generate and send end-of-day execution summary report."""
-        if self._reported_today:
-            return
-
-        trades = self.db.get_trades(limit=100)
-        summary = self.journal.generate_daily_summary(trades)
-        logger.info(f"\n{summary}")
-        self.tg_notifier.send_message(summary)
-        self.dc_notifier.send_message(summary)
-        self._reported_today = True
+        if order.status.value in ("COMPLETE", "REJECTED", "CANCELLED"):
+            alert_msg = f"Order {order.symbol} ({order.side.value} {order.quantity}) is {order.status.value} @ ₹{order.average_price:.2f}"
+            self.telegram.send_alert("Order Update", alert_msg)
+            self.discord.send_alert("Order Update", alert_msg)
 
     def start(self) -> None:
-        """Start orchestrator and run daily market lifecycle."""
-        self.running = True
-        logger.info("=" * 60)
-        logger.info(f"🚀 STARTING {self.settings.app.name.upper()} EXECUTION BOT")
-        logger.info(f"• Mode: {self.settings.env.trading_mode} | Broker: {self.settings.env.active_broker}")
-        logger.info(f"• Timezone: {self.settings.app.timezone} | Max Loss: ₹{self.settings.risk.max_daily_loss_inr:,.2f}")
-        logger.info("=" * 60)
-
-        # 1. Authenticate Broker
+        """Run daily lifecycle supervisor."""
+        logger.info("Initializing Project-Beta Execution Bot...")
         if not self.broker.authenticate():
             logger.error("Broker authentication failed. Halting startup.")
             return
 
-        # 2. Start Background Workers
+        funds = self.broker.get_funds()
+        logger.info(f"Connected to Broker. Available Margin: ₹{funds.available_margin:,.2f}")
+
+        self.is_running = True
         self.ticker.start()
-        self.order_syncer.start()
 
-        # 3. Main Market Loop
-        try:
-            while self.running:
-                session = self.market_clock.get_session()
-                ist_now_str = MarketClock.get_ist_now().strftime("%H:%M:%S")
+        logger.info("Bot is active and listening for market events...")
 
-                if session == MarketSession.PRE_OPEN:
-                    logger.info(f"[{ist_now_str} IST] Market Pre-Open session. Awaiting 09:15 open...")
-                elif session == MarketSession.TRADING:
-                    # Active Trading
-                    self._squared_off_today = False
-                    self._reported_today = False
-                elif session == MarketSession.AUTO_SQUARE_OFF:
-                    # 15:15 - 15:30 IST
-                    self.auto_square_off_intraday()
-                elif session == MarketSession.POST_CLOSE:
-                    # 15:30+ IST
-                    self.generate_daily_report()
-
-                time.sleep(2.0)
-        except KeyboardInterrupt:
-            logger.info("Keyboard interrupt received.")
-        finally:
-            self.shutdown()
-
-    def shutdown(self) -> None:
-        """Graceful shutdown handler for SIGINT/SIGTERM."""
-        logger.info("Initiating graceful shutdown...")
-        self.running = False
+    def stop(self) -> None:
+        """Gracefully shut down all components."""
+        logger.info("Shutting down Project-Beta...")
+        self.is_running = False
         self.ticker.stop()
-        self.order_syncer.stop()
-        logger.info("Project-Beta execution bot safely stopped.")
+
+        # Save daily snapshot
+        funds = self.broker.get_funds()
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        self.db.save_daily_snapshot(
+            date_str=today_str,
+            realized_pnl=funds.realized_pnl,
+            unrealized_pnl=funds.unrealized_pnl,
+            total_trades=len(self.db._get_connection().cursor().execute("SELECT trade_id FROM trades").fetchall()),
+        )
+        logger.info(f"Daily P&L Snapshot saved: Realized=₹{funds.realized_pnl:,.2f}, Unrealized=₹{funds.unrealized_pnl:,.2f}")
+        logger.info("Project-Beta execution completed cleanly.")
+
+    def auto_square_off_intraday(self) -> None:
+        """Square off open MIS positions at 15:15 IST."""
+        positions = self.broker.get_positions()
+        logger.info(f"Triggering 15:15 IST Square-off for {len(positions)} positions...")
+        for pos in positions:
+            if pos.product_type == ProductType.MIS and pos.quantity != 0:
+                side = OrderSide.SELL if pos.quantity > 0 else OrderSide.BUY
+                close_qty = abs(pos.quantity)
+                logger.info(f"Auto-squaring off MIS position: {side.value} {close_qty}x {pos.symbol}")
+                self.strategy.place_order(
+                    symbol=pos.symbol,
+                    side=side,
+                    quantity=close_qty,
+                    order_type=OrderType.MARKET,
+                    product_type=ProductType.MIS,
+                    exchange=pos.exchange,
+                )
 
 
-import argparse
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Project-Beta: Indian Equities & Derivatives Algorithmic Execution Bot")
-    parser.add_argument("--mode", choices=["PAPER", "LIVE", "paper", "live"], default=None, help="Execution mode (PAPER or LIVE)")
-    parser.add_argument("--broker", choices=["PAPER", "ZERODHA", "ANGEL_ONE", "DHAN", "paper", "zerodha", "angel_one", "dhan"], default=None, help="Target broker")
+def parse_args():
+    parser = argparse.ArgumentParser(description="Project-Beta: Indian Stock Market Algorithmic Execution Bot")
+    parser.add_argument("--mode", type=str, default="paper", choices=["paper", "live"], help="Trading mode")
+    parser.add_argument("--broker", type=str, default="paper", choices=["paper", "zerodha", "angel_one", "dhan"], help="Broker adapter")
     parser.add_argument("--config", type=str, default=None, help="Path to custom settings.yaml")
-    parser.add_argument("--dry-run", action="store_true", help="Perform startup verification and exit cleanly")
+    parser.add_argument("--dry-run", action="store_true", help="Perform sanity check and exit immediately")
     return parser.parse_args()
 
 
-def main() -> None:
+def main():
     args = parse_args()
-    settings = load_settings(args.config)
+    config = load_config(args.config)
+    config.trading.mode = args.mode
+    config.trading.broker = args.broker
 
-    if args.mode:
-        settings.env.trading_mode = args.mode.upper()
-    if args.broker:
-        settings.env.active_broker = args.broker.upper()
-
-    bot = ExecutionBotOrchestrator(settings=settings)
+    bot = ExecutionBot(config)
 
     if args.dry_run:
         logger.info("🧪 DRY-RUN MODE: Verifying bot initialization, broker adapter, and risk engine...")
-        authenticated = bot.broker.authenticate()
+        auth_ok = bot.broker.authenticate()
         funds = bot.broker.get_funds()
-        session = bot.market_clock.get_session()
-        logger.info(f"• Broker: {bot.broker.__class__.__name__} (Authenticated: {authenticated})")
+        session = bot.market_clock.get_current_session()
+        logger.info(f"• Broker: {bot.broker.__class__.__name__} (Authenticated: {auth_ok})")
         logger.info(f"• Funds: Available Margin = ₹{funds.available_margin:,.2f}")
         logger.info(f"• Market Session: {session.value}")
         logger.info("✅ Dry-run completed successfully.")
-        return
+        return 0
 
-    def signal_handler(sig, frame):
-        logger.info(f"Received signal {sig}. Stopping...")
-        bot.shutdown()
+    def sig_handler(signum, frame):
+        logger.info(f"Signal {signum} received. Stopping bot...")
+        bot.stop()
         sys.exit(0)
 
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, sig_handler)
+    signal.signal(signal.SIGTERM, sig_handler)
 
     bot.start()
 
+    try:
+        while bot.is_running:
+            time.sleep(1)
+            # Sync orders
+            bot.order_syncer.sync()
+
+            # Check for 15:15 IST square-off
+            if bot.market_clock.is_auto_square_off_time():
+                bot.auto_square_off_intraday()
+                time.sleep(60)  # Wait after square-off
+    except KeyboardInterrupt:
+        pass
+    finally:
+        bot.stop()
+
+    return 0
+
 
 if __name__ == "__main__":
-    main()
-
+    sys.exit(main())

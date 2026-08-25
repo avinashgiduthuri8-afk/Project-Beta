@@ -1,17 +1,11 @@
-"""
-Indian Market Risk Management System (RMS) Engine.
-Enforces daily max loss, session guards, order frequency limits, and pre-trade validations.
-"""
+"""Risk Engine with Pre-Trade RMS and Circuit Breakers."""
 
 from __future__ import annotations
 
 import logging
-from datetime import datetime, date
-from typing import Dict, List, Optional
-from config.config_loader import BotSettings
-from core.enums import MarketSession, OrderSide, ProductType
+from typing import List, Tuple
 from core.interfaces import BaseRiskEngine
-from core.models import AccountBalance, OrderRequest, RiskCheckResult, Trade
+from core.models import OrderRequest, AccountBalance, Position
 from risk.market_clock import MarketClock
 from risk.rate_limiter import RateLimiter
 
@@ -19,125 +13,55 @@ logger = logging.getLogger(__name__)
 
 
 class RiskEngine(BaseRiskEngine):
-    """
-    Core pre-trade and post-trade risk management engine.
-    """
+    """Pre-trade Risk Management System (RMS) ensuring regulatory & risk compliance."""
 
-    def __init__(self, settings: BotSettings) -> None:
-        self.settings = settings
-        self.market_clock = MarketClock(
-            pre_market_start=settings.market_clock.pre_market_start,
-            market_open=settings.market_clock.market_open,
-            auto_square_off=settings.market_clock.auto_square_off,
-            market_close=settings.market_clock.market_close,
-        )
-        self.rate_limiter = RateLimiter(
-            rate=settings.risk.max_orders_per_second,
-            burst=settings.risk.rate_limit_burst,
-        )
+    def __init__(
+        self,
+        max_daily_loss: float = 3000.0,
+        max_open_positions: int = 3,
+        rate_limiter: RateLimiter = None,
+        market_clock: MarketClock = None,
+    ):
+        self.max_daily_loss = max_daily_loss
+        self.max_open_positions = max_open_positions
+        self.rate_limiter = rate_limiter or RateLimiter(rate=5.0)
+        self.market_clock = market_clock or MarketClock()
+        self.circuit_breaker_triggered = False
 
-        self.max_daily_loss = settings.risk.max_daily_loss_inr
-        self.max_daily_trades = settings.risk.max_daily_trades
-        self.max_open_positions = settings.risk.max_open_positions
+    def validate_order(
+        self,
+        request: OrderRequest,
+        current_balance: AccountBalance,
+        current_positions: List[Position],
+    ) -> Tuple[bool, str]:
+        """Verify order against market session, daily loss circuit breaker, margins, and limits."""
+        # 1. Rate limiter check
+        if not self.rate_limiter.acquire(blocking=False):
+            return False, "RMS Rejected: Rate limit exceeded (>5 orders/sec)."
 
-        # Internal tracking
-        self.daily_pnl = 0.0
-        self.daily_trades_count = 0
-        self.circuit_breaker_tripped = False
-        self.circuit_breaker_reason: Optional[str] = None
-        self.current_date = date.today()
+        # 2. Daily Loss Circuit Breaker
+        total_pnl = current_balance.realized_pnl + current_balance.unrealized_pnl
+        if total_pnl <= -abs(self.max_daily_loss):
+            self.circuit_breaker_triggered = True
+            logger.critical(f"RMS CIRCUIT BREAKER ACTIVATED: Loss ₹{abs(total_pnl):.2f} exceeded max daily limit ₹{self.max_daily_loss:.2f}")
+            return False, f"RMS Rejected: Daily max loss limit (-₹{self.max_daily_loss}) hit. Trading halted for the day."
 
-    def reset_daily_metrics_if_new_day(self) -> None:
-        """Reset counters on a new trading day."""
-        today = date.today()
-        if today != self.current_date:
-            logger.info(f"Resetting RMS daily metrics for new trading date: {today}")
-            self.daily_pnl = 0.0
-            self.daily_trades_count = 0
-            self.circuit_breaker_tripped = False
-            self.circuit_breaker_reason = None
-            self.current_date = today
+        # 3. Market Clock Check (for entering new positions)
+        if not self.market_clock.is_normal_trading_active():
+            # Allow order if it is closing an existing position
+            has_open_pos = any(p.symbol == request.symbol and p.quantity != 0 for p in current_positions)
+            if not has_open_pos:
+                return False, "RMS Rejected: Outside normal trading window (09:15 - 15:15 IST)."
 
-    def evaluate_order(self, request: OrderRequest, account_balance: AccountBalance) -> RiskCheckResult:
-        """
-        Comprehensive pre-trade RMS validation.
-        """
-        self.reset_daily_metrics_if_new_day()
+        # 4. Max Open Positions Check
+        active_positions = [p for p in current_positions if p.quantity != 0]
+        is_new_symbol = not any(p.symbol == request.symbol for p in active_positions)
+        if is_new_symbol and len(active_positions) >= self.max_open_positions:
+            return False, f"RMS Rejected: Max open positions limit ({self.max_open_positions}) reached."
 
-        # 1. Circuit Breaker Check
-        if self.circuit_breaker_tripped:
-            return RiskCheckResult(
-                allowed=False,
-                reason=f"RMS Circuit Breaker is ACTIVE: {self.circuit_breaker_reason}",
-            )
+        # 5. Margin Check
+        estimated_margin_required = (request.price or 100.0) * request.quantity * 0.20
+        if estimated_margin_required > current_balance.available_margin:
+            return False, f"RMS Rejected: Insufficient margin. Required ₹{estimated_margin_required:.2f}, Available ₹{current_balance.available_margin:.2f}"
 
-        # 2. Market Session Guard (IST)
-        session = self.market_clock.get_session()
-        if session != MarketSession.TRADING:
-            return RiskCheckResult(
-                allowed=False,
-                reason=f"Order rejected: Market is currently in '{session.value}' session. Trading allowed only 09:15-15:15 IST.",
-            )
-
-        # 3. Rate Limiter (Throttling)
-        if not self.rate_limiter.acquire(tokens=1, blocking=False):
-            return RiskCheckResult(
-                allowed=False,
-                reason="Order rate limit exceeded (throttled to protect against broker API bans).",
-            )
-
-        # 4. Max Daily Trades Check
-        if self.daily_trades_count >= self.max_daily_trades:
-            self.trip_circuit_breaker(f"Reached max daily trades limit ({self.max_daily_trades}).")
-            return RiskCheckResult(
-                allowed=False,
-                reason=f"Daily trade limit reached ({self.max_daily_trades}).",
-            )
-
-        # 5. Margin Sufficiency Check
-        est_price = request.price or 100.0
-        req_margin = est_price * request.quantity
-        if request.product == ProductType.MIS:
-            req_margin *= 0.20  # Intraday 5x leverage
-
-        if request.side == OrderSide.BUY and req_margin > account_balance.available_margin:
-            return RiskCheckResult(
-                allowed=False,
-                reason=f"Insufficient margin. Required ₹{req_margin:,.2f} > Available ₹{account_balance.available_margin:,.2f}",
-            )
-
-        return RiskCheckResult(allowed=True)
-
-    def record_trade(self, trade: Trade) -> None:
-        """
-        Update daily metrics after a trade fill and check loss thresholds.
-        """
-        self.reset_daily_metrics_if_new_day()
-        self.daily_trades_count += 1
-
-        # Check daily loss limit against accumulated P&L
-        if self.daily_pnl <= -self.max_daily_loss:
-            self.trip_circuit_breaker(
-                f"Daily loss limit breached: Current Daily P&L = -₹{abs(self.daily_pnl):,.2f} "
-                f"(Threshold: -₹{self.max_daily_loss:,.2f})"
-            )
-
-    def update_daily_pnl(self, realized_pnl: float, unrealized_pnl: float) -> None:
-        """Update total daily P&L and evaluate circuit breaker."""
-        self.reset_daily_metrics_if_new_day()
-        total_pnl = realized_pnl + unrealized_pnl
-        self.daily_pnl = total_pnl
-
-        if total_pnl <= -self.max_daily_loss and not self.circuit_breaker_tripped:
-            self.trip_circuit_breaker(
-                f"Max daily loss breached! Total P&L: ₹{total_pnl:,.2f} <= -₹{self.max_daily_loss:,.2f}"
-            )
-
-    def trip_circuit_breaker(self, reason: str) -> None:
-        """Trip circuit breaker and halt further trade placement."""
-        self.circuit_breaker_tripped = True
-        self.circuit_breaker_reason = reason
-        logger.critical(f"🚨 RMS CIRCUIT BREAKER TRIPPED: {reason}")
-
-    def is_circuit_breaker_active(self) -> bool:
-        return self.circuit_breaker_tripped
+        return True, "RMS Approved"

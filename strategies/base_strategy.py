@@ -1,94 +1,63 @@
-"""
-Base Strategy Class for Project-Beta.
-Provides order generation helpers, position context, and event handling hooks.
-"""
+"""Base Strategy class for Indian Market Trading Bots."""
 
 from __future__ import annotations
 
 import logging
-from typing import Callable, Optional
-from core.enums import Exchange, OrderSide, OrderType, ProductType
+import uuid
+from typing import Optional, Dict, Any
 from core.interfaces import BaseStrategy
-from core.models import Candle, Order, OrderRequest, Tick
+from core.models import Tick, Candle, Order, OrderRequest
+from core.enums import OrderSide, OrderType, ProductType, Exchange
+from oms.execution_router import ExecutionRouter
+from oms.order_manager import OrderManager
 
 logger = logging.getLogger(__name__)
 
 
 class Strategy(BaseStrategy):
-    """
-    Base strategy class to be inherited by all algorithmic trading strategies.
-    """
+    """Abstract Strategy with order submission helpers and lifecycle hooks."""
 
-    def __init__(
-        self,
-        name: str,
-        submit_order_fn: Optional[Callable[[OrderRequest], Order]] = None,
-    ) -> None:
+    def __init__(self, name: str, router: ExecutionRouter, order_manager: OrderManager):
         self.name = name
-        self.submit_order_fn = submit_order_fn
+        self.router = router
+        self.order_manager = order_manager
+
+    def place_order(
+        self,
+        symbol: str,
+        side: OrderSide,
+        quantity: int,
+        order_type: OrderType = OrderType.MARKET,
+        product_type: ProductType = ProductType.MIS,
+        exchange: Exchange = Exchange.NSE,
+        price: Optional[float] = None,
+        trigger_price: Optional[float] = None,
+        lot_size: int = 1,
+    ) -> Order:
+        """Helper to create, route, and register a strategy order."""
+        client_order_id = f"{self.name[:4].upper()}-{uuid.uuid4().hex[:6].upper()}"
+        request = OrderRequest(
+            client_order_id=client_order_id,
+            symbol=symbol,
+            exchange=exchange,
+            side=side,
+            order_type=order_type,
+            product_type=product_type,
+            quantity=quantity,
+            price=price,
+            trigger_price=trigger_price,
+            tag=self.name,
+        )
+
+        order = self.router.route_order(request, lot_size=lot_size)
+        self.order_manager.register_order(order)
+        return order
 
     def on_tick(self, tick: Tick) -> None:
-        """Invoked on each incoming tick."""
         pass
 
     def on_candle(self, candle: Candle) -> None:
-        """Invoked on each completed or updated candle."""
         pass
 
     def on_order_update(self, order: Order) -> None:
-        """Invoked when an order status changes."""
-        logger.info(f"Strategy [{self.name}] received order update: {order.order_id} -> {order.status.value}")
-
-    def buy(
-        self,
-        symbol: str,
-        quantity: int,
-        price: Optional[float] = None,
-        product: ProductType = ProductType.MIS,
-        exchange: Exchange = Exchange.NSE,
-        order_type: OrderType = OrderType.LIMIT,
-        tag: Optional[str] = None,
-    ) -> Optional[Order]:
-        """Convenience method to submit a BUY order."""
-        if not self.submit_order_fn:
-            logger.warning(f"Strategy [{self.name}] cannot place order: submit_order_fn is not set.")
-            return None
-
-        req = OrderRequest(
-            symbol=symbol,
-            exchange=exchange,
-            side=OrderSide.BUY,
-            order_type=order_type,
-            product=product,
-            quantity=quantity,
-            price=price,
-            tag=tag or self.name,
-        )
-        return self.submit_order_fn(req)
-
-    def sell(
-        self,
-        symbol: str,
-        quantity: int,
-        price: Optional[float] = None,
-        product: ProductType = ProductType.MIS,
-        exchange: Exchange = Exchange.NSE,
-        order_type: OrderType = OrderType.LIMIT,
-        tag: Optional[str] = None,
-    ) -> Optional[Order]:
-        """Convenience method to submit a SELL order."""
-        if not self.submit_order_fn:
-            logger.warning(f"Strategy [{self.name}] cannot place order: submit_order_fn is not set.")
-            return None
-
-        req = OrderRequest(
-            symbol=symbol,
-            exchange=exchange,
-            side=OrderSide.SELL,
-            order_type=order_type,
-            product=product,
-            quantity=quantity,
-            price=price,
-            tag=tag or self.name,
-        )
-        return self.submit_order_fn(req)
+        pass

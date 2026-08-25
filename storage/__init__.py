@@ -1,4 +1,4 @@
 from storage.database import Database
-from storage.journal import TradeJournal
+from storage.journal import Journal
 
-__all__ = ["Database", "TradeJournal"]
+__all__ = ["Database", "Journal"]

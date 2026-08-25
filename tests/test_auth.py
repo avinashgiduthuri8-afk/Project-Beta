@@ -1,37 +1,26 @@
-"""
-Unit tests for TOTP Authentication and Session Token Caching (Prompt A).
-"""
+"""Unit tests for Auth and TOTP Session Management."""
 
-from __future__ import annotations
-
-import os
+import pytest
+import pyotp
 from auth.session_manager import SessionManager
 from auth.token_cache import TokenCache
 
 
 def test_totp_generation():
-    # Valid Base32 secret for testing (JBSWY3DPEHPK3PXP is standard RFC test secret)
-    secret = "JBSWY3DPEHPK3PXP"
-    otp = SessionManager.generate_totp(secret)
-    assert isinstance(otp, str)
-    assert len(otp) == 6
-    assert otp.isdigit()
+    secret = pyotp.random_base32()
+    totp_code = SessionManager.generate_totp(secret)
+    assert isinstance(totp_code, str)
+    assert len(totp_code) == 6
+    assert totp_code.isdigit()
 
 
-def test_token_cache_save_and_retrieve():
-    cache_path = ".test_session_cache.json"
-    cache = TokenCache(cache_path)
-    try:
-        cache.save_token("ZERODHA", "test_access_token_123", extra_metadata={"user": "TEST"})
-        retrieved = cache.get_token("ZERODHA")
-        assert retrieved == "test_access_token_123"
+def test_token_cache_save_and_retrieve(temp_cache_file):
+    cache = TokenCache(cache_file=temp_cache_file)
+    assert cache.get_token("zerodha") is None
 
-        # Check non-existent broker
-        assert cache.get_token("NON_EXISTENT") is None
+    cache.save_token("zerodha", "test_token_12345", {"user": "AB1234"})
+    retrieved = cache.get_token("zerodha")
+    assert retrieved == "test_token_12345"
 
-        # Clear
-        cache.clear("ZERODHA")
-        assert cache.get_token("ZERODHA") is None
-    finally:
-        if os.path.exists(cache_path):
-            os.remove(cache_path)
+    cache.clear("zerodha")
+    assert cache.get_token("zerodha") is None

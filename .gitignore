@@ -1,46 +1,40 @@
+# Secrets & credentials
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
+
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-.venv/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+*.pyc
 
-# Session & Secrets
-.env
-.session_cache.json
-*.db
-*.sqlite
-*.sqlite3
-trade_journal.csv
-logs/
+# Backup files
+*.json.bak
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
+# Runtime state files — never commit; regenerated at startup
+bots/scanner_bot/attached_assets/*.ipynb
+bots/volatile_gridX/data/circuit_breaker.json
+bots/scanner_bot/data/*.json
+bots/*/storage/*.json
+storage/*.json
 
-# Testing & Linting
+# V2 SQLite database (runtime artifact)
+v2/data/*.db
+v2/data/*.db-shm
+v2/data/*.db-wal
+
+# Logs
+logs/*.log
+*.log
+
+# Test artifacts
+.pytest_temp/
 .pytest_cache/
-.coverage
-htmlcov/
-.mypy_cache/
-.ruff_cache/
+
+# Platform artifacts (Replit / Emergent)
+.replit
+.emergent/
+skills-lock.json

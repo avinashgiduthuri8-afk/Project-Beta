@@ -1,0 +1,4395 @@
+{
+  "signals": [
+    {
+      "id": "ZEC-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.154263+00:00",
+      "coin": "ZEC",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 42850.1,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 42820.0,
+          "change_percent": -0.07024487690810184
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 42820.0,
+          "change_percent": -0.07024487690810184
+        }
+      }
+    },
+    {
+      "id": "BTC-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.147891+00:00",
+      "coin": "BTC",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 6335624.8,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 6335366.4,
+          "change_percent": -0.004078524346950615
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 6335366.4,
+          "change_percent": -0.004078524346950615
+        }
+      }
+    },
+    {
+      "id": "ETH-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.149586+00:00",
+      "coin": "ETH",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 168304.7,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 170043.2,
+          "change_percent": 1.0329479806565116
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 170043.2,
+          "change_percent": 1.0329479806565116
+        }
+      }
+    },
+    {
+      "id": "SOL-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.150552+00:00",
+      "coin": "SOL",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 6959.0,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 6998.7,
+          "change_percent": 0.570484264980598
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 6998.7,
+          "change_percent": 0.570484264980598
+        }
+      }
+    },
+    {
+      "id": "XRP-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.151830+00:00",
+      "coin": "XRP",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 111.82,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 112.199,
+          "change_percent": 0.33893757825076454
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 112.199,
+          "change_percent": 0.33893757825076454
+        }
+      }
+    },
+    {
+      "id": "BNB-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.153409+00:00",
+      "coin": "BNB",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 58184.3,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 57965.9,
+          "change_percent": -0.3753589885931453
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 57965.9,
+          "change_percent": -0.3753589885931453
+        }
+      }
+    },
+    {
+      "id": "LAYER-1782212511-premium",
+      "timestamp": "2026-06-23T11:01:51.183076+00:00",
+      "coin": "LAYER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7.804,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 19,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 44
+      },
+      "final_score": 66,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -6.009738595592007
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -6.009738595592007
+        }
+      }
+    },
+    {
+      "id": "ALICE-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.738516+00:00",
+      "coin": "ALICE",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 11.986,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 12.333,
+          "change_percent": 2.8950442182546263
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 12.333,
+          "change_percent": 2.8950442182546263
+        }
+      }
+    },
+    {
+      "id": "NEAR-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.740227+00:00",
+      "coin": "NEAR",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 201.71,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "B",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 78,
+      "opportunity_score": 81,
+      "priority": "High",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 202.46,
+          "change_percent": 0.3718209310396113
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 202.46,
+          "change_percent": 0.3718209310396113
+        }
+      }
+    },
+    {
+      "id": "WLD-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.735335+00:00",
+      "coin": "WLD",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 56.916,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 55.657,
+          "change_percent": -2.2120317661114632
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 55.657,
+          "change_percent": -2.2120317661114632
+        }
+      }
+    },
+    {
+      "id": "ADA-1782212511-premium",
+      "timestamp": "2026-06-23T11:01:51.158975+00:00",
+      "coin": "ADA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 15.568,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 15.454,
+          "change_percent": -0.7322713257964992
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 15.454,
+          "change_percent": -0.7322713257964992
+        }
+      }
+    },
+    {
+      "id": "LINK-1782212511-premium",
+      "timestamp": "2026-06-23T11:01:51.172248+00:00",
+      "coin": "LINK",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 766.23,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "B",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 78,
+      "opportunity_score": 81,
+      "priority": "High",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 778.14,
+          "change_percent": 1.5543635722955207
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 778.14,
+          "change_percent": 1.5543635722955207
+        }
+      }
+    },
+    {
+      "id": "ONDO-1782212511-premium",
+      "timestamp": "2026-06-23T11:01:51.179575+00:00",
+      "coin": "ONDO",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 31.638,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 31.829,
+          "change_percent": 0.6037044060939343
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 31.829,
+          "change_percent": 0.6037044060939343
+        }
+      }
+    },
+    {
+      "id": "PORTAL-1782212511-premium",
+      "timestamp": "2026-06-23T11:01:51.175274+00:00",
+      "coin": "PORTAL",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 1.4848,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 19,
+        "risk_reward": 0,
+        "total": 37
+      },
+      "final_score": 63,
+      "coin_class": "C",
+      "market_state": "recovery",
+      "opportunity_type": "recovery_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 74,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 1.45,
+          "change_percent": -2.343749999999996
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 1.45,
+          "change_percent": -2.343749999999996
+        }
+      }
+    },
+    {
+      "id": "LUMIA-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.741312+00:00",
+      "coin": "LUMIA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 12.139,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 20,
+        "risk_reward": 0,
+        "total": 36
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -2.215998022901393
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -2.215998022901393
+        }
+      }
+    },
+    {
+      "id": "DOGE-1782212510-premium",
+      "timestamp": "2026-06-23T11:01:50.744469+00:00",
+      "coin": "DOGE",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 8.0616,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 20,
+        "risk_reward": 0,
+        "total": 36
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "recovery",
+      "opportunity_type": "recovery_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 74,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 8.015,
+          "change_percent": -0.5780490225265426
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 8.015,
+          "change_percent": -0.5780490225265426
+        }
+      }
+    },
+    {
+      "id": "BTC-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.021792+00:00",
+      "coin": "BTC",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 6333777.1,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 6335366.4,
+          "change_percent": 0.025092452337811908
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 6335366.4,
+          "change_percent": 0.025092452337811908
+        }
+      }
+    },
+    {
+      "id": "SOL-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.023301+00:00",
+      "coin": "SOL",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7013.1,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 6998.7,
+          "change_percent": -0.20533002523849003
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 6998.7,
+          "change_percent": -0.20533002523849003
+        }
+      }
+    },
+    {
+      "id": "BNB-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.024652+00:00",
+      "coin": "BNB",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 57789.5,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 57965.9,
+          "change_percent": 0.3052457626385441
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 57965.9,
+          "change_percent": 0.3052457626385441
+        }
+      }
+    },
+    {
+      "id": "WLD-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.398845+00:00",
+      "coin": "WLD",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 57.638,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 55.657,
+          "change_percent": -3.4369686665047396
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 55.657,
+          "change_percent": -3.4369686665047396
+        }
+      }
+    },
+    {
+      "id": "ICP-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.409035+00:00",
+      "coin": "ICP",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 220.62,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 220.53,
+          "change_percent": -0.040794125645908536
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 220.53,
+          "change_percent": -0.040794125645908536
+        }
+      }
+    },
+    {
+      "id": "LAYER-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.804645+00:00",
+      "coin": "LAYER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7.732,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -5.134505949301606
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -5.134505949301606
+        }
+      }
+    },
+    {
+      "id": "ALICE-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.401735+00:00",
+      "coin": "ALICE",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 12.358,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 12.333,
+          "change_percent": -0.20229810648972613
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 12.333,
+          "change_percent": -0.20229810648972613
+        }
+      }
+    },
+    {
+      "id": "ONDO-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.797174+00:00",
+      "coin": "ONDO",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 31.747,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 31.829,
+          "change_percent": 0.2582921220902786
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 31.829,
+          "change_percent": 0.2582921220902786
+        }
+      }
+    },
+    {
+      "id": "DOGE-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.407875+00:00",
+      "coin": "DOGE",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 8.0666,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 23,
+        "risk_reward": 0,
+        "total": 39
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 8.015,
+          "change_percent": -0.6396747080554231
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 8.015,
+          "change_percent": -0.6396747080554231
+        }
+      }
+    },
+    {
+      "id": "LUMIA-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.405971+00:00",
+      "coin": "LUMIA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 12.557,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 20,
+        "risk_reward": 0,
+        "total": 36
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -5.471052002866935
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -5.471052002866935
+        }
+      }
+    },
+    {
+      "id": "XLM-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.402743+00:00",
+      "coin": "XLM",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 19.566,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 15,
+        "risk_reward": 0,
+        "total": 32
+      },
+      "final_score": 61,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 19.769,
+          "change_percent": 1.0375140549933528
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 19.769,
+          "change_percent": 1.0375140549933528
+        }
+      }
+    },
+    {
+      "id": "PORTAL-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.416434+00:00",
+      "coin": "PORTAL",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 1.4963,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 15,
+        "risk_reward": 0,
+        "total": 32
+      },
+      "final_score": 61,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 1.45,
+          "change_percent": -3.0942992715364572
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 1.45,
+          "change_percent": -3.0942992715364572
+        }
+      }
+    },
+    {
+      "id": "TNSR-1782213618-premium",
+      "timestamp": "2026-06-23T11:20:18.399707+00:00",
+      "coin": "TNSR",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 3.54,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 14,
+        "risk_reward": 0,
+        "total": 30
+      },
+      "final_score": 60,
+      "coin_class": "C",
+      "market_state": "recovery",
+      "opportunity_type": "recovery_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 74,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.6666666666666712
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.6666666666666712
+        }
+      }
+    },
+    {
+      "id": "BTC-1782213820-premium",
+      "timestamp": "2026-06-23T11:23:40.748352+00:00",
+      "coin": "BTC",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 6339562.3,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 19,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 44
+      },
+      "final_score": 66,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 6335366.4,
+          "change_percent": -0.06618595734912867
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 6335366.4,
+          "change_percent": -0.06618595734912867
+        }
+      }
+    },
+    {
+      "id": "BNB-1782213820-premium",
+      "timestamp": "2026-06-23T11:23:40.751321+00:00",
+      "coin": "BNB",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 58243.8,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 57965.9,
+          "change_percent": -0.4771323299647369
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 57965.9,
+          "change_percent": -0.4771323299647369
+        }
+      }
+    },
+    {
+      "id": "WLD-1782213821-premium",
+      "timestamp": "2026-06-23T11:23:41.168727+00:00",
+      "coin": "WLD",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 57.638,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 55.657,
+          "change_percent": -3.4369686665047396
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 55.657,
+          "change_percent": -3.4369686665047396
+        }
+      }
+    },
+    {
+      "id": "LAYER-1782213821-premium",
+      "timestamp": "2026-06-23T11:23:41.609981+00:00",
+      "coin": "LAYER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7.732,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -5.134505949301606
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -5.134505949301606
+        }
+      }
+    },
+    {
+      "id": "ALICE-1782213821-premium",
+      "timestamp": "2026-06-23T11:23:41.176474+00:00",
+      "coin": "ALICE",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 12.358,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 12.333,
+          "change_percent": -0.20229810648972613
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 12.333,
+          "change_percent": -0.20229810648972613
+        }
+      }
+    },
+    {
+      "id": "XLM-1782213821-premium",
+      "timestamp": "2026-06-23T11:23:41.177922+00:00",
+      "coin": "XLM",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 19.589,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 23,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 19.769,
+          "change_percent": 0.9188830466077886
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 19.769,
+          "change_percent": 0.9188830466077886
+        }
+      }
+    },
+    {
+      "id": "LUMIA-1782213821-premium",
+      "timestamp": "2026-06-23T11:23:41.180458+00:00",
+      "coin": "LUMIA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 12.136,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -2.1918259723137776
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -2.1918259723137776
+        }
+      }
+    },
+    {
+      "id": "ONDO-1782213821-premium",
+      "timestamp": "2026-06-23T11:23:41.606032+00:00",
+      "coin": "ONDO",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 32.054,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 31.829,
+          "change_percent": -0.7019404754476865
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 31.829,
+          "change_percent": -0.7019404754476865
+        }
+      }
+    },
+    {
+      "id": "PORTAL-1782213821-premium",
+      "timestamp": "2026-06-23T11:23:41.187917+00:00",
+      "coin": "PORTAL",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 1.4963,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 23,
+        "risk_reward": 0,
+        "total": 40
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 1.45,
+          "change_percent": -3.0942992715364572
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 1.45,
+          "change_percent": -3.0942992715364572
+        }
+      }
+    },
+    {
+      "id": "ICP-1782213821-premium",
+      "timestamp": "2026-06-23T11:23:41.184838+00:00",
+      "coin": "ICP",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 218.0,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 20,
+        "risk_reward": 0,
+        "total": 38
+      },
+      "final_score": 63,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 220.53,
+          "change_percent": 1.1605504587155968
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 220.53,
+          "change_percent": 1.1605504587155968
+        }
+      }
+    },
+    {
+      "id": "TRX-1782213821-premium",
+      "timestamp": "2026-06-23T11:23:41.214313+00:00",
+      "coin": "TRX",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 33.45,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 19,
+        "risk_reward": 0,
+        "total": 35
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 33.121,
+          "change_percent": -0.9835575485799719
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 33.121,
+          "change_percent": -0.9835575485799719
+        }
+      }
+    },
+    {
+      "id": "TNSR-1782213821-premium",
+      "timestamp": "2026-06-23T11:23:41.174089+00:00",
+      "coin": "TNSR",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 3.54,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 14,
+        "risk_reward": 0,
+        "total": 30
+      },
+      "final_score": 60,
+      "coin_class": "C",
+      "market_state": "recovery",
+      "opportunity_type": "recovery_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 74,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.6666666666666712
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.6666666666666712
+        }
+      }
+    },
+    {
+      "id": "LAYER-1782214370-premium",
+      "timestamp": "2026-06-23T11:32:50.047564+00:00",
+      "coin": "LAYER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7.813,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 19,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 44
+      },
+      "final_score": 66,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -6.11800844745936
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -6.11800844745936
+        }
+      }
+    },
+    {
+      "id": "LUMIA-1782214370-premium",
+      "timestamp": "2026-06-23T11:32:50.036037+00:00",
+      "coin": "LUMIA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 12.498,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -5.024803968634982
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -5.024803968634982
+        }
+      }
+    },
+    {
+      "id": "ONDO-1782214370-premium",
+      "timestamp": "2026-06-23T11:32:50.044768+00:00",
+      "coin": "ONDO",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 31.51,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 31.829,
+          "change_percent": 1.0123770231672455
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 31.829,
+          "change_percent": 1.0123770231672455
+        }
+      }
+    },
+    {
+      "id": "TNSR-1782214370-premium",
+      "timestamp": "2026-06-23T11:32:50.029155+00:00",
+      "coin": "TNSR",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 3.54,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 19,
+        "risk_reward": 0,
+        "total": 35
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.6666666666666712
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.6666666666666712
+        }
+      }
+    },
+    {
+      "id": "TRX-1782214370-premium",
+      "timestamp": "2026-06-23T11:32:50.040422+00:00",
+      "coin": "TRX",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 33.274,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 12,
+        "risk_reward": 0,
+        "total": 28
+      },
+      "final_score": 59,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 33.121,
+          "change_percent": -0.4598184768888582
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 33.121,
+          "change_percent": -0.4598184768888582
+        }
+      }
+    },
+    {
+      "id": "LUMIA-1782214518-premium",
+      "timestamp": "2026-06-23T11:35:18.481220+00:00",
+      "coin": "LUMIA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 12.498,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -5.024803968634982
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -5.024803968634982
+        }
+      }
+    },
+    {
+      "id": "LAYER-1782214518-premium",
+      "timestamp": "2026-06-23T11:35:18.490357+00:00",
+      "coin": "LAYER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7.813,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -6.11800844745936
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -6.11800844745936
+        }
+      }
+    },
+    {
+      "id": "ONDO-1782214518-premium",
+      "timestamp": "2026-06-23T11:35:18.487802+00:00",
+      "coin": "ONDO",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 31.556,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 31.829,
+          "change_percent": 0.865128660159715
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 31.829,
+          "change_percent": 0.865128660159715
+        }
+      }
+    },
+    {
+      "id": "PORTAL-1782214518-premium",
+      "timestamp": "2026-06-23T11:35:18.484650+00:00",
+      "coin": "PORTAL",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 1.48,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 19,
+        "risk_reward": 0,
+        "total": 36
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 1.45,
+          "change_percent": -2.027027027027029
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 1.45,
+          "change_percent": -2.027027027027029
+        }
+      }
+    },
+    {
+      "id": "TRX-1782214518-premium",
+      "timestamp": "2026-06-23T11:35:18.485754+00:00",
+      "coin": "TRX",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 33.275,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 15,
+        "pullback_quality": 9,
+        "momentum": 12,
+        "risk_reward": 0,
+        "total": 36
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 33.121,
+          "change_percent": -0.462809917355361
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 33.121,
+          "change_percent": -0.462809917355361
+        }
+      }
+    },
+    {
+      "id": "TNSR-1782214518-premium",
+      "timestamp": "2026-06-23T11:35:18.477547+00:00",
+      "coin": "TNSR",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 3.54,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 15,
+        "risk_reward": 0,
+        "total": 31
+      },
+      "final_score": 60,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.6666666666666712
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.6666666666666712
+        }
+      }
+    },
+    {
+      "id": "LUMIA-1782215215-premium",
+      "timestamp": "2026-06-23T11:46:55.782075+00:00",
+      "coin": "LUMIA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 12.541,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 18,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 43
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -5.350450522286907
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -5.350450522286907
+        }
+      }
+    },
+    {
+      "id": "LAYER-1782215215-premium",
+      "timestamp": "2026-06-23T11:46:55.788415+00:00",
+      "coin": "LAYER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7.773,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -5.63489000385951
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -5.63489000385951
+        }
+      }
+    },
+    {
+      "id": "TRX-1782215215-premium",
+      "timestamp": "2026-06-23T11:46:55.786550+00:00",
+      "coin": "TRX",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 33.451,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 15,
+        "pullback_quality": 0,
+        "momentum": 18,
+        "risk_reward": 0,
+        "total": 33
+      },
+      "final_score": 61,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 33.121,
+          "change_percent": -0.9865175928970682
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 33.121,
+          "change_percent": -0.9865175928970682
+        }
+      }
+    },
+    {
+      "id": "TNSR-1782215215-premium",
+      "timestamp": "2026-06-23T11:46:55.780319+00:00",
+      "coin": "TNSR",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 3.541,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 16,
+        "risk_reward": 0,
+        "total": 32
+      },
+      "final_score": 61,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.694436599830558
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.694436599830558
+        }
+      }
+    },
+    {
+      "id": "LUMIA-1782215392-premium",
+      "timestamp": "2026-06-23T11:49:52.911855+00:00",
+      "coin": "LUMIA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 12.541,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -5.350450522286907
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 11.87,
+          "change_percent": -5.350450522286907
+        }
+      }
+    },
+    {
+      "id": "LAYER-1782215392-premium",
+      "timestamp": "2026-06-23T11:49:52.917988+00:00",
+      "coin": "LAYER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7.773,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -5.63489000385951
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 7.335,
+          "change_percent": -5.63489000385951
+        }
+      }
+    },
+    {
+      "id": "TNSR-1782215392-premium",
+      "timestamp": "2026-06-23T11:49:52.906802+00:00",
+      "coin": "TNSR",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 3.541,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 21,
+        "risk_reward": 0,
+        "total": 37
+      },
+      "final_score": 63,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.694436599830558
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 3.481,
+          "change_percent": -1.694436599830558
+        }
+      }
+    },
+    {
+      "id": "TRX-1782215392-premium",
+      "timestamp": "2026-06-23T11:49:52.916192+00:00",
+      "coin": "TRX",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 33.192,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 15,
+        "pullback_quality": 0,
+        "momentum": 18,
+        "risk_reward": 0,
+        "total": 33
+      },
+      "final_score": 61,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {
+        "1h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 33.121,
+          "change_percent": -0.2139069655338574
+        },
+        "4h": {
+          "timestamp": "2026-06-23T16:10:40.342788+00:00",
+          "price": 33.121,
+          "change_percent": -0.2139069655338574
+        }
+      }
+    },
+    {
+      "id": "XRP-1782231040-premium",
+      "timestamp": "2026-06-23T16:10:40.518751+00:00",
+      "coin": "XRP",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 112.199,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ZEC-1782231040-premium",
+      "timestamp": "2026-06-23T16:10:40.520337+00:00",
+      "coin": "ZEC",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 42820.0,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ZEC-1782231499-premium",
+      "timestamp": "2026-06-23T16:18:19.525118+00:00",
+      "coin": "ZEC",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 42490.4,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ZEC-1782231677-premium",
+      "timestamp": "2026-06-23T16:21:17.276477+00:00",
+      "coin": "ZEC",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 42703.4,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ADA-1782231731-premium",
+      "timestamp": "2026-06-23T16:22:11.566741+00:00",
+      "coin": "ADA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 15.426,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 23,
+        "risk_reward": 0,
+        "total": 39
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "LAYER-1782231731-premium",
+      "timestamp": "2026-06-23T16:22:11.937237+00:00",
+      "coin": "LAYER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7.293,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "AAVE-1782231731-premium",
+      "timestamp": "2026-06-23T16:22:11.932586+00:00",
+      "coin": "AAVE",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7404.3,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ZEC-1782231731-premium",
+      "timestamp": "2026-06-23T16:22:11.933398+00:00",
+      "coin": "ZEC",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 42703.4,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ONDO-1782231731-premium",
+      "timestamp": "2026-06-23T16:22:11.935163+00:00",
+      "coin": "ONDO",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 31.758,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "RENDER-1782231731-premium",
+      "timestamp": "2026-06-23T16:22:11.940332+00:00",
+      "coin": "RENDER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 162.56,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "B",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 78,
+      "opportunity_score": 81,
+      "priority": "High",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "WLD-1782231731-premium",
+      "timestamp": "2026-06-23T16:22:11.922240+00:00",
+      "coin": "WLD",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 55.657,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 20,
+        "risk_reward": 0,
+        "total": 36
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "recovery",
+      "opportunity_type": "recovery_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 74,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "TNSR-1782231731-premium",
+      "timestamp": "2026-06-23T16:22:11.923708+00:00",
+      "coin": "TNSR",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 3.569,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 14,
+        "pullback_quality": 0,
+        "momentum": 18,
+        "risk_reward": 0,
+        "total": 32
+      },
+      "final_score": 61,
+      "coin_class": "C",
+      "market_state": "recovery",
+      "opportunity_type": "recovery_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 74,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "DOGE-1782231731-premium",
+      "timestamp": "2026-06-23T16:22:11.930434+00:00",
+      "coin": "DOGE",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 8.0463,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 14,
+        "pullback_quality": 0,
+        "momentum": 18,
+        "risk_reward": 0,
+        "total": 32
+      },
+      "final_score": 61,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "XRP-1782232208-premium",
+      "timestamp": "2026-06-23T16:30:08.103983+00:00",
+      "coin": "XRP",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 111.12,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "A",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 88,
+      "opportunity_score": 92,
+      "priority": "Elite",
+      "risk_level": "low",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ADA-1782232208-premium",
+      "timestamp": "2026-06-23T16:30:08.099923+00:00",
+      "coin": "ADA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 15.426,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 15,
+        "pullback_quality": 0,
+        "momentum": 21,
+        "risk_reward": 0,
+        "total": 36
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "AAVE-1782232208-premium",
+      "timestamp": "2026-06-23T16:30:08.658716+00:00",
+      "coin": "AAVE",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7404.3,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ZEC-1782232208-premium",
+      "timestamp": "2026-06-23T16:30:08.661686+00:00",
+      "coin": "ZEC",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 42664.3,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "LAYER-1782232208-premium",
+      "timestamp": "2026-06-23T16:30:08.667731+00:00",
+      "coin": "LAYER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7.293,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 20,
+        "risk_reward": 0,
+        "total": 37
+      },
+      "final_score": 63,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ONDO-1782232208-premium",
+      "timestamp": "2026-06-23T16:30:08.665154+00:00",
+      "coin": "ONDO",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 31.766,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 20,
+        "risk_reward": 0,
+        "total": 36
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "RENDER-1782232208-premium",
+      "timestamp": "2026-06-23T16:30:08.669368+00:00",
+      "coin": "RENDER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 162.7,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 20,
+        "risk_reward": 0,
+        "total": 36
+      },
+      "final_score": 62,
+      "coin_class": "B",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 78,
+      "opportunity_score": 81,
+      "priority": "High",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "WLD-1782232208-premium",
+      "timestamp": "2026-06-23T16:30:08.652050+00:00",
+      "coin": "WLD",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 56.211,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 19,
+        "risk_reward": 0,
+        "total": 35
+      },
+      "final_score": 62,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "DOGE-1782232208-premium",
+      "timestamp": "2026-06-23T16:30:08.657150+00:00",
+      "coin": "DOGE",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 8.0433,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 14,
+        "pullback_quality": 0,
+        "momentum": 18,
+        "risk_reward": 0,
+        "total": 32
+      },
+      "final_score": 61,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "TNSR-1782232208-premium",
+      "timestamp": "2026-06-23T16:30:08.653804+00:00",
+      "coin": "TNSR",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 3.569,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 14,
+        "pullback_quality": 0,
+        "momentum": 14,
+        "risk_reward": 0,
+        "total": 28
+      },
+      "final_score": 59,
+      "coin_class": "C",
+      "market_state": "recovery",
+      "opportunity_type": "recovery_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 74,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ADA-1782232847-premium",
+      "timestamp": "2026-06-23T16:40:47.151532+00:00",
+      "coin": "ADA",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 15.408,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 14,
+        "pullback_quality": 12,
+        "momentum": 14,
+        "risk_reward": 0,
+        "total": 40
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ONDO-1782232847-premium",
+      "timestamp": "2026-06-23T16:40:47.522348+00:00",
+      "coin": "ONDO",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 31.744,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 9,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 51
+      },
+      "final_score": 68,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 68,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "ZEC-1782232847-premium",
+      "timestamp": "2026-06-23T16:40:47.519905+00:00",
+      "coin": "ZEC",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 42655.7,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 6,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 47
+      },
+      "final_score": 67,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "LAYER-1782232847-premium",
+      "timestamp": "2026-06-23T16:40:47.523645+00:00",
+      "coin": "LAYER",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7.293,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 42
+      },
+      "final_score": 65,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "UNI-1782232847-premium",
+      "timestamp": "2026-06-23T16:40:47.515006+00:00",
+      "coin": "UNI",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 291.78,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "AAVE-1782232847-premium",
+      "timestamp": "2026-06-23T16:40:47.519082+00:00",
+      "coin": "AAVE",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 7255.2,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 16,
+        "pullback_quality": 0,
+        "momentum": 25,
+        "risk_reward": 0,
+        "total": 41
+      },
+      "final_score": 64,
+      "coin_class": "C",
+      "market_state": "breakout",
+      "opportunity_type": "momentum_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 70,
+      "priority": "Medium",
+      "risk_level": "high",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "WLD-1782232847-premium",
+      "timestamp": "2026-06-23T16:40:47.510932+00:00",
+      "coin": "WLD",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 55.59,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 17,
+        "pullback_quality": 0,
+        "momentum": 20,
+        "risk_reward": 0,
+        "total": 37
+      },
+      "final_score": 63,
+      "coin_class": "C",
+      "market_state": "bull_trend",
+      "opportunity_type": "continuation",
+      "opp_confidence": 63,
+      "opportunity_score": 77,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    },
+    {
+      "id": "TNSR-1782232847-premium",
+      "timestamp": "2026-06-23T16:40:47.511947+00:00",
+      "coin": "TNSR",
+      "category": "Premium",
+      "score": 90,
+      "signal_price": 3.567,
+      "reasons": [
+        "EMA crossover",
+        "Strong trend",
+        "Volume spike",
+        "Positive momentum",
+        "High volatility breakout",
+        "MTF: 5m+15m+1h aligned \u2b50"
+      ],
+      "model_version": "v12.2",
+      "phase5": {
+        "trend_quality": 13,
+        "pullback_quality": 0,
+        "momentum": 15,
+        "risk_reward": 0,
+        "total": 28
+      },
+      "final_score": 59,
+      "coin_class": "C",
+      "market_state": "recovery",
+      "opportunity_type": "recovery_trade",
+      "opp_confidence": 63,
+      "opportunity_score": 74,
+      "priority": "Medium",
+      "risk_level": "medium",
+      "historical_score": {
+        "trend_7d": 12,
+        "trend_30d": 12,
+        "trend_90d": 12,
+        "sr_quality": 12,
+        "hist_vol": 12,
+        "total": 60
+      },
+      "evaluations": {}
+    }
+  ]
+}

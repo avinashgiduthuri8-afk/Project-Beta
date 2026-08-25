@@ -1,0 +1,8 @@
+- [V2 architecture decisions](v2-architecture.md) — separate port (5001), event routing rules, schema choices; read before any V2 implementation
+- [Storage locking pattern](storage-locking.md) — threading.Lock() per-file in all bot storages; scanner uses 5 separate locks
+- [Snapshot cache pattern](snapshot-cache.md) — 3s TTL cache + asyncio.to_thread in app.py; _unified_stats accepts pre-fetched dicts
+- [API auth pattern](api-auth.md) — X-API-Key header, fail-closed (500 if env unset); / and scanner read routes exempted
+- [VGX grid storage ownership](vgx-grid-storage.md) — grid_config/grid_coins live in storage.py (not safe_storage.py); save_data() must include them or they get clobbered
+- [TestClient anyio conflict](testclient-anyio.md) — FastAPI TestClient + asyncio.to_thread in pytest produces spurious 422; call async route handlers directly instead
+- [Watchlist manager locking](watchlist-manager-locking.md) — RLock + migration once-guard; ensure_migration() before lock in add/remove; atomic temp-file writes
+- [Scanner history lock upgrade](scanner-history-lock.md) — _history_lock must be RLock; append_signal_history() holds it across read+write to close concurrent-append race

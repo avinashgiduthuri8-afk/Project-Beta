@@ -1,0 +1,32 @@
+# Core web framework
+fastapi==0.116.1
+uvicorn==0.35.0
+starlette
+jinja2==3.1.6
+python-multipart
+itsdangerous
+pydantic
+pydantic-settings
+httpx
+aiofiles
+
+# Data & analysis
+numpy
+pandas
+ta
+yfinance
+
+# Telegram
+python-telegram-bot
+
+# HTTP & networking
+requests==2.32.4
+
+# System monitoring
+psutil
+
+# Database (V2)
+aiosqlite
+
+# Testing
+pytest

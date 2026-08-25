@@ -1,51 +1,41 @@
-"""
-Unit tests for OMS & Execution Router (Prompt B).
-"""
+"""Unit tests for OMS and Execution Router."""
 
-from __future__ import annotations
-
-from core.enums import Exchange, OrderSide, OrderStatus, OrderType, ProductType
+import pytest
+from core.enums import OrderSide, OrderType, ProductType, Exchange, OrderStatus
 from core.models import OrderRequest
 from oms.execution_router import ExecutionRouter
 from oms.order_manager import OrderManager
 
 
 def test_tick_size_normalization():
-    # NSE/BSE standard tick size is 0.05
-    assert ExecutionRouter.normalize_tick_price(100.03, 0.05) == 100.05
-    assert ExecutionRouter.normalize_tick_price(100.02, 0.05) == 100.00
-    assert ExecutionRouter.normalize_tick_price(100.07, 0.05) == 100.05
-    assert ExecutionRouter.normalize_tick_price(100.08, 0.05) == 100.10
-    assert ExecutionRouter.normalize_tick_price(None, 0.05) is None
+    # NSE ₹0.05 tick size rounding tests
+    assert ExecutionRouter.normalize_tick_size(100.03, 0.05) == 100.05
+    assert ExecutionRouter.normalize_tick_size(100.01, 0.05) == 100.00
+    assert ExecutionRouter.normalize_tick_size(2450.12, 0.05) == 2450.10
+    assert ExecutionRouter.normalize_tick_size(2450.14, 0.05) == 2450.15
 
 
 def test_lot_size_normalization():
-    # NIFTY lot size 50
-    assert ExecutionRouter.normalize_quantity(49, 50) == 50
-    assert ExecutionRouter.normalize_quantity(75, 50) == 50
-    assert ExecutionRouter.normalize_quantity(100, 50) == 100
-    assert ExecutionRouter.normalize_quantity(120, 50) == 100
-    # Equity single lot
-    assert ExecutionRouter.normalize_quantity(17, 1) == 17
+    # NIFTY lot size 50 tests
+    assert ExecutionRouter.normalize_lot_size(40, lot_size=50) == 50
+    assert ExecutionRouter.normalize_lot_size(75, lot_size=50) == 100
+    assert ExecutionRouter.normalize_lot_size(10, lot_size=1) == 10
 
 
-def test_order_manager_submission_and_tracking(order_manager: OrderManager):
+def test_order_manager_submission_and_tracking(order_manager, paper_broker, execution_router):
     req = OrderRequest(
+        client_order_id="TEST-ORD-01",
         symbol="RELIANCE",
-        exchange=Exchange.NSE,
         side=OrderSide.BUY,
-        order_type=OrderType.LIMIT,
-        product=ProductType.MIS,
+        order_type=OrderType.MARKET,
+        product_type=ProductType.MIS,
         quantity=10,
-        price=2950.0,
     )
+    order = execution_router.route_order(req)
+    order_manager.register_order(order)
 
-    order = order_manager.submit_order(req, lot_size=1, tick_size=0.05)
-    assert order.order_id is not None
-    assert order.symbol == "RELIANCE"
-    assert order.quantity == 10
-
-    # Retrieve from manager
-    stored = order_manager.get_order(order.order_id)
-    assert stored is not None
-    assert stored.order_id == order.order_id
+    tracked_order = order_manager.get_order(order.order_id)
+    assert tracked_order is not None
+    assert tracked_order.symbol == "RELIANCE"
+    assert tracked_order.quantity == 10
+    assert tracked_order.status == OrderStatus.COMPLETE

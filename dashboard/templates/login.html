@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROJECT-ALPHA — Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-app:        #0a0a0f;
+            --bg-card:       #111118;
+            --bg-input:      #16161f;
+            --border:        #1e1e2e;
+            --border-focus:  #3b82f6;
+            --text-primary:  #f0f0ff;
+            --text-secondary:#8b8ba0;
+            --blue:          #3b82f6;
+            --blue-hover:    #2563eb;
+            --red:           #f43f5e;
+            --green:         #00d4a0;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-app);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 48px 40px 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+
+        .login-logo-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        .login-logo-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 8px;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        input[type="password"]:focus {
+            border-color: var(--border-focus);
+        }
+
+        input[type="password"]::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .error-banner {
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.35);
+            border-radius: 8px;
+            color: var(--red);
+            font-size: 0.85rem;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: var(--blue);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-login:hover { background: var(--blue-hover); }
+
+        .login-footer {
+            margin-top: 28px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            text-align: center;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="login-logo-dot"></div>
+            <span class="login-logo-text">PROJECT-ALPHA</span>
+        </div>
+
+        <h1 class="login-title">Dashboard Login</h1>
+        <p class="login-subtitle">Enter your dashboard API key to continue.</p>
+
+        {% if error %}
+        <div class="error-banner">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="/login">
+            <div class="form-group">
+                <label for="api_key">API Key</label>
+                <input
+                    type="password"
+                    id="api_key"
+                    name="api_key"
+                    placeholder="Enter API key"
+                    autocomplete="current-password"
+                    autofocus
+                    required
+                />
+            </div>
+            <button type="submit" class="btn-login">Sign In</button>
+        </form>
+
+        <p class="login-footer">PROJECT-ALPHA Trading Dashboard &mdash; Authorised access only</p>
+    </div>
+</body>
+</html>

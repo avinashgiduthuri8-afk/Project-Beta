@@ -1,19 +1,12 @@
-"""
-Unit and integration tests for CLI argument parsing and dry-run mode.
-"""
-
-from __future__ import annotations
+"""Integration test for Main Bot CLI Dry Run."""
 
 import subprocess
 import sys
 
 
 def test_cli_dry_run():
-    result = subprocess.run(
-        [sys.executable, "main.py", "--mode", "paper", "--broker", "paper", "--dry-run"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
+    cmd = [sys.executable, "main.py", "--mode", "paper", "--broker", "paper", "--dry-run"]
+    result = subprocess.run(cmd, capture_output=True, text=True)
     assert result.returncode == 0
-    assert "Dry-run completed successfully" in result.stdout or "Dry-run completed successfully" in result.stderr
+    assert "DRY-RUN MODE" in result.stderr or "DRY-RUN MODE" in result.stdout
+    assert "Dry-run completed successfully" in result.stderr or "Dry-run completed successfully" in result.stdout

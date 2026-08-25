@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
-from datetime import datetime, time
-from zoneinfo import ZoneInfo
+from datetime import datetime, time, timezone, timedelta
 from typing import Optional
 from core.enums import MarketSession
 
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    ZoneInfo = None
+
 
 class MarketClock:
-    """Manages Indian Market (NSE/BSE) trading sessions in Asia/Kolkata timezone."""
+    """Manages Indian Market (NSE/BSE) trading sessions in Asia/Kolkata timezone (UTC+5:30)."""
 
     def __init__(
         self,
@@ -19,7 +23,15 @@ class MarketClock:
         square_off_str: str = "15:15:00",
         market_close_str: str = "15:30:00",
     ):
-        self.tz = ZoneInfo(timezone_str)
+        try:
+            if ZoneInfo is not None:
+                self.tz = ZoneInfo(timezone_str)
+            else:
+                self.tz = timezone(timedelta(hours=5, minutes=30), name="IST")
+        except Exception:
+            # Fallback for Windows environments without tzdata package
+            self.tz = timezone(timedelta(hours=5, minutes=30), name="IST")
+
         self.pre_open_time = time.fromisoformat(pre_open_str)
         self.market_open_time = time.fromisoformat(market_open_str)
         self.square_off_time = time.fromisoformat(square_off_str)

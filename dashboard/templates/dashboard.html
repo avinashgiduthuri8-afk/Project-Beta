@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT-ALPHA · Dashboard V2</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    {# ── Derived values for initial render ─────────────────────────────── #}
+    {% set combined_pnl   = data.vgx_overview.daily_pnl + data.pmb_overview.daily_pnl + data.mtb_overview.daily_pnl %}
+    {% set total_open     = (data.vgx_overview.open_positions | length) + (data.pmb_overview.open_positions | length) + (data.mtb_overview.open_positions | length) %}
+    {% set vgx_pos_count  = data.vgx_overview.open_positions | length %}
+    {% set vgx_prog       = [vgx_pos_count * 20, 100] | min %}
+
+    {# Telegram: ONLINE if any telegram relay is up #}
+    {% if data.service_statuses.scanner_telegram == 'ONLINE'
+       or data.service_statuses.vgx_telegram == 'ONLINE'
+       or data.service_statuses.pmb_telegram == 'ONLINE'
+       or data.service_statuses.mtb_telegram == 'ONLINE' %}
+        {% set tg_status = 'ONLINE' %}
+    {% else %}
+        {% set tg_status = 'OFFLINE' %}
+    {% endif %}
+
+    {# Status dot CSS class helpers #}
+    {% macro dot_class(val) %}{% if val == 'ONLINE' %}dot-online{% elif val == 'LIVE' %}dot-live{% elif val == 'PAPER' %}dot-paper{% else %}dot-offline{% endif %}{% endmacro %}
+    {% macro lbl_class(val) %}{% if val == 'ONLINE' %}st-online{% elif val == 'LIVE' %}st-live{% elif val == 'PAPER' %}st-paper{% else %}st-offline{% endif %}{% endmacro %}
+    {# Bot card pill class #}
+    {% macro bot_pill(svc, mode) %}{% if svc == 'OFFLINE' %}offline{% elif mode == 'LIVE' %}live{% elif mode == 'PAPER' %}paper{% else %}online{% endif %}{% endmacro %}
+
+    <div class="ultimate-shell">
+
+        <!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════ -->
+        <aside class="side-navigation-dock" id="sidebar">
+            <div class="brand-header">
+                <h2>PROJECT-ALPHA <span class="pulse-core"></span></h2>
+            </div>
+            <nav class="navigation-links">
+                <div class="nav-dropdown-group">
+                    <button class="nav-dropdown-toggle active" data-menu="overview">Overview</button>
+                    <div class="nav-dropdown-menu" id="menu-overview">
+                        <a href="#" class="nav-anchor active" data-target="home-view">Dashboard Home</a>
+                        <a href="#" class="nav-anchor" data-target="scanner-view">Scanner Center</a>
+                        <a href="#" class="nav-anchor" data-target="portfolio-view">Portfolio Center</a>
+                    </div>
+                </div>
+                <div class="nav-dropdown-group">
+                    <button class="nav-dropdown-toggle" data-menu="logs">Execution Logs</button>
+                    <div class="nav-dropdown-menu view-hidden" id="menu-logs">
+                        <a href="#" class="nav-anchor" data-target="open-view">Open Positions</a>
+                        <a href="#" class="nav-anchor" data-target="history-view">Trade History</a>
+                    </div>
+                </div>
+                <div class="nav-dropdown-group">
+                    <button class="nav-dropdown-toggle" data-menu="bots">Bot Control</button>
+                    <div class="nav-dropdown-menu view-hidden" id="menu-bots">
+                        <a href="#" class="nav-anchor" data-target="vgx-view">VGX Bot</a>
+                        <a href="#" class="nav-anchor" data-target="pmb-view">PMB Bot</a>
+                        <a href="#" class="nav-anchor" data-target="mtb-view">MTB Bot</a>
+                    </div>
+                </div>
+                <div class="nav-dropdown-group">
+                    <button class="nav-dropdown-toggle" data-menu="analytics">Analytics</button>
+                    <div class="nav-dropdown-menu view-hidden" id="menu-analytics">
+                        <a href="#" class="nav-anchor" data-target="performance-tracker">Signal Performance</a>
+                        <a href="#" class="nav-anchor" data-target="signal-history">Signal History</a>
+                        <a href="#" class="nav-anchor" data-target="coin-performance">Coin Performance</a>
+                        <a href="#" class="nav-anchor" data-target="tier-accuracy">Tier Accuracy</a>
+                    </div>
+                </div>
+                <div class="nav-dropdown-group">
+                    <button class="nav-dropdown-toggle" data-menu="watchlist">Watchlist</button>
+                    <div class="nav-dropdown-menu view-hidden" id="menu-watchlist">
+                        <a href="#" class="nav-anchor" data-target="watchlist-center">Scanner Watchlist</a>
+                    </div>
+                </div>
+                <div class="nav-dropdown-group">
+                    <button class="nav-dropdown-toggle" data-menu="devops">DevOps</button>
+                    <div class="nav-dropdown-menu view-hidden" id="menu-devops">
+                        <a href="#" class="nav-anchor" data-target="monitoring-view">System Health</a>
+                        <a href="#" class="nav-anchor" data-target="settings-view">Settings Panel</a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- ═══════════════════════════ MAIN AREA ════════════════════════════ -->
+        <div class="main-workspace-wrapper">
+
+            <!-- ── TOPBAR ──────────────────────────────────────────────────── -->
+            <header class="application-status-header">
+                <button class="sidebar-hamburger" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+
+                <div class="status-left-group">
+                    <!-- Scanner -->
+                    <div class="status-badge-item">
+                        <span class="status-dot {{ dot_class(data.service_statuses.scanner) }}" id="dot-scanner"></span>
+                        <span class="badge-label">Scanner</span>
+                        <span class="{{ lbl_class(data.service_statuses.scanner) }}" id="sb-scanner">{{ data.service_statuses.scanner }}</span>
+                    </div>
+                    <span class="status-divider"></span>
+                    <!-- VGX -->
+                    <div class="status-badge-item">
+                        <span class="status-dot {{ dot_class(data.service_statuses.vgx) }}" id="dot-vgx"></span>
+                        <span class="badge-label">VGX</span>
+                        <span class="{{ lbl_class(data.service_statuses.vgx) }}" id="sb-vgx">{{ data.service_statuses.vgx }}</span>
+                    </div>
+                    <!-- PMB -->
+                    <div class="status-badge-item">
+                        <span class="status-dot {{ dot_class(data.service_statuses.pmb) }}" id="dot-pmb"></span>
+                        <span class="badge-label">PMB</span>
+                        <span class="{{ lbl_class(data.service_statuses.pmb) }}" id="sb-pmb">{{ data.service_statuses.pmb }}</span>
+                    </div>
+                    <!-- MTB -->
+                    <div class="status-badge-item">
+                        <span class="status-dot {{ dot_class(data.service_statuses.mtb) }}" id="dot-mtb"></span>
+                        <span class="badge-label">MTB</span>
+                        <span class="{{ lbl_class(data.service_statuses.mtb) }}" id="sb-mtb">{{ data.service_statuses.mtb }}</span>
+                    </div>
+                    <span class="status-divider"></span>
+                    <!-- Telegram -->
+                    <div class="status-badge-item">
+                        <span class="status-dot {{ dot_class(tg_status) }}" id="dot-telegram"></span>
+                        <span class="badge-label">Telegram</span>
+                        <span class="{{ lbl_class(tg_status) }}" id="sb-telegram">{{ tg_status }}</span>
+                    </div>
+                    <!-- Railway -->
+                    <div class="status-badge-item">
+                        <span class="status-dot {{ dot_class(data.railway_monitoring.status) }}" id="dot-railway"></span>
+                        <span class="badge-label">Railway</span>
+                        <span class="{{ lbl_class(data.railway_monitoring.status) }}" id="sb-railway">{{ data.railway_monitoring.status }}</span>
+                    </div>
+                </div>
+
+                <div class="status-right-group">
+                    <!-- Last Updated timestamp — browser-side IST clock, refreshed every
+                         time refreshDashboardData() runs (see script.js: updateLastUpdatedTimestamp). -->
+                    <span class="last-updated-label" id="last-updated-label">Last updated: —</span>
+                    <button id="alert-dropdown-btn" class="utility-badge-trigger">
+                        Alerts <span class="alert-counter-badge">{{ data.notifications | length }}</span>
+                    </button>
+                    <button id="global-theme-toggle" class="action-control-btn">Theme</button>
+                </div>
+
+                <!-- Alerts overlay -->
+                <div id="alerts-popup-overlay" class="alerts-overlay-card view-hidden">
+                    <div class="overlay-header"><h4>System Notification Stream</h4></div>
+                    <div class="overlay-list-wrapper">
+                        {% for log in data.notifications %}
+                        <div class="alert-item alert-type-{{ log.type }}">
+                            <p>{{ log.text }}</p>
+                            <span class="alert-timestamp-label">{{ log.time }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </header>
+
+            <!-- ── VIEWPORT ────────────────────────────────────────────────── -->
+            <main class="workspace-viewport">
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  HOME VIEW — V2 Redesign                                   -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="home-view" class="spa-view-layer">
+
+                    <!-- KPI STRIP -->
+                    <div class="v2-section-label" style="margin-top:0;">Key Performance Indicators</div>
+                    <div class="kpi-row">
+
+                        <div class="kpi-card accent-blue">
+                            <div class="kpi-label">Total AUM</div>
+                            <div class="kpi-value font-mono" id="kpi-aum">{{ data.portfolio_overview.total_value|inr }}</div>
+                            <div class="kpi-sub">Daily Δ: <span id="kpi-aum-delta" class="text-green">{{ data.portfolio_overview.daily_pnl|inr }}</span></div>
+                        </div>
+
+                        <div class="kpi-card {% if combined_pnl >= 0 %}accent-green{% else %}accent-red{% endif %}">
+                            <div class="kpi-label">Combined Daily PnL</div>
+                            <div class="kpi-value font-mono {% if combined_pnl >= 0 %}text-green{% else %}text-red{% endif %}" id="kpi-pnl">
+                                {{ combined_pnl|inr }}
+                            </div>
+                            <div class="kpi-sub">VGX + PMB + MTB</div>
+                        </div>
+
+                        <div class="kpi-card {% if data.performance_stats.win_rate_pct >= 50 %}accent-green{% else %}accent-amber{% endif %}">
+                            <div class="kpi-label">Signal Win Rate</div>
+                            <div class="kpi-value font-mono" id="kpi-winrate">{{ data.performance_stats.win_rate_pct }}%</div>
+                            <div class="kpi-sub">{{ data.performance_stats.winning_signals }}W / {{ data.performance_stats.losing_signals }}L</div>
+                        </div>
+
+                        <div class="kpi-card accent-blue">
+                            <div class="kpi-label">Open Positions</div>
+                            <div class="kpi-value font-mono" id="kpi-openpos">{{ total_open }}</div>
+                            <div class="kpi-sub">
+                                <a href="#" id="market-assets-link" style="color:inherit;text-decoration:none;">
+                                    <span id="market-assets-count">{{ data.scanner_overview.coins_scanned }}</span> assets monitored
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card {% if data.risk_engine.capital_utilisation_pct > 80 %}accent-red{% elif data.risk_engine.capital_utilisation_pct > 50 %}accent-amber{% else %}accent-green{% endif %}">
+                            <div class="kpi-label">Capital Deployed</div>
+                            <div class="kpi-value font-mono" id="kpi-capital">{{ data.risk_engine.total_deployed|inr(0) }}</div>
+                            <div class="kpi-sub">{{ data.risk_engine.capital_utilisation_pct }}% of limit</div>
+                        </div>
+
+                        <div class="kpi-card {% if data.system_meta.overall_health_pct >= 80 %}accent-green{% elif data.system_meta.overall_health_pct >= 50 %}accent-amber{% else %}accent-red{% endif %}">
+                            <div class="kpi-label">System Health</div>
+                            <div class="kpi-value font-mono" id="kpi-health">{{ data.system_meta.overall_health_pct }}%</div>
+                            <div class="kpi-sub">Uptime: {{ data.system_meta.uptime }}</div>
+                        </div>
+
+                    </div><!-- /.kpi-row -->
+
+                    <!-- BOT CARDS -->
+                    <div class="v2-section-label">Bot Status</div>
+                    <div class="bot-cards-row">
+
+                        <!-- VGX Bot -->
+                        <div class="bot-card">
+                            <div class="bot-card-header">
+                                <div>
+                                    <div class="bot-card-name">Volatile GridX</div>
+                                    <div class="bot-card-title">VGX Bot</div>
+                                </div>
+                                <span class="bot-status-pill {{ bot_pill(data.service_statuses.vgx, data.vgx_overview.status) }}" id="vbc-vgx-status">
+                                    <span class="status-dot" style="width:5px;height:5px;background:currentColor;border-radius:50%;"></span>
+                                    {{ data.vgx_overview.status }}
+                                </span>
+                            </div>
+                            <div class="bot-card-metrics">
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Balance</span>
+                                    <span class="bot-metric-value text-blue" id="vbc-vgx-balance">{{ data.vgx_overview.virtual_balance|inr(0) }}</span>
+                                </div>
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Daily PnL</span>
+                                    <span class="bot-metric-value {% if data.vgx_overview.daily_pnl >= 0 %}text-green{% else %}text-red{% endif %}" id="vbc-vgx-pnl">
+                                        {{ data.vgx_overview.daily_pnl|inr }}
+                                    </span>
+                                </div>
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Win Rate</span>
+                                    <span class="bot-metric-value" id="vbc-vgx-winrate">{{ data.vgx_overview.win_rate }}%</span>
+                                </div>
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Positions</span>
+                                    <span class="bot-metric-value" id="vbc-vgx-positions">{{ vgx_pos_count }} / 5</span>
+                                </div>
+                            </div>
+                            <div class="bot-card-footer">
+                                <div class="progress-track">
+                                    <div class="progress-fill fill-blue" id="vbc-vgx-progress" style="width:{{ vgx_prog }}%;"></div>
+                                </div>
+                                <div class="progress-label">
+                                    <span>Capital usage</span>
+                                    <span id="vbc-vgx-prog-label">{{ vgx_prog }}%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PMB Bot -->
+                        <div class="bot-card">
+                            <div class="bot-card-header">
+                                <div>
+                                    <div class="bot-card-name">Price Movement Bot</div>
+                                    <div class="bot-card-title">PMB Bot</div>
+                                </div>
+                                <span class="bot-status-pill {{ bot_pill(data.service_statuses.pmb, data.pmb_overview.mode) }}" id="vbc-pmb-status">
+                                    <span class="status-dot" style="width:5px;height:5px;background:currentColor;border-radius:50%;"></span>
+                                    {{ data.pmb_overview.mode }}
+                                </span>
+                            </div>
+                            <div class="bot-card-metrics">
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Cash Balance</span>
+                                    <span class="bot-metric-value text-blue" id="vbc-pmb-cash">{{ data.pmb_overview.cash_balance|inr(0) }}</span>
+                                </div>
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Daily PnL</span>
+                                    <span class="bot-metric-value {% if data.pmb_overview.daily_pnl >= 0 %}text-green{% else %}text-red{% endif %}" id="vbc-pmb-pnl">
+                                        {{ data.pmb_overview.daily_pnl|inr }}
+                                    </span>
+                                </div>
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Trade Amount</span>
+                                    <span class="bot-metric-value">{{ data.pmb_overview.trade_amount|inr(0) }}</span>
+                                </div>
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Positions</span>
+                                    <span class="bot-metric-value" id="vbc-pmb-positions">{{ data.pmb_overview.open_positions | length }}</span>
+                                </div>
+                            </div>
+                            <div class="bot-card-footer">
+                                {% set pmb_pos = data.pmb_overview.open_positions | length %}
+                                {% set pmb_prog = [pmb_pos * 25, 100] | min %}
+                                <div class="progress-track">
+                                    <div class="progress-fill fill-amber" id="vbc-pmb-progress" style="width:{{ pmb_prog }}%;"></div>
+                                </div>
+                                <div class="progress-label">
+                                    <span>Capital usage</span>
+                                    <span>Total PnL: {{ data.pmb_overview.total_pnl|inr }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MTB Bot -->
+                        <div class="bot-card">
+                            <div class="bot-card-header">
+                                <div>
+                                    <div class="bot-card-name">MACD Trend Bounce</div>
+                                    <div class="bot-card-title">MTB Bot</div>
+                                </div>
+                                <span class="bot-status-pill {{ bot_pill(data.service_statuses.mtb, data.mtb_overview.mode) }}" id="vbc-mtb-status">
+                                    <span class="status-dot" style="width:5px;height:5px;background:currentColor;border-radius:50%;"></span>
+                                    {{ data.mtb_overview.mode }}
+                                </span>
+                            </div>
+                            <div class="bot-card-metrics">
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Cash Balance</span>
+                                    <span class="bot-metric-value text-blue" id="vbc-mtb-cash">{{ data.mtb_overview.cash_balance|inr(0) }}</span>
+                                </div>
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Daily PnL</span>
+                                    <span class="bot-metric-value {% if data.mtb_overview.daily_pnl >= 0 %}text-green{% else %}text-red{% endif %}" id="vbc-mtb-pnl">
+                                        {{ data.mtb_overview.daily_pnl|inr }}
+                                    </span>
+                                </div>
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Trade Amount</span>
+                                    <span class="bot-metric-value">{{ data.mtb_overview.trade_amount|inr(0) }}</span>
+                                </div>
+                                <div class="bot-metric">
+                                    <span class="bot-metric-label">Positions</span>
+                                    <span class="bot-metric-value" id="vbc-mtb-positions">{{ data.mtb_overview.open_positions | length }}</span>
+                                </div>
+                            </div>
+                            <div class="bot-card-footer">
+                                {% set mtb_pos = data.mtb_overview.open_positions | length %}
+                                {% set mtb_prog = [mtb_pos * 25, 100] | min %}
+                                <div class="progress-track">
+                                    <div class="progress-fill fill-green" id="vbc-mtb-progress" style="width:{{ mtb_prog }}%;"></div>
+                                </div>
+                                <div class="progress-label">
+                                    <span>Capital usage</span>
+                                    <span>Total PnL: {{ data.mtb_overview.total_pnl|inr }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /.bot-cards-row -->
+
+                    <!-- SCANNER PREVIEW + MARKET STATE -->
+                    <div class="v2-section-label">Live Market Intel</div>
+                    <div class="v2-two-col">
+
+                        <!-- Scanner Signals Preview -->
+                        <div class="v2-panel">
+                            <div class="v2-panel-header">
+                                <span class="v2-panel-title">Live Signals</span>
+                                <span class="v2-panel-sub" id="home-signal-count">
+                                    Elite: <span class="text-blue">{{ data.scanner_overview.elite_signals }}</span>
+                                    &nbsp;·&nbsp; High: <span class="text-gold">{{ data.scanner_overview.high_signals }}</span>
+                                    &nbsp;·&nbsp; Active: <span>{{ data.scanner_overview.active_signals }}</span>
+                                </span>
+                            </div>
+                            <div class="scroller-table-axis" style="max-height:240px;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Coin</th>
+                                            <th>Tier</th>
+                                            <th>Score</th>
+                                            <th>Price</th>
+                                            <th>Age</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="home-signals-tbody">
+                                        {% for trace in data.recent_signals[:8] %}
+                                        <tr>
+                                            <td><strong>{{ trace.coin }}</strong></td>
+                                            <td>
+                                                <span class="{% if trace.category == 'ELITE' %}tier-elite{% elif trace.category == 'HIGH' %}tier-high{% elif trace.category == 'MEDIUM' %}tier-medium{% else %}tier-other{% endif %}">
+                                                    {{ trace.category }}
+                                                </span>
+                                            </td>
+                                            <td class="font-mono">{{ trace.score }}</td>
+                                            <td class="font-mono text-sm">{{ trace.signal_price }}</td>
+                                            <td class="text-muted text-sm">{{ trace.signal_age }}</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="5" class="text-muted" style="text-align:center;padding:20px;">No active signals</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Market State + Scanner Stats -->
+                        <div class="v2-panel">
+                            <div class="v2-panel-header">
+                                <span class="v2-panel-title">Market State</span>
+                                <span class="v2-panel-sub text-green">{{ data.scanner_overview.current_market_status or 'ACTIVE' }}</span>
+                            </div>
+                            <div class="v2-panel-body">
+                                <div class="market-metrics">
+                                    <div class="market-metric-row">
+                                        <span class="market-metric-label">Market Strength</span>
+                                        <span class="market-metric-value font-mono">{{ data.market_state.market_strength }}%</span>
+                                    </div>
+                                    <div class="market-metric-row">
+                                        <span class="market-metric-label">Trend Direction</span>
+                                        <span class="market-metric-value">{{ data.market_state.trend or '—' }}</span>
+                                    </div>
+                                    <div class="market-metric-row">
+                                        <span class="market-metric-label">Coins Scanned</span>
+                                        <span class="market-metric-value font-mono">{{ data.scanner_overview.coins_scanned }}</span>
+                                    </div>
+                                    <div class="market-metric-row">
+                                        <span class="market-metric-label">Last Scan</span>
+                                        <span class="market-metric-value text-sm">{{ data.scanner_overview.last_scan_time }}</span>
+                                    </div>
+                                    <div class="market-metric-row">
+                                        <span class="market-metric-label">Railway CPU</span>
+                                        <span class="market-metric-value font-mono">{{ data.railway_monitoring.cpu_usage }}</span>
+                                    </div>
+                                    <div class="market-metric-row">
+                                        <span class="market-metric-label">Railway Memory</span>
+                                        <span class="market-metric-value font-mono">{{ data.railway_monitoring.memory_usage }}</span>
+                                    </div>
+                                    <div class="market-metric-row">
+                                        <span class="market-metric-label">System Version</span>
+                                        <span class="market-metric-value text-sm">{{ data.system_meta.version }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /.v2-two-col -->
+
+                    <!-- RISK PANEL -->
+                    <div class="v2-section-label">Risk Engine</div>
+                    <div class="risk-panel">
+                        <div class="risk-panel-header">
+                            <span class="risk-panel-title">Risk Engine Status</span>
+                            <span class="risk-panel-badge {% if not data.risk_engine.trading_enabled %}danger{% endif %}" id="risk-trading-badge">
+                                {% if data.risk_engine.trading_enabled %}TRADING ENABLED{% else %}TRADING HALTED{% endif %}
+                            </span>
+                            <label class="trading-toggle-switch" title="Toggle trading on/off">
+                                <input type="checkbox"
+                                       id="trading-toggle-input"
+                                       {% if data.risk_engine.trading_enabled %}checked{% endif %}
+                                       onchange="toggleTrading(this)">
+                                <span class="trading-toggle-slider"></span>
+                            </label>
+                            <span class="trading-toggle-label" id="trading-toggle-label">
+                                {% if data.risk_engine.trading_enabled %}
+                                    <span class="text-green">Trading Enabled</span>
+                                {% else %}
+                                    <span class="text-red">Trading Disabled</span>
+                                {% endif %}
+                            </span>
+                            <span style="font-size:0.65rem;color:var(--text-secondary);">Updated: <span id="risk-updated">{{ data.risk_engine.last_updated }}</span></span>
+                        </div>
+                        <div class="risk-grid">
+                            <div class="risk-item">
+                                <span class="risk-item-label">Emergency Stop</span>
+                                <span class="risk-item-value {% if data.risk_engine.emergency_stop %}text-red{% else %}text-green{% endif %}" id="risk-estop">
+                                    {{ 'ACTIVE' if data.risk_engine.emergency_stop else 'INACTIVE' }}
+                                </span>
+                                <span class="risk-item-sub">Circuit breaker</span>
+                            </div>
+                            <div class="risk-item">
+                                <span class="risk-item-label">Capital Deployed</span>
+                                <span class="risk-item-value font-mono" id="risk-deployed">{{ data.risk_engine.total_deployed|inr(0) }}</span>
+                                <span class="risk-item-sub">of {{ data.risk_engine.total_capital_limit|inr(0) }} limit</span>
+                            </div>
+                            <div class="risk-item">
+                                <span class="risk-item-label">Utilisation</span>
+                                <span class="risk-item-value font-mono {% if data.risk_engine.capital_utilisation_pct > 80 %}text-red{% elif data.risk_engine.capital_utilisation_pct > 50 %}text-gold{% else %}text-green{% endif %}" id="risk-util">
+                                    {{ data.risk_engine.capital_utilisation_pct }}%
+                                </span>
+                                <span class="risk-item-sub">Capital used</span>
+                            </div>
+                            <div class="risk-item">
+                                <span class="risk-item-label">Open Risk</span>
+                                <span class="risk-item-value font-mono" id="risk-openpos">{{ total_open }}</span>
+                                <span class="risk-item-sub">Active positions</span>
+                            </div>
+                            <div class="risk-item">
+                                <span class="risk-item-label">Trading Status</span>
+                                <span class="risk-item-value {% if data.risk_engine.trading_enabled %}text-green{% else %}text-red{% endif %}" id="risk-trading">
+                                    {{ 'ENABLED' if data.risk_engine.trading_enabled else 'HALTED' }}
+                                </span>
+                                <span class="risk-item-sub">All bots</span>
+                            </div>
+                        </div>
+                    </div><!-- /.risk-panel -->
+
+                    <!-- ANALYTICS SECTION (with existing Chart.js canvases) -->
+                    <div class="v2-section-label">Analytics</div>
+                    <div class="analytics-grid">
+
+                        <div class="chart-placeholder">
+                            <div class="chart-ph-header">
+                                <span class="chart-ph-title">Signal Distribution</span>
+                                <span class="chart-ph-tag">Elite / High / Medium</span>
+                            </div>
+                            <div class="chart-ph-body">
+                                <canvas id="homePieChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-placeholder">
+                            <div class="chart-ph-header">
+                                <span class="chart-ph-title">Market Strength Gauge</span>
+                                <span class="chart-ph-tag">Volatility Index</span>
+                            </div>
+                            <div class="chart-ph-body" style="position:relative;">
+                                <canvas id="homeGaugeChart"></canvas>
+                                <div class="gauge-readout-digits">{{ data.market_state.market_strength }}%</div>
+                            </div>
+                        </div>
+
+                        <div class="chart-placeholder">
+                            <div class="chart-ph-header">
+                                <span class="chart-ph-title">Daily Signal Breakouts</span>
+                                <span class="chart-ph-tag">7-day trend</span>
+                            </div>
+                            <div class="chart-ph-body">
+                                <canvas id="homeLineChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-placeholder">
+                            <div class="chart-ph-header">
+                                <span class="chart-ph-title">Activity Timeline</span>
+                                <span class="chart-ph-tag">Real-time events</span>
+                            </div>
+                            <div class="chart-ph-body" style="align-items:flex-start;overflow-y:auto;">
+                                <div class="activity-timeline-scroller" style="width:100%;max-height:170px;">
+                                    {% for event in data.activity_timeline %}
+                                    <div class="timeline-event-row">
+                                        <div class="event-marker-dot-node"></div>
+                                        <div class="event-details-block">
+                                            <h6>{{ event.title }}</h6>
+                                            <p>{{ event.desc }}</p>
+                                            <span class="event-timestamp-tag">{{ event.time }}</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /.analytics-grid -->
+
+                </div><!-- /#home-view -->
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  SCANNER CENTER                                             -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="scanner-view" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-12" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;">
+                            <h5 style="margin:0;">Scanner Center</h5>
+                            <button class="btn-commit-mock-state" onclick="refreshScanner()" style="width:auto;padding:6px 18px;">Refresh Scanner</button>
+                        </div>
+                        <div id="scanner-refresh-msg" style="display:none;text-align:center;font-size:0.85rem;padding:4px 0;color:#ff4444;"></div>
+
+                        <div class="metric-card span-12" style="margin-top:4px;">
+                            <h5>Scanner Health Monitor</h5>
+                            <div class="dashboard-grid-matrix" style="margin-top:8px;">
+                                <div class="metric-card span-3"><h6>API Status</h6><h3 id="sh-api-status" class="text-green">{{ data.scanner_overview.api_status or 'ONLINE' }}</h3></div>
+                                <div class="metric-card span-3"><h6>Health Score</h6><h3 id="sh-health-score" class="text-green">{{ data.scanner_overview.health_score or 100 }}%</h3></div>
+                                <div class="metric-card span-3"><h6>Total Scans</h6><h3 id="sh-total-scans">{{ data.scanner_overview.total_scans or 0 }}</h3></div>
+                                <div class="metric-card span-3"><h6>Failed Scans</h6><h3 id="sh-failed-scans" class="text-red">{{ data.scanner_overview.failed_scans or 0 }}</h3></div>
+                                <div class="metric-card span-3"><h6>Consecutive Failures</h6><h3 id="sh-consecutive-failures">{{ data.scanner_overview.consecutive_failures or 0 }}</h3></div>
+                                <div class="metric-card span-3"><h6>Scan Duration</h6><h3 id="sh-scan-duration">{{ data.scanner_overview.scan_duration_ms or 0 }} ms</h3></div>
+                                <div class="metric-card span-3"><h6>Market Status</h6><h3 id="sh-market-status">{{ data.scanner_overview.current_market_status or 'ACTIVE' }}</h3></div>
+                                <div class="metric-card span-3"><h6>Last Successful Scan</h6><h4 id="sh-last-scan" style="font-size:0.85rem;margin-top:4px;">—</h4></div>
+                            </div>
+                        </div>
+
+                        <div class="metric-card span-12">
+                            <h5>Restart Recovery</h5>
+                            <div class="dashboard-grid-matrix" style="margin-top:8px;">
+                                <div class="metric-card span-4"><h6>Last Restart</h6><h4 id="sh-restart-time" style="font-size:0.85rem;margin-top:4px;">{{ data.scanner_overview.last_restart_time or 'Unknown' }}</h4></div>
+                                <div class="metric-card span-4"><h6>Recovered Signals</h6><h3 id="sh-recovered-signals">{{ data.scanner_overview.recovered_signals or 0 }}</h3></div>
+                                <div class="metric-card span-4"><h6>Recovery Status</h6><h3 id="sh-recovery-status" class="text-green">{{ data.scanner_overview.recovery_status or 'SUCCESS' }}</h3></div>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════════════════════════════════════════ -->
+                        <!-- SCANNER CENTER V2 — MONITORING (additive, read-only) -->
+                        <!-- ═══════════════════════════════════════════════ -->
+
+                        <!-- Signal Funnel -->
+                        <div class="metric-card span-12 accordion-section">
+                            <div class="accordion-header" onclick="toggleAccordion('funnel-body')">
+                                <h5>Signal Funnel</h5>
+                                <span class="accordion-caret" id="funnel-body-caret">▾</span>
+                            </div>
+                            <div class="accordion-body" id="funnel-body">
+                                <div class="funnel-waterfall" id="funnel-waterfall">
+                                    <div class="funnel-stage" data-stage="coins_scanned">
+                                        <div class="funnel-label"><span>Coins Scanned</span><span class="funnel-count" id="funnel-coins_scanned">0</span></div>
+                                        <div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-bar-coins_scanned" style="width:100%;"></div></div>
+                                    </div>
+                                    <div class="funnel-stage" data-stage="passed_volume">
+                                        <div class="funnel-label"><span>Passed Volume Filter</span><span class="funnel-count" id="funnel-passed_volume">0</span></div>
+                                        <div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-bar-passed_volume" style="width:0%;"></div></div>
+                                    </div>
+                                    <div class="funnel-stage" data-stage="passed_trend">
+                                        <div class="funnel-label"><span>Passed Trend Filter</span><span class="funnel-count" id="funnel-passed_trend">0</span></div>
+                                        <div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-bar-passed_trend" style="width:0%;"></div></div>
+                                    </div>
+                                    <div class="funnel-stage" data-stage="passed_score">
+                                        <div class="funnel-label"><span>Passed Score Threshold</span><span class="funnel-count" id="funnel-passed_score">0</span></div>
+                                        <div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-bar-passed_score" style="width:0%;"></div></div>
+                                    </div>
+                                    <div class="funnel-stage" data-stage="signals_generated">
+                                        <div class="funnel-label"><span>Signals Generated</span><span class="funnel-count" id="funnel-signals_generated">0</span></div>
+                                        <div class="funnel-bar-track"><div class="funnel-bar-fill funnel-bar-final" id="funnel-bar-signals_generated" style="width:0%;"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- API + Cache Monitoring -->
+                        <div class="metric-card span-6 accordion-section">
+                            <div class="accordion-header" onclick="toggleAccordion('api-mon-body')">
+                                <h5>API Monitoring</h5>
+                                <span class="accordion-caret" id="api-mon-body-caret">▾</span>
+                            </div>
+                            <div class="accordion-body compact-stat-grid" id="api-mon-body">
+                                <div class="compact-stat"><span class="compact-stat-label">Total Calls</span><span class="compact-stat-value" id="api-total-calls">0</span></div>
+                                <div class="compact-stat"><span class="compact-stat-label">Calls / min</span><span class="compact-stat-value" id="api-calls-per-min">0</span></div>
+                                <div class="compact-stat"><span class="compact-stat-label">Success</span><span class="compact-stat-value text-green" id="api-success">0</span></div>
+                                <div class="compact-stat"><span class="compact-stat-label">429 Errors</span><span class="compact-stat-value text-red" id="api-429">0</span></div>
+                                <div class="compact-stat"><span class="compact-stat-label">Retries</span><span class="compact-stat-value text-gold" id="api-retries">0</span></div>
+                                <div class="compact-stat"><span class="compact-stat-label">Fallbacks</span><span class="compact-stat-value" id="api-fallbacks">0</span></div>
+                            </div>
+                        </div>
+
+                        <div class="metric-card span-6 accordion-section">
+                            <div class="accordion-header" onclick="toggleAccordion('cache-mon-body')">
+                                <h5>Cache Monitoring</h5>
+                                <span class="accordion-caret" id="cache-mon-body-caret">▾</span>
+                            </div>
+                            <div class="accordion-body" id="cache-mon-body">
+                                <div class="cache-row">
+                                    <span class="cache-row-label">Ticker Cache</span>
+                                    <div class="funnel-bar-track cache-bar-track"><div class="funnel-bar-fill" id="cache-bar-ticker" style="width:0%;"></div></div>
+                                    <span class="cache-row-ratio" id="cache-ratio-ticker">0%</span>
+                                </div>
+                                <div class="cache-row">
+                                    <span class="cache-row-label">Candle Cache</span>
+                                    <div class="funnel-bar-track cache-bar-track"><div class="funnel-bar-fill" id="cache-bar-candle" style="width:0%;"></div></div>
+                                    <span class="cache-row-ratio" id="cache-ratio-candle">0%</span>
+                                </div>
+                                <div class="cache-row">
+                                    <span class="cache-row-label">Watchlist Cache</span>
+                                    <div class="funnel-bar-track cache-bar-track"><div class="funnel-bar-fill" id="cache-bar-watchlist" style="width:0%;"></div></div>
+                                    <span class="cache-row-ratio" id="cache-ratio-watchlist">0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Monitoring -->
+                        <div class="metric-card span-12 accordion-section">
+                            <div class="accordion-header" onclick="toggleAccordion('perf-mon-body')">
+                                <h5>Performance Monitoring</h5>
+                                <span class="accordion-caret" id="perf-mon-body-caret">▾</span>
+                            </div>
+                            <div class="accordion-body compact-stat-grid" id="perf-mon-body">
+                                <div class="compact-stat"><span class="compact-stat-label">Avg Cycle</span><span class="compact-stat-value" id="perf-avg-ms">0 ms</span></div>
+                                <div class="compact-stat"><span class="compact-stat-label">Max Cycle</span><span class="compact-stat-value" id="perf-max-ms">0 ms</span></div>
+                                <div class="compact-stat"><span class="compact-stat-label">Min Cycle</span><span class="compact-stat-value" id="perf-min-ms">0 ms</span></div>
+                                <div class="compact-stat"><span class="compact-stat-label">Slowest Coin</span><span class="compact-stat-value" id="perf-slowest-coin">—</span></div>
+                                <div class="compact-stat"><span class="compact-stat-label">Fastest Coin</span><span class="compact-stat-value" id="perf-fastest-coin">—</span></div>
+                                <div class="compact-stat"><span class="compact-stat-label">Last Error</span><span class="compact-stat-value text-red" id="perf-last-error">None</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Event Log -->
+                        <div class="metric-card span-12 accordion-section">
+                            <div class="accordion-header" onclick="toggleAccordion('event-log-body')">
+                                <h5>Scanner Event Log</h5>
+                                <span class="accordion-caret" id="event-log-body-caret">▾</span>
+                            </div>
+                            <div class="accordion-body" id="event-log-body">
+                                <div class="event-log-scroller" id="event-log-scroller">
+                                    <div class="event-log-empty" id="event-log-empty">No events yet.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="metric-card span-3"><h5>Coins Scanned</h5><h2 id="so-coins-scanned">{{ data.scanner_overview.coins_scanned }}</h2></div>
+                        <div class="metric-card span-3"><h5>Elite Signals</h5><h2 class="text-blue" id="so-elite-signals">{{ data.scanner_overview.elite_signals }}</h2></div>
+                        <div class="metric-card span-3"><h5>High Signals</h5><h2 class="text-gold" id="so-high-signals">{{ data.scanner_overview.high_signals }}</h2></div>
+                        <div class="metric-card span-3"><h5>Medium Signals</h5><h2 class="text-red" id="so-medium-signals">{{ data.scanner_overview.medium_signals }}</h2></div>
+                        <div class="metric-card span-3"><h5>Active Signals</h5><h2 id="so-active-signals">{{ data.scanner_overview.active_signals }}</h2></div>
+                        <div class="metric-card span-3"><h5>Expired Signals</h5><h2 class="text-red" id="so-expired-signals">{{ data.scanner_overview.expired_signals or 0 }}</h2><div class="card-footer-metric">Since last cleanup</div></div>
+                        <div class="metric-card span-3"><h5>Last Cleanup</h5><h4 id="so-last-cleanup" style="font-size:0.9rem;margin-top:8px;">{{ '—' if not data.scanner_overview.last_cleanup_time else 'Pending' }}</h4></div>
+                        <div class="metric-card span-3"><h5>Next Cleanup</h5><h4 id="so-next-cleanup" style="font-size:0.9rem;margin-top:8px;">—</h4><div class="card-footer-metric">Every 10 minutes</div></div>
+
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>Live Telemetry Engine Signals (Active Matrix Data Stream)</h5>
+                            <div class="scroller-table-axis">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Pair Target</th>
+                                            <th>Classification Level</th>
+                                            <th>Vector Score</th>
+                                            <th>Reference Base Price</th>
+                                            <th>Market</th>
+                                            <th>Discovery Timestamp</th>
+                                            <th>Macro Market Phase</th>
+                                            <th>Age</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for trace in data.recent_signals %}
+                                        <tr>
+                                            <td><strong>{{ trace.coin }}</strong></td>
+                                            <td>{{ trace.category }}</td>
+                                            <td>{{ trace.score }}</td>
+                                            <td>{{ trace.signal_price }}</td>
+                                            <td>{{ trace.market }}</td>
+                                            <td>{{ trace.timestamp }}</td>
+                                            <td>{{ trace.market_state }}</td>
+                                            <td style="color:var(--text-secondary);font-size:0.85em;white-space:nowrap;">{{ trace.signal_age }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  SIGNAL PERFORMANCE TRACKER                                 -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="performance-tracker" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-2"><h5>Total Signals</h5><h2 class="text-blue">{{ data.performance_stats.total_signals }}</h2><div class="card-footer-metric">Evaluated via 1H/4H/24H/3D/7D</div></div>
+                        <div class="metric-card span-2"><h5>Winning Signals</h5><h2 class="text-green">{{ data.performance_stats.winning_signals }}</h2><div class="card-footer-metric">Positive return</div></div>
+                        <div class="metric-card span-2"><h5>Losing Signals</h5><h2 class="text-red">{{ data.performance_stats.losing_signals }}</h2><div class="card-footer-metric">Zero or negative return</div></div>
+                        <div class="metric-card span-2"><h5>Win Rate %</h5><h2 class="{% if data.performance_stats.win_rate_pct >= 50 %}text-green{% else %}text-red{% endif %}">{{ data.performance_stats.win_rate_pct }}%</h2><div class="card-footer-metric">All-time</div></div>
+                        <div class="metric-card span-2"><h5>Average Return %</h5><h2 class="{% if data.performance_stats.avg_return_pct >= 0 %}text-green{% else %}text-red{% endif %}">{{ data.performance_stats.avg_return_pct }}%</h2><div class="card-footer-metric">Mean across all signals</div></div>
+                        <div class="metric-card span-2"><h5>Best Signal</h5><h3 class="text-green">{{ data.performance_stats.best_signal.coin or "—" }} {{ data.performance_stats.best_signal.return_pct or "0" }}%</h3><div class="card-footer-metric">{{ data.performance_stats.best_signal.timestamp or "—" }}</div></div>
+                        <div class="metric-card span-2"><h5>Worst Signal</h5><h3 class="text-red">{{ data.performance_stats.worst_signal.coin or "—" }} {{ data.performance_stats.worst_signal.return_pct or "0" }}%</h3><div class="card-footer-metric">{{ data.performance_stats.worst_signal.timestamp or "—" }}</div></div>
+
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>Signal Performance Matrix</h5>
+                            <div class="scroller-table-axis">
+                                <table id="performance-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Coin</th><th>Signal Time</th><th>Entry Price</th><th>Current Price</th>
+                                            <th>1H %</th><th>4H %</th><th>24H %</th><th>3D %</th><th>7D %</th>
+                                            <th>Return %</th><th>Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="performance-table-body">
+                                        {% for s in data.performance_signals %}
+                                        <tr>
+                                            <td><strong>{{ s.coin }}</strong></td>
+                                            <td class="text-muted text-sm">{{ s.timestamp }}</td>
+                                            <td>{{ s.signal_price }}</td>
+                                            <td>{{ s.current_price }}</td>
+                                            <td class="{% if s['1h_pct'] >= 0 %}text-green{% else %}text-red{% endif %}">{{ s['1h_pct'] }}%</td>
+                                            <td class="{% if s['4h_pct'] >= 0 %}text-green{% else %}text-red{% endif %}">{{ s['4h_pct'] }}%</td>
+                                            <td class="{% if s['24h_pct'] >= 0 %}text-green{% else %}text-red{% endif %}">{{ s['24h_pct'] }}%</td>
+                                            <td class="{% if s['3d_pct'] >= 0 %}text-green{% else %}text-red{% endif %}">{{ s['3d_pct'] }}%</td>
+                                            <td class="{% if s['7d_pct'] >= 0 %}text-green{% else %}text-red{% endif %}">{{ s['7d_pct'] }}%</td>
+                                            <td class="{% if s.return_pct >= 0 %}text-green{% else %}text-red{% endif %}">{{ s.return_pct }}%</td>
+                                            <td><span class="row-badge-pill {% if s.result == 'WIN' %}signal-type-elite{% else %}color-indicator-error{% endif %}">{{ s.result }}</span></td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="11" class="text-muted">No evaluated signals yet — signals will appear as 1H/4H/24H/3D/7D horizons mature.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="metric-card span-12">
+                            <h5>Per-Coin Performance</h5>
+                            <div class="layout-matrix-inner-row">
+                                <div class="nested-status-well"><h6>BTC</h6><h4 class="text-blue">{{ data.coin_performance.BTC.signals }}</h4><div class="card-footer-metric">W: {{ data.coin_performance.BTC.wins }} | L: {{ data.coin_performance.BTC.losses }} | WR: {{ data.coin_performance.BTC.win_rate_pct }}%</div></div>
+                                <div class="nested-status-well"><h6>ETH</h6><h4 class="text-blue">{{ data.coin_performance.ETH.signals }}</h4><div class="card-footer-metric">W: {{ data.coin_performance.ETH.wins }} | L: {{ data.coin_performance.ETH.losses }} | WR: {{ data.coin_performance.ETH.win_rate_pct }}%</div></div>
+                                <div class="nested-status-well"><h6>SOL</h6><h4 class="text-blue">{{ data.coin_performance.SOL.signals }}</h4><div class="card-footer-metric">W: {{ data.coin_performance.SOL.wins }} | L: {{ data.coin_performance.SOL.losses }} | WR: {{ data.coin_performance.SOL.win_rate_pct }}%</div></div>
+                                <div class="nested-status-well"><h6>XRP</h6><h4 class="text-blue">{{ data.coin_performance.XRP.signals }}</h4><div class="card-footer-metric">W: {{ data.coin_performance.XRP.wins }} | L: {{ data.coin_performance.XRP.losses }} | WR: {{ data.coin_performance.XRP.win_rate_pct }}%</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  SIGNAL HISTORY                                             -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="signal-history" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-2"><h5>History Signals</h5><h2 class="text-blue">{{ data.signal_history_stats.total }}</h2><div class="card-footer-metric">All-time recorded</div></div>
+                        <div class="metric-card span-2"><h5>Winners</h5><h2 class="text-green">{{ data.signal_history_stats.winners }}</h2><div class="card-footer-metric">Positive return</div></div>
+                        <div class="metric-card span-2"><h5>Losers</h5><h2 class="text-red">{{ data.signal_history_stats.losers }}</h2><div class="card-footer-metric">Zero or negative return</div></div>
+                        <div class="metric-card span-2"><h5>Win Rate %</h5><h2 class="{% if data.signal_history_stats.win_rate_pct >= 50 %}text-green{% else %}text-red{% endif %}">{{ data.signal_history_stats.win_rate_pct }}%</h2><div class="card-footer-metric">All-time</div></div>
+                        <div class="metric-card span-2"><h5>Avg Return %</h5><h2 class="{% if data.signal_history_stats.avg_return_pct >= 0 %}text-green{% else %}text-red{% endif %}">{{ data.signal_history_stats.avg_return_pct }}%</h2><div class="card-footer-metric">Mean across history</div></div>
+                        <div class="metric-card span-2"><h5>Records</h5><h2 class="text-blue">{{ data.signal_history_stats.total }}</h2><div class="card-footer-metric">Stored in signal_history.json</div></div>
+
+                        <div class="metric-card span-12" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                            <input type="text" id="sh-search" placeholder="Search coin..." style="flex:1;min-width:140px;" class="matrix-input" />
+                            <select id="sh-filter" class="matrix-select" style="min-width:140px;">
+                                <option value="ALL">All Results</option>
+                                <option value="WIN">Winners Only</option>
+                                <option value="LOSS">Losers Only</option>
+                            </select>
+                            <select id="sh-sort" class="matrix-select" style="min-width:140px;">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="return">Highest Return</option>
+                                <option value="worst">Worst Return</option>
+                            </select>
+                            <span class="text-muted text-sm" id="sh-count-label">{{ data.signal_history|length }} records</span>
+                        </div>
+
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>Signal History</h5>
+                            <div class="scroller-table-axis">
+                                <table id="signal-history-table">
+                                    <thead>
+                                        <tr><th>Coin</th><th>Signal Time</th><th>Score</th><th>Tier</th><th>Entry Price</th><th>1H %</th><th>4H %</th><th>24H %</th><th>3D %</th><th>7D %</th><th>Return %</th><th>Result</th></tr>
+                                    </thead>
+                                    <tbody id="signal-history-table-body">
+                                        {% for s in data.signal_history %}
+                                        <tr>
+                                            <td><strong>{{ s.coin }}</strong></td>
+                                            <td class="text-muted text-sm">{{ s.timestamp }}</td>
+                                            <td>{{ s.score }}</td>
+                                            <td>{{ s.tier }}</td>
+                                            <td>{{ s.signal_price }}</td>
+                                            <td class="{% if s['1h_pct'] >= 0 %}text-green{% else %}text-red{% endif %}">{{ s['1h_pct'] }}%</td>
+                                            <td class="{% if s['4h_pct'] >= 0 %}text-green{% else %}text-red{% endif %}">{{ s['4h_pct'] }}%</td>
+                                            <td class="{% if s['24h_pct'] >= 0 %}text-green{% else %}text-red{% endif %}">{{ s['24h_pct'] }}%</td>
+                                            <td class="{% if s['3d_pct'] >= 0 %}text-green{% else %}text-red{% endif %}">{{ s['3d_pct'] }}%</td>
+                                            <td class="{% if s['7d_pct'] >= 0 %}text-green{% else %}text-red{% endif %}">{{ s['7d_pct'] }}%</td>
+                                            <td class="{% if s.return_pct >= 0 %}text-green{% else %}text-red{% endif %}">{{ s.return_pct }}%</td>
+                                            <td><span class="row-badge-pill {% if s.result == 'WIN' %}signal-type-elite{% else %}color-indicator-error{% endif %}">{{ s.result }}</span></td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="12" class="text-muted">No history yet — signals are logged permanently after evaluation.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  COIN PERFORMANCE                                           -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="coin-performance" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-2"><h5>Coins Tracked</h5><h2 class="text-blue">{{ data.coin_performance_stats.coins_tracked }}</h2><div class="card-footer-metric">Auto-discovered from history</div></div>
+                        <div class="metric-card span-2"><h5>Total Signals</h5><h2 class="text-blue">{{ data.coin_performance_stats.total_signals }}</h2><div class="card-footer-metric">Across all coins</div></div>
+                        <div class="metric-card span-2"><h5>Winning Signals</h5><h2 class="text-green">{{ data.coin_performance_stats.winning_signals }}</h2><div class="card-footer-metric">Positive return</div></div>
+                        <div class="metric-card span-2"><h5>Losing Signals</h5><h2 class="text-red">{{ data.coin_performance_stats.losing_signals }}</h2><div class="card-footer-metric">Zero or negative</div></div>
+                        <div class="metric-card span-2"><h5>Win Rate %</h5><h2 class="{% if data.coin_performance_stats.win_rate_pct >= 50 %}text-green{% else %}text-red{% endif %}">{{ data.coin_performance_stats.win_rate_pct }}%</h2><div class="card-footer-metric">All-time</div></div>
+                        <div class="metric-card span-2"><h5>Records</h5><h2 class="text-blue">{{ data.coin_performance_stats.coins_tracked }}</h2><div class="card-footer-metric">Stored in coin_performance.json</div></div>
+
+                        <div class="metric-card span-12" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                            <input type="text" id="cp-search" placeholder="Search coin..." style="flex:1;min-width:140px;" class="matrix-input" />
+                            <select id="cp-sort" class="matrix-select" style="min-width:180px;">
+                                <option value="winrate">Highest Win Rate</option>
+                                <option value="signals">Most Signals</option>
+                                <option value="best">Best Return</option>
+                                <option value="worst">Worst Return</option>
+                            </select>
+                            <span class="text-muted text-sm" id="cp-count-label">{{ data.coin_performance_data|length }} coins</span>
+                        </div>
+
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>Coin Performance</h5>
+                            <div class="scroller-table-axis">
+                                <table id="coin-performance-table">
+                                    <thead>
+                                        <tr><th>Coin</th><th>Signals</th><th>Wins</th><th>Losses</th><th>Win Rate</th><th>Avg Return</th><th>Best Return</th><th>Worst Return</th><th>Last Signal</th></tr>
+                                    </thead>
+                                    <tbody id="coin-performance-table-body">
+                                        {% for c in data.coin_performance_data %}
+                                        <tr>
+                                            <td><strong>{{ c.coin }}</strong></td>
+                                            <td>{{ c.total_signals }}</td>
+                                            <td class="text-green">{{ c.winning_signals }}</td>
+                                            <td class="text-red">{{ c.losing_signals }}</td>
+                                            <td class="{% if c.win_rate_pct >= 50 %}text-green{% else %}text-red{% endif %}">{{ c.win_rate_pct }}%</td>
+                                            <td class="{% if c.avg_return_pct >= 0 %}text-green{% else %}text-red{% endif %}">{{ c.avg_return_pct }}%</td>
+                                            <td class="text-green">{{ c.best_return_pct }}%</td>
+                                            <td class="text-red">{{ c.worst_return_pct }}%</td>
+                                            <td class="text-muted text-sm">{{ c.last_signal_time or "—" }}</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="9" class="text-muted">No coin data yet — signals are recorded after evaluation.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  TIER ACCURACY                                              -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="tier-accuracy" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-2"><h5>Tiers Tracked</h5><h2 class="text-blue">{{ data.tier_accuracy_stats.tiers_tracked }}</h2><div class="card-footer-metric">ELITE / HIGH / MEDIUM</div></div>
+                        <div class="metric-card span-2"><h5>Total Signals</h5><h2 class="text-blue">{{ data.tier_accuracy_stats.total_signals }}</h2><div class="card-footer-metric">Across all tiers</div></div>
+                        <div class="metric-card span-2"><h5>Winning Signals</h5><h2 class="text-green">{{ data.tier_accuracy_stats.winning_signals }}</h2><div class="card-footer-metric">Positive return</div></div>
+                        <div class="metric-card span-2"><h5>Losing Signals</h5><h2 class="text-red">{{ data.tier_accuracy_stats.losing_signals }}</h2><div class="card-footer-metric">Zero or negative</div></div>
+                        <div class="metric-card span-2"><h5>Win Rate %</h5><h2 class="{% if data.tier_accuracy_stats.win_rate_pct >= 50 %}text-green{% else %}text-red{% endif %}">{{ data.tier_accuracy_stats.win_rate_pct }}%</h2><div class="card-footer-metric">All-time</div></div>
+                        <div class="metric-card span-2"><h5>Records</h5><h2 class="text-blue">{{ data.tier_accuracy_stats.tiers_tracked }}</h2><div class="card-footer-metric">Stored in tier_accuracy.json</div></div>
+
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>Signal Accuracy by Tier</h5>
+                            <div class="scroller-table-axis">
+                                <table id="tier-accuracy-table">
+                                    <thead>
+                                        <tr><th>Tier</th><th>Signals</th><th>Wins</th><th>Losses</th><th>Win Rate</th><th>Average Return</th></tr>
+                                    </thead>
+                                    <tbody id="tier-accuracy-table-body">
+                                        {% for t in data.tier_accuracy_data %}
+                                        <tr>
+                                            <td><span class="row-badge-pill {% if t.tier == 'ELITE' %}signal-type-elite{% elif t.tier == 'HIGH' %}signal-type-high{% else %}signal-type-medium{% endif %}">{{ t.tier }}</span></td>
+                                            <td>{{ t.total_signals }}</td>
+                                            <td class="text-green">{{ t.winning_signals }}</td>
+                                            <td class="text-red">{{ t.losing_signals }}</td>
+                                            <td class="{% if t.win_rate_pct >= 50 %}text-green{% else %}text-red{% endif %}">{{ t.win_rate_pct }}%</td>
+                                            <td class="{% if t.avg_return_pct >= 0 %}text-green{% else %}text-red{% endif %}">{{ t.avg_return_pct }}%</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="6" class="text-muted">No tier data yet — signals are recorded after evaluation.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  PORTFOLIO                                                   -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="portfolio-view" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-4"><h5>Total Portfolio Value</h5><h2 class="text-blue" id="port-total-value">{{ data.portfolio_overview.total_value|inr }}</h2><div class="card-footer-metric">Open Positions: <span id="port-open-positions">{{ data.portfolio_overview.open_positions }}</span></div></div>
+                        <div class="metric-card span-2"><h5>Available Cash</h5><h3 id="port-available-cash">{{ data.portfolio_overview.available_cash|inr }}</h3></div>
+                        <div class="metric-card span-2"><h5>Invested Amount</h5><h3 id="port-invested-amount">{{ data.portfolio_overview.invested_amount|inr }}</h3></div>
+                        <div class="metric-card span-2"><h5>Total PnL Net</h5><h3 id="port-total-pnl" class="{% if data.portfolio_overview.total_pnl >= 0 %}text-green{% else %}text-red{% endif %}">{{ data.portfolio_overview.total_pnl|inr }}</h3></div>
+                        <div class="metric-card span-2"><h5>Daily PnL Delta</h5><h3 id="port-daily-pnl" class="{% if data.portfolio_overview.daily_pnl >= 0 %}text-green{% else %}text-red{% endif %}">{{ data.portfolio_overview.daily_pnl|inr }}</h3></div>
+                        <div class="metric-card span-6 canvas-wrapper-box"><h5>Asset Portfolio Allocation Weights</h5><div class="canvas-holder"><canvas id="portfolioPieChart"></canvas></div></div>
+                        <div class="metric-card span-6 canvas-wrapper-box"><h5>Compounded Equity Valuation Curve</h5><div class="canvas-holder"><canvas id="portfolioGrowthLineChart"></canvas></div></div>
+
+                        <!-- Capital Allocation % widget — frontend-only, computed from
+                             vgx_overview.virtual_balance / pmb_overview.cash_balance /
+                             mtb_overview.cash_balance (see dashboard.js: renderCapitalAllocation). -->
+                        {% set _alloc_vgx = data.vgx_overview.virtual_balance or 0 %}
+                        {% set _alloc_pmb = data.pmb_overview.cash_balance or 0 %}
+                        {% set _alloc_mtb = data.mtb_overview.cash_balance or 0 %}
+                        {% set _alloc_total = _alloc_vgx + _alloc_pmb + _alloc_mtb %}
+                        <div class="metric-card span-12" id="capital-allocation-widget">
+                            <h5>Capital Allocation %</h5>
+                            {% if _alloc_total > 0 %}
+                            <div class="capital-allocation-row" id="capital-allocation-content">
+                                <div class="capital-allocation-item">
+                                    <span class="capital-allocation-label">VGX</span>
+                                    <span class="capital-allocation-bar-track"><span class="capital-allocation-bar-fill alloc-bar-vgx" id="alloc-bar-vgx" style="width: {{ "%.2f"|format((_alloc_vgx / _alloc_total) * 100) }}%;"></span></span>
+                                    <span class="capital-allocation-pct text-blue" id="alloc-pct-vgx">{{ "%.2f"|format((_alloc_vgx / _alloc_total) * 100) }}%</span>
+                                </div>
+                                <div class="capital-allocation-item">
+                                    <span class="capital-allocation-label">PMB</span>
+                                    <span class="capital-allocation-bar-track"><span class="capital-allocation-bar-fill alloc-bar-pmb" id="alloc-bar-pmb" style="width: {{ "%.2f"|format((_alloc_pmb / _alloc_total) * 100) }}%;"></span></span>
+                                    <span class="capital-allocation-pct text-green" id="alloc-pct-pmb">{{ "%.2f"|format((_alloc_pmb / _alloc_total) * 100) }}%</span>
+                                </div>
+                                <div class="capital-allocation-item">
+                                    <span class="capital-allocation-label">MTB</span>
+                                    <span class="capital-allocation-bar-track"><span class="capital-allocation-bar-fill alloc-bar-mtb" id="alloc-bar-mtb" style="width: {{ "%.2f"|format((_alloc_mtb / _alloc_total) * 100) }}%;"></span></span>
+                                    <span class="capital-allocation-pct text-gold" id="alloc-pct-mtb">{{ "%.2f"|format((_alloc_mtb / _alloc_total) * 100) }}%</span>
+                                </div>
+                            </div>
+                            <div class="text-muted" id="capital-allocation-empty" style="display:none;">No allocation data available</div>
+                            {% else %}
+                            <div class="capital-allocation-row" id="capital-allocation-content" style="display:none;">
+                                <div class="capital-allocation-item">
+                                    <span class="capital-allocation-label">VGX</span>
+                                    <span class="capital-allocation-bar-track"><span class="capital-allocation-bar-fill alloc-bar-vgx" id="alloc-bar-vgx" style="width: 0%;"></span></span>
+                                    <span class="capital-allocation-pct text-blue" id="alloc-pct-vgx">0.00%</span>
+                                </div>
+                                <div class="capital-allocation-item">
+                                    <span class="capital-allocation-label">PMB</span>
+                                    <span class="capital-allocation-bar-track"><span class="capital-allocation-bar-fill alloc-bar-pmb" id="alloc-bar-pmb" style="width: 0%;"></span></span>
+                                    <span class="capital-allocation-pct text-green" id="alloc-pct-pmb">0.00%</span>
+                                </div>
+                                <div class="capital-allocation-item">
+                                    <span class="capital-allocation-label">MTB</span>
+                                    <span class="capital-allocation-bar-track"><span class="capital-allocation-bar-fill alloc-bar-mtb" id="alloc-bar-mtb" style="width: 0%;"></span></span>
+                                    <span class="capital-allocation-pct text-gold" id="alloc-pct-mtb">0.00%</span>
+                                </div>
+                            </div>
+                            <div class="text-muted" id="capital-allocation-empty">No allocation data available</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  OPEN POSITIONS                                             -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="open-view" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>Active Automated Strategy Deployments</h5>
+                            <div class="scroller-table-axis">
+                                <table>
+                                    <thead>
+                                        <tr><th>Bot</th><th>Coin Pair</th><th>Quantity</th><th>Avg Entry Price</th><th>Unrealized PnL %</th><th>Status</th></tr>
+                                    </thead>
+                                    <tbody id="open-positions-tbody">
+                                        {% for pos in data.open_positions %}
+                                        <tr>
+                                            <td><span class="row-badge-pill signal-type-elite">{{ pos.bot }}</span></td>
+                                            <td><strong>{{ pos.coin }}/INR</strong></td>
+                                            <td class="font-mono">{{ pos.quantity }}</td>
+                                            <td class="font-mono">{{ pos.buy_price|inr(4) }}</td>
+                                            <td><span class="{% if pos.pnl_pct >= 0 %}text-green{% else %}text-red{% endif %} font-600">{{ pos.pnl_pct }}%</span></td>
+                                            <td><span class="row-badge-pill signal-type-elite">{{ pos.status }}</span></td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="6" class="text-muted" style="text-align:center;padding:20px;">No open positions</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  TRADE HISTORY                                              -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="history-view" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>Historical Transaction Core Archive Records</h5>
+                            <div class="scroller-table-axis">
+                                <table>
+                                    <thead>
+                                        <tr><th>Asset Target Pair</th><th>Execution Entry Price</th><th>Terminal Exit Settlement</th><th>Net Realized Profit/Loss Delta</th><th>Settlement Closure Mark</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for trade in data.closed_trades %}
+                                        <tr>
+                                            <td><strong>{{ trade.coin }}/INR</strong></td>
+                                            <td>{{ trade.entry_price }}</td>
+                                            <td>{{ trade.exit_price }}</td>
+                                            <td><span class="{% if '-' in trade.pnl %}text-red{% else %}text-green{% endif %} font-600">{{ trade.pnl }}</span></td>
+                                            <td class="text-muted text-sm">{{ trade.time }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  VGX BOT VIEW — Volatile GridX                             -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="vgx-view" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-3">
+                            <h5>VGX Status</h5>
+                            <h3 class="{% if data.vgx_overview.status == 'LIVE' %}text-green{% elif data.vgx_overview.status == 'PAPER' %}text-gold{% else %}text-red{% endif %}">{{ data.vgx_overview.status }}</h3>
+                            <div class="card-footer-metric">Volatile GridX · Production Bot</div>
+                        </div>
+                        <div class="metric-card span-3">
+                            <h5>Virtual Balance</h5>
+                            <h3 class="text-blue">{{ data.vgx_overview.virtual_balance|inr }}</h3>
+                            <div class="card-footer-metric">Trade Amount: {{ data.vgx_overview.trade_amount|inr(0) }}</div>
+                        </div>
+                        <div class="metric-card span-3">
+                            <h5>Daily PnL</h5>
+                            <h3 class="{% if data.vgx_overview.daily_pnl >= 0 %}text-green{% else %}text-red{% endif %}">{{ data.vgx_overview.daily_pnl|inr }}</h3>
+                            <div class="card-footer-metric">Total PnL: {{ data.vgx_overview.total_pnl|inr }}</div>
+                        </div>
+                        <div class="metric-card span-3">
+                            <h5>Win Rate</h5>
+                            <h3 class="{% if data.vgx_overview.win_rate >= 50 %}text-green{% else %}text-red{% endif %}">{{ data.vgx_overview.win_rate }}%</h3>
+                            <div class="card-footer-metric">W: {{ data.vgx_overview.wins }} &nbsp;|&nbsp; L: {{ data.vgx_overview.losses }} &nbsp;|&nbsp; Trades: {{ data.vgx_overview.paper_trades }}</div>
+                        </div>
+                        <div class="metric-card span-4"><h5>Open Positions</h5><h2 class="text-blue">{{ data.vgx_overview.open_positions | length }}</h2><div class="card-footer-metric">Max: 5 · Target: +5% · Stop: -5%</div></div>
+                        <div class="metric-card span-4"><h5>Grid Levels Active</h5><h2 class="text-gold">{{ data.vgx_overview.grid_levels }}</h2><div class="card-footer-metric">Coins: {{ data.vgx_overview.grid_coins | join(", ") }}</div></div>
+                        <div class="metric-card span-4">
+                            <h5>Last Trade</h5>
+                            {% if data.vgx_overview.last_trade %}
+                            <h3 class="text-white" style="font-size:1rem">{{ data.vgx_overview.last_trade.coin }} <span class="row-badge-pill" style="font-size:0.7rem">{{ data.vgx_overview.last_trade.action }}</span></h3>
+                            <div class="card-footer-metric">Price: {{ data.vgx_overview.last_trade.price|inr(4) }} &nbsp;|&nbsp; PnL: {{ data.vgx_overview.last_trade.pnl|inr }} &nbsp;|&nbsp; {{ data.vgx_overview.last_trade.time }}</div>
+                            {% else %}
+                            <h3 class="text-muted">No trades yet</h3>
+                            {% endif %}
+                        </div>
+                        <div class="metric-card span-8 canvas-wrapper-box"><h5>VGX Virtual Balance — Equity Curve</h5><div class="canvas-holder"><canvas id="vgxEquityChart"></canvas></div></div>
+                        <div class="metric-card span-4 canvas-wrapper-box"><h5>VGX Win / Loss Distribution</h5><div class="canvas-holder"><canvas id="vgxWinLossChart"></canvas></div></div>
+                        <div class="metric-card span-12">
+                            <h5>VGX Strategy Parameters — Volatile GridX</h5>
+                            <div class="layout-matrix-inner-row">
+                                <div class="nested-status-well"><h6>Trade Amount</h6><h4 class="text-blue">{{ data.vgx_overview.trade_amount|inr(0) }}</h4></div>
+                                <div class="nested-status-well"><h6>Take Profit Target</h6><h4 class="text-green">+{{ data.vgx_overview.target_pct }}%</h4></div>
+                                <div class="nested-status-well"><h6>Stop Loss</h6><h4 class="text-red">-{{ data.vgx_overview.stop_loss_pct }}%</h4></div>
+                                <div class="nested-status-well"><h6>Trailing Stop</h6><h4 class="text-gold">1.5% from Peak</h4></div>
+                                <div class="nested-status-well"><h6>Min Signal Score</h6><h4 class="text-blue">≥ 70</h4></div>
+                                <div class="nested-status-well"><h6>Risk Profile</h6><h4 class="text-gold">MODERATE (40%)</h4></div>
+                            </div>
+                        </div>
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>VGX Open Positions</h5>
+                            <div class="scroller-table-axis">
+                                <table>
+                                    <thead><tr><th>Coin</th><th>Buy Price</th><th>Quantity</th><th>Amount</th><th>Trailing Active</th><th>Source</th></tr></thead>
+                                    <tbody>
+                                        {% for pos in data.vgx_overview.open_positions %}
+                                        <tr>
+                                            <td><strong>{{ pos.coin }}/INR</strong></td>
+                                            <td>{{ pos.buy_price|inr(4) }}</td>
+                                            <td class="font-mono">{{ "%.8f"|format(pos.qty) }}</td>
+                                            <td>{{ pos.amount|inr }}</td>
+                                            <td><span class="row-badge-pill {% if pos.trailing_active %}signal-type-elite{% else %}color-indicator-low{% endif %}">{{ 'ACTIVE' if pos.trailing_active else 'WAITING' }}</span></td>
+                                            <td class="text-muted">{{ pos.source }}</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="6" class="text-muted">No open VGX positions — waiting for scanner signals</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- ── VGX Grid Management Panels ─────────────────────── -->
+                        <div class="metric-card span-12">
+                            <h5>Grid Coins <span id="vgx-coin-count" class="card-footer-metric" style="margin-left:6px"></span></h5>
+                            <div id="vgx-coin-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px;min-height:32px;"></div>
+                            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                                <input id="vgx-coin-input" type="text" maxlength="10"
+                                    placeholder="e.g. DOGE"
+                                    style="width:120px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:0.85rem;text-transform:uppercase;">
+                                <button class="btn-sm btn-outline" onclick="vgxAddCoinTag()">+ Add</button>
+                                <button class="btn-sm btn-primary" style="margin-left:auto" onclick="vgxSaveGridCoins()">Save Coin List</button>
+                            </div>
+                            <div id="vgx-coins-msg" style="font-size:0.78rem;margin-top:6px;"></div>
+                        </div>
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>Manual Base Prices <span class="card-footer-metric" style="margin-left:6px">(grid centre per coin — blank = auto live price)</span></h5>
+                            <div class="scroller-table-axis">
+                                <table id="vgx-base-price-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Coin</th>
+                                            <th>Base Price</th>
+                                            <th>Set At</th>
+                                            <th>Set By</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vgx-base-price-tbody">
+                                        <tr><td colspan="5" class="text-muted">Loading…</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                                <input id="vgx-bp-coin-input" type="text" maxlength="10" placeholder="Coin (e.g. BTC)"
+                                    style="width:110px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:0.85rem;text-transform:uppercase;">
+                                <input id="vgx-bp-price-input" type="number" min="0.0001" step="any" placeholder="Base price"
+                                    style="width:150px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:0.85rem;">
+                                <button class="btn-sm btn-primary" onclick="vgxSaveBasePrice()">Set Price</button>
+                            </div>
+                            <div id="vgx-bp-msg" style="font-size:0.78rem;margin-top:6px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  PMB BOT VIEW — Price Movement Bot                          -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="pmb-view" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-3">
+                            <h5>PMB Status</h5>
+                            <h3 class="{% if data.pmb_overview.status == 'INTEGRATED' %}text-green{% else %}text-gold{% endif %}">{{ data.pmb_overview.status }}</h3>
+                            <div class="card-footer-metric">Mode: {{ data.pmb_overview.mode }} · {% if data.service_statuses.pmb == 'ONLINE' %}RUNNING{% else %}DISABLED{% endif %}</div>
+                        </div>
+                        <div class="metric-card span-3"><h5>PMB Open Positions</h5><h2 class="text-blue">{{ data.pmb_overview.open_positions | length }}</h2><div class="card-footer-metric">Base Buy: ₹1000 · Dip: ₹100 · Max 4 Dips</div></div>
+                        <div class="metric-card span-3">
+                            <h5>PMB Daily PnL</h5>
+                            <h3 class="{% if data.pmb_overview.daily_pnl >= 0 %}text-green{% else %}text-red{% endif %}">{{ data.pmb_overview.daily_pnl|inr }}</h3>
+                            <div class="card-footer-metric">Total PnL: {{ data.pmb_overview.total_pnl|inr }}</div>
+                        </div>
+                        <div class="metric-card span-3"><h5>PMB Trade Amount</h5><h3 class="text-white">{{ data.pmb_overview.trade_amount|inr }}</h3><div class="card-footer-metric">Cash: {{ data.pmb_overview.cash_balance|inr }}</div></div>
+                        <div class="metric-card span-12">
+                            <h5>PMB Strategy Parameters</h5>
+                            <div class="layout-matrix-inner-row">
+                                <div class="nested-status-well"><h6>Base Buy</h6><h4 class="text-blue">₹1,000</h4></div>
+                                <div class="nested-status-well"><h6>Dip Buy</h6><h4 class="text-gold">₹100 × 4 Max</h4></div>
+                                <div class="nested-status-well"><h6>Partial Sell</h6><h4 class="text-green">₹120 at +4%</h4></div>
+                                <div class="nested-status-well"><h6>Stop Loss</h6><h4 class="text-red">-20% of Avg Entry</h4></div>
+                            </div>
+                        </div>
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>PMB Open Positions</h5>
+                            <div class="scroller-table-axis">
+                                <table>
+                                    <!-- Live current price / live PnL are display-only fields computed at
+                                         render time from the scanner's ticker cache (see
+                                         _enrich_open_positions_live_pnl / _get_scanner_ticker_prices_only in
+                                         app.py). They never touch the underlying position/storage record —
+                                         this is the OPEN positions table, not trade history. -->
+                                    <thead><tr><th>Coin</th><th>Avg Entry</th><th>Current Price</th><th>Live PnL ₹</th><th>Live PnL %</th><th>Dips</th><th>Partial Sells</th><th>Invested</th><th>Qty Held</th><th>Next Dip</th><th>Next Sell</th><th>Stop Loss</th></tr></thead>
+                                    <tbody>
+                                        {% for pos in data.pmb_overview.open_positions %}
+                                        <tr>
+                                            <td><strong>{{ pos.coin }}</strong></td>
+                                            <td>{{ pos.avg_entry_price|inr(4) }}</td>
+                                            <td class="font-mono">{% if pos.current_price is not none %}{{ pos.current_price|inr(4) }}{% else %}—{% endif %}</td>
+                                            <td class="{% if pos.live_pnl_status == 'profit' %}text-green{% elif pos.live_pnl_status == 'loss' %}text-red{% else %}text-muted{% endif %}">
+                                                {% if pos.live_pnl is not none %}
+                                                <span class="row-badge-pill {% if pos.live_pnl_status == 'profit' %}badge-green{% elif pos.live_pnl_status == 'loss' %}badge-red{% else %}badge-blue{% endif %}">{{ pos.live_pnl|inr }}</span>
+                                                {% else %}—{% endif %}
+                                            </td>
+                                            <td class="{% if pos.live_pnl_status == 'profit' %}text-green{% elif pos.live_pnl_status == 'loss' %}text-red{% else %}text-muted{% endif %}">
+                                                {% if pos.live_pnl_pct is not none %}
+                                                <span class="row-badge-pill {% if pos.live_pnl_status == 'profit' %}badge-green{% elif pos.live_pnl_status == 'loss' %}badge-red{% else %}badge-blue{% endif %}">{{ "%.2f"|format(pos.live_pnl_pct) }}%</span>
+                                                {% else %}—{% endif %}
+                                            </td>
+                                            <td class="text-gold">{{ pos.dip_count }}/4</td>
+                                            <td class="text-green">{{ pos.partial_sell_count }}</td>
+                                            <td>{{ pos.total_invested|inr }}</td>
+                                            <td class="font-mono">{{ "%.6f"|format(pos.total_quantity) }}</td>
+                                            <td class="text-red">{{ pos.next_dip_price|inr(4) }}</td>
+                                            <td class="text-green">{{ pos.next_sell_price|inr(4) }}</td>
+                                            <td class="text-red">{{ pos.stop_loss_price|inr(4) }}</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="12" class="text-muted">No open PMB positions</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>PMB Trade History</h5>
+                            <div class="scroller-table-axis">
+                                <table>
+                                    <thead><tr><th>Coin</th><th>Action</th><th>Entry Price</th><th>Exit Price</th><th>Cur. Price</th><th>Amount</th><th>PnL ₹</th><th>PnL %</th><th>Holding</th><th>Exit Reason</th><th>Timestamp</th></tr></thead>
+                                    <tbody>
+                                        {% for trade in data.pmb_overview.closed_trades[-20:] %}
+                                        <tr data-coin="{{ trade.coin }}">
+                                            <td><strong>{{ trade.coin }}</strong></td>
+                                            <td><span class="row-badge-pill">{{ trade.action }}</span></td>
+                                            <td class="text-muted">{% if trade.entry_price is defined and trade.entry_price != "—" %}{{ trade.entry_price|float|inr(4) }}{% else %}—{% endif %}</td>
+                                            <td>{{ trade.price|inr(4) }}</td>
+                                            <td class="text-muted font-mono" data-cur-price>{% if trade.current_price %}{{ trade.current_price|float|inr(4) }}{% else %}—{% endif %}</td>
+                                            <td>{{ trade.amount|inr }}</td>
+                                            <td class="{% if trade.pnl is defined and trade.pnl >= 0 %}text-green{% else %}text-red{% endif %}">{% if trade.pnl is defined %}{{ trade.pnl|inr(4) }}{% else %}—{% endif %}</td>
+                                            <td class="{% if trade.pnl_pct is defined and trade.pnl_pct >= 0 %}text-green{% else %}text-red{% endif %}">{% if trade.pnl_pct is defined and trade.pnl_pct != 0.0 %}{{ "%.2f"|format(trade.pnl_pct) }}%{% else %}—{% endif %}</td>
+                                            <td class="text-muted">{{ trade.holding_time if trade.holding_time is defined else "—" }}</td>
+                                            <td><span class="row-badge-pill {% if trade.exit_reason == 'TAKE_PROFIT' %}badge-green{% elif trade.exit_reason == 'STOP_LOSS' %}badge-red{% elif trade.exit_reason == 'TRAILING_STOP' %}badge-gold{% elif trade.exit_reason == 'MANUAL' %}badge-blue{% endif %}">{{ trade.exit_reason if trade.exit_reason is defined else "—" }}</span></td>
+                                            <td class="text-muted text-sm">{{ trade.timestamp }}</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="11" class="text-muted">No PMB trade history</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  MTB BOT VIEW — MACD Trend Bounce                          -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="mtb-view" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-3">
+                            <h5>MTB Status</h5>
+                            <h3 class="{% if data.mtb_overview.status == 'ONLINE' %}text-green{% else %}text-gold{% endif %}">{{ data.mtb_overview.status }}</h3>
+                            <div class="card-footer-metric">Mode: {{ data.mtb_overview.mode }} · {% if data.service_statuses.mtb == 'ONLINE' %}RUNNING{% else %}DISABLED{% endif %}</div>
+                        </div>
+                        <div class="metric-card span-3"><h5>MTB Open Positions</h5><h2 class="text-blue">{{ data.mtb_overview.open_positions | length }}</h2><div class="card-footer-metric">Trade Amount: {{ data.mtb_overview.trade_amount|inr }}</div></div>
+                        <div class="metric-card span-3">
+                            <h5>MTB Daily PnL</h5>
+                            <h3 class="{% if data.mtb_overview.daily_pnl >= 0 %}text-green{% else %}text-red{% endif %}">{{ data.mtb_overview.daily_pnl|inr }}</h3>
+                            <div class="card-footer-metric">Total PnL: {{ data.mtb_overview.total_pnl|inr }}</div>
+                        </div>
+                        <div class="metric-card span-3"><h5>MTB Trade Amount</h5><h3 class="text-white">{{ data.mtb_overview.trade_amount|inr }}</h3><div class="card-footer-metric">Cash: {{ data.mtb_overview.cash_balance|inr }}</div></div>
+                        <div class="metric-card span-12">
+                            <h5>MTB Strategy Parameters — MACD Trend Bounce</h5>
+                            <div class="layout-matrix-inner-row">
+                                <div class="nested-status-well"><h6>EMA Fast/Slow</h6><h4 class="text-blue">9 / 21 Period</h4></div>
+                                <div class="nested-status-well"><h6>MACD Signal</h6><h4 class="text-gold">12/26/9 Crossover</h4></div>
+                                <div class="nested-status-well"><h6>Min Score Gate</h6><h4 class="text-green">≥ 75 (Scanner)</h4></div>
+                                <div class="nested-status-well"><h6>Take Profit</h6><h4 class="text-green">+5% Full Exit</h4></div>
+                                <div class="nested-status-well"><h6>Stop Loss</h6><h4 class="text-red">-3% Full Exit</h4></div>
+                            </div>
+                        </div>
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>MTB Open Positions</h5>
+                            <div class="scroller-table-axis">
+                                <table>
+                                    <thead><tr><th>Symbol</th><th>Entry Price</th><th>Qty</th><th>Amount</th><th>Take Profit</th><th>Stop Loss</th><th>Score</th><th>Confidence</th><th>Entry Time</th></tr></thead>
+                                    <tbody>
+                                        {% for pos in data.mtb_overview.open_positions %}
+                                        <tr>
+                                            <td><strong>{{ pos.symbol }}</strong></td>
+                                            <td>{{ pos.entry_price|inr(4) }}</td>
+                                            <td class="font-mono">{{ "%.6f"|format(pos.quantity) }}</td>
+                                            <td>{{ pos.trade_amount|inr }}</td>
+                                            <td class="text-green">{{ pos.take_profit_price|inr(4) }}</td>
+                                            <td class="text-red">{{ pos.stop_loss_price|inr(4) }}</td>
+                                            <td class="text-blue">{{ pos.score }}</td>
+                                            <td>{{ pos.confidence }}</td>
+                                            <td class="text-muted text-sm">{{ pos.entry_time }}</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="9" class="text-muted">No open MTB positions</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>MTB Closed Trades</h5>
+                            <div class="scroller-table-axis">
+                                <table>
+                                    <thead><tr><th>Symbol</th><th>Entry Price</th><th>Exit Price</th><th>Cur. Price</th><th>Proceeds</th><th>PnL ₹</th><th>Return %</th><th>Holding</th><th>Exit Reason</th><th>Timestamp</th></tr></thead>
+                                    <tbody>
+                                        {% for pos in data.mtb_overview.closed_trades[-20:] %}
+                                        <tr data-coin="{{ pos.coin }}">
+                                            <td><strong>{{ pos.symbol or pos.coin }}</strong></td>
+                                            <td class="text-muted">{% if pos.entry_price is defined and pos.entry_price != "—" %}{{ pos.entry_price|float|inr(4) }}{% else %}—{% endif %}</td>
+                                            <td>{{ pos.price|inr(4) }}</td>
+                                            <td class="text-muted font-mono" data-cur-price>{% if pos.current_price %}{{ pos.current_price|float|inr(4) }}{% else %}—{% endif %}</td>
+                                            <td>{{ pos.amount|inr }}</td>
+                                            <td class="{% if pos.pnl >= 0 %}text-green{% else %}text-red{% endif %} font-600">{{ pos.pnl|inr(4) }}</td>
+                                            <td class="{% if pos.return_pct >= 0 %}text-green{% else %}text-red{% endif %}">{{ "%.2f"|format(pos.return_pct) }}%</td>
+                                            <td class="text-muted">{{ pos.holding_time if pos.holding_time is defined else "—" }}</td>
+                                            <td><span class="row-badge-pill {% if pos.exit_reason == 'TAKE_PROFIT' %}badge-green{% elif pos.exit_reason == 'STOP_LOSS' %}badge-red{% elif pos.exit_reason == 'TRAILING_STOP' %}badge-gold{% elif pos.exit_reason == 'MANUAL' %}badge-blue{% endif %}">{{ pos.exit_reason if pos.exit_reason is defined else (pos.reason if pos.reason is defined else "—") }}</span></td>
+                                            <td class="text-muted text-sm">{{ pos.timestamp }}</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="10" class="text-muted">No closed MTB trades</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  SYSTEM HEALTH / MONITORING                                 -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="monitoring-view" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <div class="metric-card span-3"><h5>Cluster Operational Uptime</h5><h3>{{ data.system_meta.uptime }}</h3></div>
+                        <div class="metric-card span-3"><h5>Aggregated Engine Diagnostic Health</h5><h3 class="text-green">{{ data.system_meta.overall_health_pct }}% efficiency</h3></div>
+                        <div class="metric-card span-3"><h5>Railway Containers Restarts</h5><h3>{{ data.railway_monitoring.restart_count }} Throttles</h3></div>
+                        <div class="metric-card span-3"><h5>Version Branch Status</h5><h3>{{ data.system_meta.version }}</h3></div>
+
+                        <div class="metric-card span-12">
+                            <h5>Micro-Service Sandbox Container Allocation Health Mapping</h5>
+                            <p class="desc-text">Internal loop checks verifying independent bot processing handles.</p>
+                            <div class="layout-matrix-inner-row">
+                                <div class="nested-status-well"><h6>Scanner Thread Matrix</h6><h4 class="text-green">ONLINE (100% Health)</h4></div>
+                                <div class="nested-status-well"><h6>PMB Price Movement Bot</h6><h4 class="{% if data.service_statuses.pmb == 'ONLINE' %}text-green{% else %}text-gold{% endif %}">{{ data.pmb_overview.status }} · {% if data.service_statuses.pmb == 'ONLINE' %}RUNNING{% else %}DISABLED{% endif %}</h4></div>
+                                <div class="nested-status-well"><h6>MTB MACD Trend Bounce</h6><h4 class="{% if data.service_statuses.mtb == 'ONLINE' %}text-green{% else %}text-gold{% endif %}">{{ data.mtb_overview.status }} · {% if data.service_statuses.mtb == 'ONLINE' %}RUNNING{% else %}DISABLED{% endif %}</h4></div>
+                                <div class="nested-status-well"><h6>Telegram Outbound Relay</h6><h4 class="text-green">ONLINE (100% Health)</h4></div>
+                                <div class="nested-status-well"><h6>FastAPI Render Worker</h6><h4 class="text-green">ONLINE (100% Health)</h4></div>
+                            </div>
+                        </div>
+
+                        <div class="metric-card span-4">
+                            <h5>Risk Engine — Trading Enabled</h5>
+                            <h3 class="{% if data.risk_engine.trading_enabled %}text-green{% else %}text-red{% endif %}">{{ 'YES' if data.risk_engine.trading_enabled else 'NO — ALL BOTS HALTED' }}</h3>
+                            <div class="card-footer-metric">Emergency Stop: <span class="{% if data.risk_engine.emergency_stop %}text-red{% else %}text-green{% endif %}">{{ 'ACTIVE' if data.risk_engine.emergency_stop else 'INACTIVE' }}</span></div>
+                        </div>
+                        <div class="metric-card span-4">
+                            <h5>Total Capital Deployed</h5>
+                            <h3>{{ data.risk_engine.total_deployed|inr }}</h3>
+                            <div class="card-footer-metric">Limit: {{ data.risk_engine.total_capital_limit|inr(0) }} &nbsp;|&nbsp; Utilisation: {{ data.risk_engine.capital_utilisation_pct }}%</div>
+                        </div>
+                        <div class="metric-card span-4"><h5>Risk Engine Last Updated</h5><h3 class="text-muted" style="font-size:1rem">{{ data.risk_engine.last_updated }}</h3></div>
+
+                        <div class="metric-card span-12 table-container-card">
+                            <h5>Per-Bot Capital Allocation &amp; Risk Limits</h5>
+                            <div class="scroller-table-axis">
+                                <table>
+                                    <thead><tr><th>Bot</th><th>Mode</th><th>Trade Amount</th><th>Capital Limit</th><th>Deployed Capital</th><th>Open Positions</th><th>Max Positions</th></tr></thead>
+                                    <tbody>
+                                        {% for bot_name, bot_info in data.risk_engine.bots.items() %}
+                                        <tr>
+                                            <td><strong>{{ bot_name }}</strong></td>
+                                            <td><span class="row-badge-pill {% if bot_info.mode == 'LIVE' %}signal-type-elite{% elif bot_info.mode == 'PAPER' %}color-indicator-warn{% else %}color-indicator-low{% endif %}">{{ bot_info.mode }}</span></td>
+                                            <td>{{ bot_info.trade_amount|inr(0) }}</td>
+                                            <td>{{ bot_info.capital_limit|inr(0) }}</td>
+                                            <td>{{ bot_info.deployed_capital|inr }}</td>
+                                            <td class="text-blue">{{ bot_info.open_positions }}</td>
+                                            <td>{{ bot_info.max_positions }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  SETTINGS                                                   -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="settings-view" class="spa-view-layer view-hidden">
+                    <div class="metric-card span-8">
+                        <h3>PROJECT-ALPHA Engine Parameters Preferences</h3>
+                        <p class="desc-text">Manage threshold properties without altering code interface hooks.</p>
+                        <hr class="divider-line">
+                        <form class="settings-mock-form" onsubmit="event.preventDefault();">
+                            <div class="form-element-container">
+                                <label>Strategy Risk Profile Classification</label>
+                                <select id="settings-risk-profile" class="form-select-control">
+                                    <option value="70">Permissive Filters (All Scores &gt; 70)</option>
+                                    <option value="80" selected>Conservative Operational Mode (Scores &gt; 80)</option>
+                                    <option value="90">Strict Verification Only (Scores &gt; 90)</option>
+                                </select>
+                            </div>
+                            <div class="form-element-container">
+                                <label>UI Component Refresh Synchronization Interval</label>
+                                <select id="settings-refresh-interval" class="form-select-control">
+                                    <option value="1000">Real-Time Auto Pull (1s)</option>
+                                    <option value="5000" selected>Standard Dashboard Throttle (5s Polling loop)</option>
+                                    <option value="10000">Balanced Dashboard Throttle (10s Polling loop)</option>
+                                    <option value="0">Manual Execution Trigger Check Only</option>
+                                </select>
+                            </div>
+                            <button type="button" id="settings-save-btn" class="btn-commit-mock-state">Save Settings Configuration Parameters</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  SCANNER WATCHLIST                                          -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="watchlist-center" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        <h3 style="grid-column:span 12;margin-bottom:0;">Scanner Watchlist</h3>
+                        <p style="grid-column:span 12;color:var(--text-secondary);font-size:0.85rem;">Unified scanner watchlist. All bots read from this single source of truth and apply their own strategy filters.</p>
+
+                        <div class="metric-card span-12" style="border:1px solid var(--blue);box-shadow:0 0 8px rgba(59,130,246,0.15);">
+                            <h6 style="color:var(--text-secondary);margin-bottom:4px;">Total Coins</h6>
+                            <h4 class="text-blue" id="total-coin-count">{{ data.scanner_overview.coins_scanned or 0 }}</h4>
+                        </div>
+
+                        <div class="metric-card span-12">
+                            <h5>Scanner Universe</h5>
+                            <div class="scroller-table-axis" style="max-height:400px;">
+                                <table>
+                                    <thead><tr><th>Coin</th><th>Action</th></tr></thead>
+                                    <tbody id="scanner-coin-table">
+                                        {% for item in data.scanner_overview.coin_pairs %}
+                                        <tr>
+                                            <td><strong>{{ item.coin }}/{{ item.quote or 'INR' }}</strong></td>
+                                            <td><button class="btn-remove-coin" data-coin="{{ item.coin }}">REMOVE</button></td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="2" class="text-muted">No coins</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <datalist id="coindcx-coins"></datalist>
+                            <div class="form-element-container" style="margin-top:12px;">
+                                <input type="text" id="scanner-add-input" list="coindcx-coins" placeholder="Enter coin symbol…" autocomplete="off" class="form-select-control" style="width:60%;display:inline-block;">
+                                <button class="btn-commit-mock-state" onclick="addCoin()" style="width:35%;display:inline-block;margin-left:4px;">Add</button>
+                                <div id="scanner-pair-preview" style="display:none;font-size:0.82rem;margin-top:5px;min-height:1.2em;font-weight:500;letter-spacing:0.01em;"></div>
+                                <div id="scanner-add-error" style="display:none;color:#ff4444;font-size:0.78rem;margin-top:4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div><!-- /.main-workspace-wrapper -->
+    </div><!-- /.ultimate-shell -->
+
+    <script id="dashboard-state-payload-json" type="application/json">{{ data | tojson }}</script>
+    <script>window.DASHBOARD_API_KEY = {{ dashboard_api_key | tojson }};</script>
+    <script src="static/script.js"></script>
+</body>
+</html>

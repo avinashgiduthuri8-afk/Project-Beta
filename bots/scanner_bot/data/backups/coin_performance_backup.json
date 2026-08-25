@@ -1,0 +1,222 @@
+{
+  "ZEC": {
+    "coin": "ZEC",
+    "total_signals": 1,
+    "winning_signals": 0,
+    "losing_signals": 1,
+    "win_rate_pct": 0.0,
+    "avg_return_pct": -0.07,
+    "best_return_pct": -0.07,
+    "worst_return_pct": -0.07,
+    "last_signal_time": "2026-06-23T11:01:50.154263+00:00"
+  },
+  "BTC": {
+    "coin": "BTC",
+    "total_signals": 3,
+    "winning_signals": 1,
+    "losing_signals": 2,
+    "win_rate_pct": 33.3,
+    "avg_return_pct": -0.01,
+    "best_return_pct": 0.03,
+    "worst_return_pct": -0.07,
+    "last_signal_time": "2026-06-23T11:23:40.748352+00:00"
+  },
+  "ETH": {
+    "coin": "ETH",
+    "total_signals": 1,
+    "winning_signals": 1,
+    "losing_signals": 0,
+    "win_rate_pct": 100.0,
+    "avg_return_pct": 1.03,
+    "best_return_pct": 1.03,
+    "worst_return_pct": 1.03,
+    "last_signal_time": "2026-06-23T11:01:50.149586+00:00"
+  },
+  "SOL": {
+    "coin": "SOL",
+    "total_signals": 2,
+    "winning_signals": 1,
+    "losing_signals": 1,
+    "win_rate_pct": 50.0,
+    "avg_return_pct": 0.18,
+    "best_return_pct": 0.57,
+    "worst_return_pct": -0.21,
+    "last_signal_time": "2026-06-23T11:20:18.023301+00:00"
+  },
+  "XRP": {
+    "coin": "XRP",
+    "total_signals": 1,
+    "winning_signals": 1,
+    "losing_signals": 0,
+    "win_rate_pct": 100.0,
+    "avg_return_pct": 0.34,
+    "best_return_pct": 0.34,
+    "worst_return_pct": 0.34,
+    "last_signal_time": "2026-06-23T11:01:50.151830+00:00"
+  },
+  "BNB": {
+    "coin": "BNB",
+    "total_signals": 3,
+    "winning_signals": 1,
+    "losing_signals": 2,
+    "win_rate_pct": 33.3,
+    "avg_return_pct": -0.18,
+    "best_return_pct": 0.31,
+    "worst_return_pct": -0.48,
+    "last_signal_time": "2026-06-23T11:23:40.751321+00:00"
+  },
+  "LAYER": {
+    "coin": "LAYER",
+    "total_signals": 7,
+    "winning_signals": 0,
+    "losing_signals": 7,
+    "win_rate_pct": 0.0,
+    "avg_return_pct": -5.68,
+    "best_return_pct": -5.13,
+    "worst_return_pct": -6.12,
+    "last_signal_time": "2026-06-23T11:49:52.917988+00:00"
+  },
+  "ALICE": {
+    "coin": "ALICE",
+    "total_signals": 3,
+    "winning_signals": 1,
+    "losing_signals": 2,
+    "win_rate_pct": 33.3,
+    "avg_return_pct": 0.83,
+    "best_return_pct": 2.9,
+    "worst_return_pct": -0.2,
+    "last_signal_time": "2026-06-23T11:23:41.176474+00:00"
+  },
+  "NEAR": {
+    "coin": "NEAR",
+    "total_signals": 1,
+    "winning_signals": 1,
+    "losing_signals": 0,
+    "win_rate_pct": 100.0,
+    "avg_return_pct": 0.37,
+    "best_return_pct": 0.37,
+    "worst_return_pct": 0.37,
+    "last_signal_time": "2026-06-23T11:01:50.740227+00:00"
+  },
+  "WLD": {
+    "coin": "WLD",
+    "total_signals": 3,
+    "winning_signals": 0,
+    "losing_signals": 3,
+    "win_rate_pct": 0.0,
+    "avg_return_pct": -3.03,
+    "best_return_pct": -2.21,
+    "worst_return_pct": -3.44,
+    "last_signal_time": "2026-06-23T11:23:41.168727+00:00"
+  },
+  "ADA": {
+    "coin": "ADA",
+    "total_signals": 1,
+    "winning_signals": 0,
+    "losing_signals": 1,
+    "win_rate_pct": 0.0,
+    "avg_return_pct": -0.73,
+    "best_return_pct": -0.73,
+    "worst_return_pct": -0.73,
+    "last_signal_time": "2026-06-23T11:01:51.158975+00:00"
+  },
+  "LINK": {
+    "coin": "LINK",
+    "total_signals": 1,
+    "winning_signals": 1,
+    "losing_signals": 0,
+    "win_rate_pct": 100.0,
+    "avg_return_pct": 1.55,
+    "best_return_pct": 1.55,
+    "worst_return_pct": 1.55,
+    "last_signal_time": "2026-06-23T11:01:51.172248+00:00"
+  },
+  "ONDO": {
+    "coin": "ONDO",
+    "total_signals": 5,
+    "winning_signals": 4,
+    "losing_signals": 1,
+    "win_rate_pct": 80.0,
+    "avg_return_pct": 0.41,
+    "best_return_pct": 1.01,
+    "worst_return_pct": -0.7,
+    "last_signal_time": "2026-06-23T11:35:18.487802+00:00"
+  },
+  "PORTAL": {
+    "coin": "PORTAL",
+    "total_signals": 4,
+    "winning_signals": 0,
+    "losing_signals": 4,
+    "win_rate_pct": 0.0,
+    "avg_return_pct": -2.64,
+    "best_return_pct": -2.03,
+    "worst_return_pct": -3.09,
+    "last_signal_time": "2026-06-23T11:35:18.484650+00:00"
+  },
+  "LUMIA": {
+    "coin": "LUMIA",
+    "total_signals": 7,
+    "winning_signals": 0,
+    "losing_signals": 7,
+    "win_rate_pct": 0.0,
+    "avg_return_pct": -4.37,
+    "best_return_pct": -2.19,
+    "worst_return_pct": -5.47,
+    "last_signal_time": "2026-06-23T11:49:52.911855+00:00"
+  },
+  "DOGE": {
+    "coin": "DOGE",
+    "total_signals": 2,
+    "winning_signals": 0,
+    "losing_signals": 2,
+    "win_rate_pct": 0.0,
+    "avg_return_pct": -0.61,
+    "best_return_pct": -0.58,
+    "worst_return_pct": -0.64,
+    "last_signal_time": "2026-06-23T11:20:18.407875+00:00"
+  },
+  "ICP": {
+    "coin": "ICP",
+    "total_signals": 2,
+    "winning_signals": 1,
+    "losing_signals": 1,
+    "win_rate_pct": 50.0,
+    "avg_return_pct": 0.56,
+    "best_return_pct": 1.16,
+    "worst_return_pct": -0.04,
+    "last_signal_time": "2026-06-23T11:23:41.184838+00:00"
+  },
+  "XLM": {
+    "coin": "XLM",
+    "total_signals": 2,
+    "winning_signals": 2,
+    "losing_signals": 0,
+    "win_rate_pct": 100.0,
+    "avg_return_pct": 0.98,
+    "best_return_pct": 1.04,
+    "worst_return_pct": 0.92,
+    "last_signal_time": "2026-06-23T11:23:41.177922+00:00"
+  },
+  "TNSR": {
+    "coin": "TNSR",
+    "total_signals": 6,
+    "winning_signals": 0,
+    "losing_signals": 6,
+    "win_rate_pct": 0.0,
+    "avg_return_pct": -1.68,
+    "best_return_pct": -1.67,
+    "worst_return_pct": -1.69,
+    "last_signal_time": "2026-06-23T11:49:52.906802+00:00"
+  },
+  "TRX": {
+    "coin": "TRX",
+    "total_signals": 5,
+    "winning_signals": 0,
+    "losing_signals": 5,
+    "win_rate_pct": 0.0,
+    "avg_return_pct": -0.62,
+    "best_return_pct": -0.21,
+    "worst_return_pct": -0.99,
+    "last_signal_time": "2026-06-23T11:49:52.916192+00:00"
+  }
+}

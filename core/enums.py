@@ -1,28 +1,26 @@
-"""Domain Enums for Indian Equities & Derivatives Trading."""
+"""Core Enums for Indian Stock Trading Platform (Project-Beta)."""
 
 from enum import Enum
 
 
 class Exchange(str, Enum):
-    NSE = "NSE"      # National Stock Exchange (Cash)
-    BSE = "BSE"      # Bombay Stock Exchange (Cash)
-    NFO = "NFO"      # NSE Futures & Options
-    BFO = "BFO"      # BSE Futures & Options
-    CDS = "CDS"      # Currency Derivatives
-    MCX = "MCX"      # Multi Commodity Exchange
+    NSE = "NSE"
+    BSE = "BSE"
+    NFO = "NFO"
+    BFO = "BFO"
 
 
 class ProductType(str, Enum):
-    MIS = "MIS"      # Margin Intraday Square-off (Day trade)
-    CNC = "CNC"      # Cash and Carry (Equity delivery)
-    NRML = "NRML"    # Normal (Derivatives carryforward)
+    MIS = "MIS"      # Intraday Margin Square-off
+    CNC = "CNC"      # Cash and Carry (Delivery)
+    NRML = "NRML"    # Normal (Derivatives Carryforward)
 
 
 class OrderType(str, Enum):
     MARKET = "MARKET"
     LIMIT = "LIMIT"
-    SL = "SL"          # Stop-Loss Limit
-    SL_M = "SL-M"      # Stop-Loss Market (restricted by NSE on options, but standard enum)
+    SL = "SL"
+    SL_M = "SL-M"
 
 
 class OrderSide(str, Enum):
@@ -46,7 +44,38 @@ class TimeInForce(str, Enum):
 
 class MarketSession(str, Enum):
     CLOSED = "CLOSED"
-    PRE_OPEN = "PRE_OPEN"          # 09:00 - 09:08 IST
-    NORMAL = "NORMAL"              # 09:15 - 15:30 IST
+    PRE_OPEN = "PRE_OPEN"                    # 09:00 - 09:08 IST
+    PRE_OPEN_MATCH = "PRE_OPEN_MATCH"        # 09:08 - 09:15 IST
+    NORMAL = "NORMAL"                        # 09:15 - 15:15 IST
     SQUARE_OFF_WINDOW = "SQUARE_OFF_WINDOW"  # 15:15 - 15:30 IST
-    POST_CLOSE = "POST_CLOSE"      # 15:30 - 16:00 IST
+    POST_CLOSE = "POST_CLOSE"                # 15:30 - 16:00 IST
+
+
+class MarketRegime(str, Enum):
+    BULLISH_TRENDING = "BULLISH_TRENDING"
+    BEARISH_TRENDING = "BEARISH_TRENDING"
+    HIGH_VOLATILITY_EXPANSION = "HIGH_VOLATILITY_EXPANSION"
+    LOW_VOLATILITY_CHOP = "LOW_VOLATILITY_CHOP"
+    NEUTRAL = "NEUTRAL"
+
+
+class SetupType(str, Enum):
+    MINERVINI_VCP = "MINERVINI_VCP"
+    POCKET_PIVOT = "POCKET_PIVOT"
+    NR7_SQUEEZE = "NR7_SQUEEZE"
+    HIGH_DELIVERY_BREAKOUT = "HIGH_DELIVERY_BREAKOUT"
+    VWAP_MOMENTUM = "VWAP_MOMENTUM"
+    MEAN_REVERSION_FADE = "MEAN_REVERSION_FADE"
+
+
+class Timeframe(str, Enum):
+    M15 = "15m"
+    H1 = "1h"
+    D1 = "1d"
+
+
+class AISignalDecision(str, Enum):
+    CONFIRMED = "CONFIRMED"
+    CHALLENGED = "CHALLENGED"
+    REJECTED = "REJECTED"
+    NEUTRAL = "NEUTRAL"

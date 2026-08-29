@@ -5,7 +5,10 @@ from __future__ import annotations
 import logging
 import os
 from typing import Optional, Dict, Any
-import pyotp
+try:
+    import pyotp
+except ImportError:
+    pyotp = None
 from auth.token_cache import TokenCache
 
 logger = logging.getLogger(__name__)
@@ -22,9 +25,12 @@ class SessionManager:
         """Generate current 6-digit Time-based One-Time Password (TOTP) from base32 secret."""
         if not totp_secret:
             raise ValueError("TOTP secret key cannot be empty.")
+        if pyotp is None:
+            raise RuntimeError("pyotp is not installed. Please install pyotp.")
         clean_secret = totp_secret.replace(" ", "").upper()
         totp = pyotp.TOTP(clean_secret)
         return totp.now()
+
 
     def get_or_create_session(
         self,

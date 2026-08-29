@@ -1,10 +1,18 @@
 {
   "ELITE": {
     "tier": "ELITE",
-    "total_signals": 60,
-    "winning_signals": 15,
-    "losing_signals": 45,
-    "win_rate_pct": 25.0,
-    "avg_return_pct": -1.58
+    "total_signals": 91,
+    "winning_signals": 35,
+    "losing_signals": 56,
+    "win_rate_pct": 38.5,
+    "avg_return_pct": 7.89
+  },
+  "MEDIUM": {
+    "tier": "MEDIUM",
+    "total_signals": 4,
+    "winning_signals": 2,
+    "losing_signals": 2,
+    "win_rate_pct": 50.0,
+    "avg_return_pct": 2.42
   }
 }

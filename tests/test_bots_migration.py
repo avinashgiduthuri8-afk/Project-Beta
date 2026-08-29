@@ -14,11 +14,17 @@ from execution.mrb_bot import MeanReversionBot
 from execution.pmb_bot import PortfolioManagementBot
 
 
+class MockOpenClock(MarketClock):
+    def is_normal_trading_active(self, dt=None):
+        return True
+
+
 def test_mtb_momentum_breakout():
     broker = PaperBroker()
     router = ExecutionRouter(broker)
     om = OrderManager()
-    mtb = MomentumTradingBot(router, om)
+    clock = MockOpenClock()
+    mtb = MomentumTradingBot(router, om, market_clock=clock)
 
     # Bullish Breakout Candle: Open <= VWAP (2490 <= 2500) and Close > VWAP (2520 > 2500)
     c_bull = Candle(
@@ -44,7 +50,8 @@ def test_mrb_mean_reversion_fade():
     broker = PaperBroker()
     router = ExecutionRouter(broker)
     om = OrderManager()
-    mrb = MeanReversionBot(router, om, deviation_threshold_pct=1.0)
+    clock = MockOpenClock()
+    mrb = MeanReversionBot(router, om, market_clock=clock, deviation_threshold_pct=1.0)
 
     # Overbought Candle: Close (2530) is > 1% higher than VWAP (2500)
     c_overbought = Candle(
@@ -64,6 +71,7 @@ def test_mrb_mean_reversion_fade():
     assert order.symbol == "INFY"
     assert order.side == OrderSide.SELL
     assert "INFY" in mrb.active_trades
+
 
 
 def test_pmb_portfolio_health_and_circuit_breaker():

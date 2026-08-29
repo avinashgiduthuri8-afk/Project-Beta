@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROJECT-ALPHA · Dashboard V2</title>
+    <title>PROJECT-BETA · Indian Equities &amp; Algorithmic Trading Platform</title>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -37,17 +37,20 @@
         <!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════ -->
         <aside class="side-navigation-dock" id="sidebar">
             <div class="brand-header">
-                <h2>PROJECT-ALPHA <span class="pulse-core"></span></h2>
+                <h2>PROJECT-BETA <span class="pulse-core"></span></h2>
             </div>
             <nav class="navigation-links">
                 <div class="nav-dropdown-group">
                     <button class="nav-dropdown-toggle active" data-menu="overview">Overview</button>
                     <div class="nav-dropdown-menu" id="menu-overview">
                         <a href="#" class="nav-anchor active" data-target="home-view">Dashboard Home</a>
+                        <a href="#" class="nav-anchor" data-target="beta-pipeline-view">⚡ BETA 13-Stage Pipeline</a>
+                        <a href="#" class="nav-anchor" data-target="stock-research-view">🔍 Stock Deep Dive / Research</a>
                         <a href="#" class="nav-anchor" data-target="scanner-view">Scanner Center</a>
                         <a href="#" class="nav-anchor" data-target="portfolio-view">Portfolio Center</a>
                     </div>
                 </div>
+
                 <div class="nav-dropdown-group">
                     <button class="nav-dropdown-toggle" data-menu="logs">Execution Logs</button>
                     <div class="nav-dropdown-menu view-hidden" id="menu-logs">
@@ -58,9 +61,9 @@
                 <div class="nav-dropdown-group">
                     <button class="nav-dropdown-toggle" data-menu="bots">Bot Control</button>
                     <div class="nav-dropdown-menu view-hidden" id="menu-bots">
-                        <a href="#" class="nav-anchor" data-target="vgx-view">VGX Bot</a>
-                        <a href="#" class="nav-anchor" data-target="pmb-view">PMB Bot</a>
-                        <a href="#" class="nav-anchor" data-target="mtb-view">MTB Bot</a>
+                        <a href="#" class="nav-anchor" data-target="vgx-view">Grid Momentum Bot</a>
+                        <a href="#" class="nav-anchor" data-target="pmb-view">Price Action Bot</a>
+                        <a href="#" class="nav-anchor" data-target="mtb-view">Trend Bounce Bot</a>
                     </div>
                 </div>
                 <div class="nav-dropdown-group">
@@ -68,14 +71,14 @@
                     <div class="nav-dropdown-menu view-hidden" id="menu-analytics">
                         <a href="#" class="nav-anchor" data-target="performance-tracker">Signal Performance</a>
                         <a href="#" class="nav-anchor" data-target="signal-history">Signal History</a>
-                        <a href="#" class="nav-anchor" data-target="coin-performance">Coin Performance</a>
+                        <a href="#" class="nav-anchor" data-target="coin-performance">Stock Performance</a>
                         <a href="#" class="nav-anchor" data-target="tier-accuracy">Tier Accuracy</a>
                     </div>
                 </div>
                 <div class="nav-dropdown-group">
                     <button class="nav-dropdown-toggle" data-menu="watchlist">Watchlist</button>
                     <div class="nav-dropdown-menu view-hidden" id="menu-watchlist">
-                        <a href="#" class="nav-anchor" data-target="watchlist-center">Scanner Watchlist</a>
+                        <a href="#" class="nav-anchor" data-target="watchlist-center">NIFTY 50 Watchlist</a>
                     </div>
                 </div>
                 <div class="nav-dropdown-group">
@@ -168,9 +171,125 @@
                 <!-- ═══════════════════════════════════════════════════════════ -->
                 <div id="home-view" class="spa-view-layer">
 
+                    <!-- ═══════════════════════════════════════════════════════════ -->
+                    <!--  BETA 13-STAGE ARCHITECTURE & AUTO-EXECUTION ENGINE WIDGET  -->
+                    <!-- ═══════════════════════════════════════════════════════════ -->
+                    <div class="beta-pipeline-card">
+                        <div class="beta-pipeline-header">
+                            <div class="beta-title-group">
+                                <h3>⚡ BETA 13-Stage Execution &amp; Intelligence Lifecycle</h3>
+                                <span class="beta-pipeline-sub">End-to-End Automated Indian Stock Pipeline: Market Data ➔ Scanner ➔ Scorecard ➔ AI Advisor ➔ Trade Constructor ➔ RMS ➔ Auto-Execution ➔ Position Manager ➔ Journal ➔ Analytics ➔ Learning ➔ Backtest ➔ Strategy Tuning ↺</span>
+                            </div>
+                            <div class="beta-controls-group">
+                                <button id="beta-toggle-auto-btn" class="beta-action-btn btn-auto-on" onclick="toggleBetaAutoExecution()">
+                                    <span class="status-pulse-dot"></span>
+                                    <span id="beta-auto-label">AUTO-EXECUTION: ACTIVE</span>
+                                </button>
+                                <button id="beta-run-cycle-btn" class="beta-action-btn btn-run-cycle" onclick="triggerBetaCycleNow()">
+                                    <span>▶ Run 13-Stage Cycle</span>
+                                </button>
+                                <button id="beta-calibrate-btn" class="beta-action-btn btn-calibrate" onclick="calibrateBetaStrategy()">
+                                    <span>↺ Strategy Feedback</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 13-Stage Horizontal Interactive Flowchart -->
+                        <div class="beta-flowchart-grid" id="beta-flowchart-grid">
+                            <div class="stage-step" id="stage-1">
+                                <div class="stage-badge"><span class="step-num">1</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">MARKET DATA</div>
+                                <div class="stage-detail" id="stage-1-sub">NSE OHLCV/VWAP</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-2">
+                                <div class="stage-badge"><span class="step-num">2</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">SCANNER</div>
+                                <div class="stage-detail" id="stage-2-sub">VCP / NR7 / Vol</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-3">
+                                <div class="stage-badge"><span class="step-num">3</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">SIGNAL ENGINE</div>
+                                <div class="stage-detail" id="stage-3-sub">100-Pt 4-Pillar</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-4">
+                                <div class="stage-badge"><span class="step-num">4</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">AI INTEL</div>
+                                <div class="stage-detail" id="stage-4-sub">Thesis Advisor</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-5">
+                                <div class="stage-badge"><span class="step-num">5</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">CONSTRUCTOR</div>
+                                <div class="stage-detail" id="stage-5-sub">1:2+ R:R &amp; Lots</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-6">
+                                <div class="stage-badge"><span class="step-num">6</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">RISK ENGINE</div>
+                                <div class="stage-detail" id="stage-6-sub">RMS &amp; IST Clock</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-7">
+                                <div class="stage-badge"><span class="step-num">7</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">EXECUTION</div>
+                                <div class="stage-detail" id="stage-7-sub">₹0.05 Smart Route</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-8">
+                                <div class="stage-badge"><span class="step-num">8</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">POSITIONS</div>
+                                <div class="stage-detail" id="stage-8-sub">Trailing &amp; 15:15</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-9">
+                                <div class="stage-badge"><span class="step-num">9</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">JOURNAL</div>
+                                <div class="stage-detail" id="stage-9-sub">SQLite &amp; CSV</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-10">
+                                <div class="stage-badge"><span class="step-num">10</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">ANALYTICS</div>
+                                <div class="stage-detail" id="stage-10-sub">Win Rate &amp; Exp</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-11">
+                                <div class="stage-badge"><span class="step-num">11</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">LEARNING</div>
+                                <div class="stage-detail" id="stage-11-sub">Alpha Attribution</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-12">
+                                <div class="stage-badge"><span class="step-num">12</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">BACKTEST</div>
+                                <div class="stage-detail" id="stage-12-sub">Walk-Forward</div>
+                            </div>
+                            <div class="stage-arrow">➔</div>
+                            <div class="stage-step" id="stage-13">
+                                <div class="stage-badge"><span class="step-num">13</span> <span class="stage-dot dot-active"></span></div>
+                                <div class="stage-name">STRATEGY ↺</div>
+                                <div class="stage-detail" id="stage-13-sub">Dynamic Tuning</div>
+                            </div>
+                        </div>
+
+                        <!-- Live Pipeline Status Telemetry Banner -->
+                        <div class="beta-telemetry-strip">
+                            <div class="tel-item"><span class="tel-label">Market Session:</span> <strong id="tel-session" class="text-blue">NORMAL (09:15-15:15 IST)</strong></div>
+                            <div class="tel-item"><span class="tel-label">Active Plans:</span> <strong id="tel-plans" class="text-green">0 Created</strong></div>
+                            <div class="tel-item"><span class="tel-label">Pre-Trade RMS:</span> <strong id="tel-rms" class="text-green">Passed</strong></div>
+                            <div class="tel-item"><span class="tel-label">Open Positions:</span> <strong id="tel-positions">0 Active</strong></div>
+                            <div class="tel-item"><span class="tel-label">Score Threshold:</span> <strong id="tel-score-thresh" class="text-amber">70.0/100</strong></div>
+                            <div class="tel-item"><span class="tel-label">Feedback Loop:</span> <strong id="tel-feedback" class="text-green">Continuous ↺</strong></div>
+                        </div>
+                    </div>
+
                     <!-- KPI STRIP -->
-                    <div class="v2-section-label" style="margin-top:0;">Key Performance Indicators</div>
+                    <div class="v2-section-label" style="margin-top:20px;">Key Performance Indicators</div>
                     <div class="kpi-row">
+
 
                         <div class="kpi-card accent-blue">
                             <div class="kpi-label">Total AUM</div>
@@ -373,10 +492,10 @@
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>Coin</th>
+                                            <th>Stock Symbol</th>
                                             <th>Tier</th>
                                             <th>Score</th>
-                                            <th>Price</th>
+                                            <th>LTP (₹)</th>
                                             <th>Age</th>
                                         </tr>
                                     </thead>
@@ -711,18 +830,18 @@
                         <div class="metric-card span-3"><h5>Next Cleanup</h5><h4 id="so-next-cleanup" style="font-size:0.9rem;margin-top:8px;">—</h4><div class="card-footer-metric">Every 10 minutes</div></div>
 
                         <div class="metric-card span-12 table-container-card">
-                            <h5>Live Telemetry Engine Signals (Active Matrix Data Stream)</h5>
+                            <h5>Live Indian Stock Scanner Signals (NSE NIFTY 50 Universe)</h5>
                             <div class="scroller-table-axis">
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>Pair Target</th>
-                                            <th>Classification Level</th>
-                                            <th>Vector Score</th>
-                                            <th>Reference Base Price</th>
-                                            <th>Market</th>
+                                            <th>Stock Symbol (NSE)</th>
+                                            <th>Signal Tier</th>
+                                            <th>100-Pt Score</th>
+                                            <th>LTP (₹)</th>
+                                            <th>Exchange</th>
                                             <th>Discovery Timestamp</th>
-                                            <th>Macro Market Phase</th>
+                                            <th>Setup Pattern</th>
                                             <th>Age</th>
                                         </tr>
                                     </thead>
@@ -743,6 +862,264 @@
                                 </table>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  STOCK INTELLIGENCE & DEEP DIVE RESEARCH                     -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="stock-research-view" class="spa-view-layer view-hidden">
+                    <div class="dashboard-grid-matrix">
+                        
+                        <!-- Search & Quick Navigation Header -->
+                        <div class="metric-card span-12" style="background: linear-gradient(145deg, #10141f, #0c0e17); border: 1px solid #1f293d;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                                <div>
+                                    <h3 style="margin:0; font-size:1.25rem; display:flex; align-items:center; gap:8px;">
+                                        <span>🔍 Stock Intelligence &amp; Deep Research Hub</span>
+                                        <span class="row-badge-pill signal-type-elite" style="font-size:0.75rem;">NSE / BSE EQUITIES</span>
+                                    </h3>
+                                    <p style="margin:4px 0 0; color:var(--text-secondary); font-size:0.85rem;">
+                                        Comprehensive technical setups, Minervini VCP metrics, 100-point 4-pillar scorecard, walk-forward backtest, and AI trend forecasting.
+                                    </p>
+                                </div>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <input type="text" id="stock-search-input" list="nse-search-datalist" placeholder="Search symbol (e.g. RELIANCE, TCS, INFY)..."
+                                        style="width:240px; padding:8px 12px; border-radius:6px; border:1px solid var(--border); background:var(--bg-app); color:var(--text-primary); font-size:0.9rem; text-transform:uppercase;"
+                                        onkeydown="if(event.key==='Enter') searchStockDeepDive()">
+                                    <datalist id="nse-search-datalist">
+                                        <option value="RELIANCE"></option>
+                                        <option value="TCS"></option>
+                                        <option value="INFY"></option>
+                                        <option value="HDFCBANK"></option>
+                                        <option value="ICICIBANK"></option>
+                                        <option value="SBIN"></option>
+                                        <option value="TATAMOTORS"></option>
+                                        <option value="BHARTIARTL"></option>
+                                        <option value="ITC"></option>
+                                        <option value="LT"></option>
+                                    </datalist>
+                                    <button class="btn-commit-mock-state" onclick="searchStockDeepDive()" style="padding:8px 16px; margin:0;">Search</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Trending Quick Pills -->
+                            <div style="margin-top:14px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <span style="font-size:0.78rem; color:var(--text-secondary); font-weight:600;">TOP NIFTY 50:</span>
+                                <button class="btn-sm btn-outline" onclick="selectStockSearch('RELIANCE')">RELIANCE</button>
+                                <button class="btn-sm btn-outline" onclick="selectStockSearch('TCS')">TCS</button>
+                                <button class="btn-sm btn-outline" onclick="selectStockSearch('INFY')">INFY</button>
+                                <button class="btn-sm btn-outline" onclick="selectStockSearch('HDFCBANK')">HDFCBANK</button>
+                                <button class="btn-sm btn-outline" onclick="selectStockSearch('ICICIBANK')">ICICIBANK</button>
+                                <button class="btn-sm btn-outline" onclick="selectStockSearch('SBIN')">SBIN</button>
+                                <button class="btn-sm btn-outline" onclick="selectStockSearch('TATAMOTORS')">TATAMOTORS</button>
+                                <button class="btn-sm btn-outline" onclick="selectStockSearch('BHARTIARTL')">BHARTIARTL</button>
+                                <button class="btn-sm btn-outline" onclick="selectStockSearch('ITC')">ITC</button>
+                                <button class="btn-sm btn-outline" onclick="selectStockSearch('LT')">LT</button>
+                            </div>
+                        </div>
+
+                        <!-- Action Toolbar Alongside Selected Stock -->
+                        <div class="metric-card span-12" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; background: rgba(17, 17, 24, 0.85); border-left: 4px solid var(--blue);">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <h2 id="si-symbol" style="margin:0; font-size:1.6rem; letter-spacing:0.5px;">RELIANCE</h2>
+                                <span id="si-name" style="color:var(--text-secondary); font-size:0.95rem; font-weight:500;">Reliance Industries Ltd</span>
+                                <span id="si-tier-badge" class="row-badge-pill signal-type-elite">ELITE SCORE 92/100</span>
+                            </div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <button id="btn-stock-backtest" class="btn-sm" style="background:#3b82f6; color:#fff; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer;" onclick="backtestCurrentStock()">
+                                    <span>↺ Run Walk-Forward Backtest</span>
+                                </button>
+                                <button id="btn-stock-predict" class="btn-sm" style="background:#8b5cf6; color:#fff; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer;" onclick="predictCurrentStockTrend()">
+                                    <span>🧠 Predict Stock Trend</span>
+                                </button>
+                                <button id="btn-stock-watchlist" class="btn-sm" style="background:#10b981; color:#fff; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer;" onclick="toggleCurrentStockWatchlist()">
+                                    <span>＋ Add to Watchlist</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 1. Valuation & Price Overview -->
+                        <div class="metric-card span-4">
+                            <h5>Valuation &amp; Price Metrics</h5>
+                            <div style="margin:12px 0;">
+                                <div style="display:flex; align-items:baseline; gap:8px;">
+                                    <h2 id="si-ltp" class="text-blue" style="font-size:1.8rem; margin:0;">₹3,125.40</h2>
+                                    <span id="si-change" class="text-green font-600" style="font-size:0.95rem;">+₹42.10 (+1.36%)</span>
+                                </div>
+                            </div>
+                            <div class="layout-matrix-inner-row" style="grid-template-columns: 1fr 1fr; gap:8px; margin-top:12px;">
+                                <div class="nested-status-well"><h6>Day Range</h6><h4 id="si-day-range" style="font-size:0.85rem;">₹3,085 - ₹3,140</h4></div>
+                                <div class="nested-status-well"><h6>52-Week Range</h6><h4 id="si-52w-range" style="font-size:0.85rem;">₹2,220 - ₹3,218</h4></div>
+                                <div class="nested-status-well"><h6>Volume</h6><h4 id="si-volume" class="text-gold" style="font-size:0.95rem;">4.8M</h4></div>
+                                <div class="nested-status-well"><h6>Delivery %</h6><h4 id="si-delivery" class="text-green" style="font-size:0.95rem;">68.4%</h4></div>
+                                <div class="nested-status-well"><h6>Sector</h6><h4 id="si-sector" style="font-size:0.85rem;">Energy / Conglomerate</h4></div>
+                                <div class="nested-status-well"><h6>Beta</h6><h4 id="si-beta" class="font-mono" style="font-size:0.95rem;">0.95</h4></div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Minervini VCP & Trade Constructor -->
+                        <div class="metric-card span-4">
+                            <h5>Minervini VCP &amp; Trade Setup</h5>
+                            <div style="margin:10px 0;">
+                                <span id="si-setup-name" class="row-badge-pill signal-type-elite" style="font-size:0.85rem;">MINERVINI VOLATILITY CONTRACTION (VCP)</span>
+                            </div>
+                            <div class="layout-matrix-inner-row" style="grid-template-columns: 1fr 1fr; gap:8px; margin-top:12px;">
+                                <div class="nested-status-well"><h6>Pivot Buy Point</h6><h4 id="si-pivot" class="text-blue" style="font-size:1.1rem;">₹3,135.00</h4></div>
+                                <div class="nested-status-well"><h6>Hard Stop Loss</h6><h4 id="si-stoploss" class="text-red" style="font-size:1.1rem;">₹3,060.00</h4></div>
+                                <div class="nested-status-well"><h6>Target 1 (1:2R)</h6><h4 id="si-target1" class="text-green" style="font-size:1.1rem;">₹3,280.00</h4></div>
+                                <div class="nested-status-well"><h6>Target 2 (1:3.5R)</h6><h4 id="si-target2" class="text-green" style="font-size:1.1rem;">₹3,390.00</h4></div>
+                            </div>
+                            <div style="margin-top:10px; font-size:0.8rem; color:var(--text-secondary);">
+                                <strong>Contraction Stages:</strong> <span id="si-contractions" style="color:var(--text-primary);">T1: -11.2% | T2: -5.4% | T3: -2.1%</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. 100-Point 4-Pillar Quality Scorecard -->
+                        <div class="metric-card span-4">
+                            <h5>100-Point 4-Pillar Scorecard</h5>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0 14px;">
+                                <span style="font-size:0.85rem; color:var(--text-secondary);">Quality Index Score:</span>
+                                <h3 id="si-total-score" class="text-green" style="margin:0; font-size:1.4rem;">92 / 100</h3>
+                            </div>
+                            
+                            <div style="display:flex; flex-direction:column; gap:8px; font-size:0.82rem;">
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                                        <span>Technical Structure (Stage 2)</span>
+                                        <strong id="si-sc-tech" class="text-blue">23 / 25</strong>
+                                    </div>
+                                    <div style="height:6px; background:#1e1e2e; border-radius:3px; overflow:hidden;">
+                                        <div id="si-bar-tech" style="width:92%; height:100%; background:var(--blue); border-radius:3px;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                                        <span>RS vs NIFTY 50 Index</span>
+                                        <strong id="si-sc-rs" class="text-green">24 / 25</strong>
+                                    </div>
+                                    <div style="height:6px; background:#1e1e2e; border-radius:3px; overflow:hidden;">
+                                        <div id="si-bar-rs" style="width:96%; height:100%; background:var(--green); border-radius:3px;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                                        <span>Institutional Delivery %</span>
+                                        <strong id="si-sc-vol" class="text-gold">22 / 25</strong>
+                                    </div>
+                                    <div style="height:6px; background:#1e1e2e; border-radius:3px; overflow:hidden;">
+                                        <div id="si-bar-vol" style="width:88%; height:100%; background:var(--gold); border-radius:3px;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                                        <span>Risk/Reward Asymmetry</span>
+                                        <strong id="si-sc-rr" class="text-blue">23 / 25</strong>
+                                    </div>
+                                    <div style="height:6px; background:#1e1e2e; border-radius:3px; overflow:hidden;">
+                                        <div id="si-bar-rr" style="width:92%; height:100%; background:var(--blue); border-radius:3px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Technical Indicators & Moving Averages Radar -->
+                        <div class="metric-card span-6">
+                            <h5>Technical Indicators &amp; Trend Radar</h5>
+                            <div class="layout-matrix-inner-row" style="grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:10px;">
+                                <div class="nested-status-well"><h6>20 EMA</h6><h4 id="si-ema20" class="font-mono" style="font-size:0.95rem;">₹3,060.00</h4></div>
+                                <div class="nested-status-well"><h6>50 EMA</h6><h4 id="si-ema50" class="font-mono" style="font-size:0.95rem;">₹2,980.00</h4></div>
+                                <div class="nested-status-well"><h6>200 EMA</h6><h4 id="si-ema200" class="font-mono" style="font-size:0.95rem;">₹2,750.00</h4></div>
+                                <div class="nested-status-well"><h6>RSI (14)</h6><h4 id="si-rsi" class="text-green" style="font-size:0.95rem;">63.8</h4></div>
+                                <div class="nested-status-well"><h6>RS vs NIFTY</h6><h4 id="si-rs-nifty" class="text-gold" style="font-size:0.95rem;">+2.4%</h4></div>
+                                <div class="nested-status-well"><h6>Stage 2 Uptrend</h6><h4 class="text-green" style="font-size:0.95rem;">CONFIRMED</h4></div>
+                            </div>
+                            <div style="margin-top:12px; display:flex; justify-content:space-between; font-size:0.85rem;">
+                                <span><strong>Key Support:</strong> <span id="si-support" class="text-green">₹3,060 (20 EMA)</span></span>
+                                <span><strong>Key Resistance:</strong> <span id="si-resistance" class="text-red">₹3,218 (52W High)</span></span>
+                            </div>
+                        </div>
+
+                        <!-- 5. AI Analyst Conviction & Thesis -->
+                        <div class="metric-card span-6">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h5>AI Intelligence &amp; Catalyst Engine</h5>
+                                <span id="si-ai-verdict" class="row-badge-pill signal-type-elite">STRONG_BUY (88.5%)</span>
+                            </div>
+                            <div style="margin-top:8px;">
+                                <h6 style="color:var(--text-secondary); margin-bottom:4px; font-size:0.78rem;">BULLISH CATALYSTS</h6>
+                                <ul id="si-catalysts" style="font-size:0.82rem; margin:0 0 10px 16px; padding:0; color:var(--text-primary); line-height:1.4;">
+                                    <li>Breakout from 8-week Volatility Contraction Pattern (VCP) with volume spike.</li>
+                                    <li>Delivery % above 65%, indicating institutional accumulation.</li>
+                                    <li>Relative Strength index at 3-month high vs NIFTY 50 benchmark.</li>
+                                </ul>
+                                <h6 style="color:var(--text-secondary); margin-bottom:4px; font-size:0.78rem;">RISK FACTORS</h6>
+                                <ul id="si-risks" style="font-size:0.82rem; margin:0 0 0 16px; padding:0; color:var(--text-secondary); line-height:1.4;">
+                                    <li>Approaching all-time high resistance at ₹3,218.</li>
+                                    <li>Crude oil volatility could introduce short-term margin noise.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 6. DYNAMIC BACKTEST RESULTS PANEL (Displays upon clicking Run Backtest) -->
+                        <div id="si-backtest-panel" class="metric-card span-12 view-hidden" style="border: 1px solid #3b82f6; background: #0e121d;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h5>📊 Walk-Forward Backtest Report (250 Trading Sessions) — <span id="bt-symbol-title" class="text-blue">RELIANCE</span></h5>
+                                <button class="btn-sm btn-outline" onclick="document.getElementById('si-backtest-panel').classList.add('view-hidden')">✕ Close</button>
+                            </div>
+                            <div class="layout-matrix-inner-row" style="grid-template-columns: repeat(6, 1fr); gap:10px; margin:12px 0;">
+                                <div class="nested-status-well"><h6>Total Trades</h6><h4 id="bt-total-trades" class="text-blue">42</h4></div>
+                                <div class="nested-status-well"><h6>Win Rate</h6><h4 id="bt-win-rate" class="text-green">73.8%</h4></div>
+                                <div class="nested-status-well"><h6>Profit Factor</h6><h4 id="bt-profit-factor" class="text-gold">2.45</h4></div>
+                                <div class="nested-status-well"><h6>Net P&amp;L (₹)</h6><h4 id="bt-net-pnl" class="text-green">+₹84,500.00</h4></div>
+                                <div class="nested-status-well"><h6>Max Drawdown</h6><h4 id="bt-drawdown" class="text-red">-4.2%</h4></div>
+                                <div class="nested-status-well"><h6>Risk : Reward</h6><h4 id="bt-rr" class="font-mono">1 : 2.6</h4></div>
+                            </div>
+                            <div class="scroller-table-axis" style="max-height:220px; margin-top:8px;">
+                                <table>
+                                    <thead>
+                                        <tr><th>Trade ID</th><th>Entry Date</th><th>Setup</th><th>Type</th><th>Holding</th><th>Return %</th><th>Net P&amp;L (₹)</th><th>Outcome</th></tr>
+                                    </thead>
+                                    <tbody id="bt-trades-tbody">
+                                        <tr><td colspan="8" class="text-muted">Loading historical simulation…</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 7. DYNAMIC AI TREND PREDICTION PANEL (Displays upon clicking Predict Trend) -->
+                        <div id="si-predict-panel" class="metric-card span-12 view-hidden" style="border: 1px solid #8b5cf6; background: #110e20;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h5>🧠 AI Neural Trend Forecast &amp; Projection Engine — <span id="pr-symbol-title" class="text-purple" style="color:#c084fc;">RELIANCE</span></h5>
+                                <button class="btn-sm btn-outline" onclick="document.getElementById('si-predict-panel').classList.add('view-hidden')">✕ Close</button>
+                            </div>
+                            <div class="layout-matrix-inner-row" style="grid-template-columns: repeat(4, 1fr); gap:12px; margin:14px 0;">
+                                <div class="nested-status-well" style="border-left:3px solid #3b82f6;">
+                                    <h6>1-Day Forecast</h6>
+                                    <h4 id="pr-1d-dir" class="text-green">BULLISH</h4>
+                                    <div class="card-footer-metric">Target: <strong id="pr-1d-tgt" class="text-blue">₹3,165</strong> (<span id="pr-1d-ret">+1.2%</span>)</div>
+                                </div>
+                                <div class="nested-status-well" style="border-left:3px solid #8b5cf6;">
+                                    <h6>5-Day Forecast</h6>
+                                    <h4 id="pr-5d-dir" class="text-green">STRONG BULLISH</h4>
+                                    <div class="card-footer-metric">Target: <strong id="pr-5d-tgt" class="text-blue">₹3,260</strong> (<span id="pr-5d-ret">+4.3%</span>)</div>
+                                </div>
+                                <div class="nested-status-well" style="border-left:3px solid #10b981;">
+                                    <h6>10-Day Continuation</h6>
+                                    <h4 id="pr-10d-dir" class="text-green">BULLISH CONTINUATION</h4>
+                                    <div class="card-footer-metric">Target: <strong id="pr-10d-tgt" class="text-blue">₹3,380</strong> (<span id="pr-10d-ret">+8.1%</span>)</div>
+                                </div>
+                                <div class="nested-status-well" style="border-left:3px solid #f43f5e;">
+                                    <h6>Invalidation Level (Hard SL)</h6>
+                                    <h4 id="pr-sl" class="text-red">₹3,040.00</h4>
+                                    <div class="card-footer-metric">Confidence: <strong id="pr-conf" class="text-gold">88.5%</strong></div>
+                                </div>
+                            </div>
+                            <div id="pr-summary" style="padding:10px 14px; background:rgba(255,255,255,0.04); border-radius:6px; font-size:0.85rem; line-height:1.5;">
+                                AI model detects high probability Stage-2 continuation for RELIANCE. Probability of reaching target within 5 trading sessions is 88.5%.
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -794,12 +1171,11 @@
                         </div>
 
                         <div class="metric-card span-12">
-                            <h5>Per-Coin Performance</h5>
+                            <h5>Per-Stock Performance</h5>
                             <div class="layout-matrix-inner-row">
-                                <div class="nested-status-well"><h6>BTC</h6><h4 class="text-blue">{{ data.coin_performance.BTC.signals }}</h4><div class="card-footer-metric">W: {{ data.coin_performance.BTC.wins }} | L: {{ data.coin_performance.BTC.losses }} | WR: {{ data.coin_performance.BTC.win_rate_pct }}%</div></div>
-                                <div class="nested-status-well"><h6>ETH</h6><h4 class="text-blue">{{ data.coin_performance.ETH.signals }}</h4><div class="card-footer-metric">W: {{ data.coin_performance.ETH.wins }} | L: {{ data.coin_performance.ETH.losses }} | WR: {{ data.coin_performance.ETH.win_rate_pct }}%</div></div>
-                                <div class="nested-status-well"><h6>SOL</h6><h4 class="text-blue">{{ data.coin_performance.SOL.signals }}</h4><div class="card-footer-metric">W: {{ data.coin_performance.SOL.wins }} | L: {{ data.coin_performance.SOL.losses }} | WR: {{ data.coin_performance.SOL.win_rate_pct }}%</div></div>
-                                <div class="nested-status-well"><h6>XRP</h6><h4 class="text-blue">{{ data.coin_performance.XRP.signals }}</h4><div class="card-footer-metric">W: {{ data.coin_performance.XRP.wins }} | L: {{ data.coin_performance.XRP.losses }} | WR: {{ data.coin_performance.XRP.win_rate_pct }}%</div></div>
+                                {% for sym, perf in data.coin_performance.items() %}
+                                <div class="nested-status-well"><h6>{{ sym }}</h6><h4 class="text-blue">{{ perf.total_signals or perf.signals or 0 }}</h4><div class="card-footer-metric">W: {{ perf.wins or perf.winning_signals or 0 }} | L: {{ perf.losses or perf.losing_signals or 0 }} | WR: {{ perf.win_rate_pct or 0 }}%</div></div>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
@@ -1029,24 +1405,24 @@
                 <div id="open-view" class="spa-view-layer view-hidden">
                     <div class="dashboard-grid-matrix">
                         <div class="metric-card span-12 table-container-card">
-                            <h5>Active Automated Strategy Deployments</h5>
+                            <h5>Active Indian Stock Positions</h5>
                             <div class="scroller-table-axis">
                                 <table>
                                     <thead>
-                                        <tr><th>Bot</th><th>Coin Pair</th><th>Quantity</th><th>Avg Entry Price</th><th>Unrealized PnL %</th><th>Status</th></tr>
+                                        <tr><th>Bot / Module</th><th>Stock Symbol (NSE)</th><th>Quantity</th><th>Avg Entry Price</th><th>Unrealized PnL %</th><th>Status</th></tr>
                                     </thead>
                                     <tbody id="open-positions-tbody">
                                         {% for pos in data.open_positions %}
                                         <tr>
                                             <td><span class="row-badge-pill signal-type-elite">{{ pos.bot }}</span></td>
-                                            <td><strong>{{ pos.coin }}/INR</strong></td>
+                                            <td><strong>{{ pos.coin }} (NSE)</strong></td>
                                             <td class="font-mono">{{ pos.quantity }}</td>
-                                            <td class="font-mono">{{ pos.buy_price|inr(4) }}</td>
+                                            <td class="font-mono">{{ pos.buy_price|inr(2) }}</td>
                                             <td><span class="{% if pos.pnl_pct >= 0 %}text-green{% else %}text-red{% endif %} font-600">{{ pos.pnl_pct }}%</span></td>
                                             <td><span class="row-badge-pill signal-type-elite">{{ pos.status }}</span></td>
                                         </tr>
                                         {% else %}
-                                        <tr><td colspan="6" class="text-muted" style="text-align:center;padding:20px;">No open positions</td></tr>
+                                        <tr><td colspan="6" class="text-muted" style="text-align:center;padding:20px;">No open positions — waiting for pipeline orders</td></tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
@@ -1061,21 +1437,23 @@
                 <div id="history-view" class="spa-view-layer view-hidden">
                     <div class="dashboard-grid-matrix">
                         <div class="metric-card span-12 table-container-card">
-                            <h5>Historical Transaction Core Archive Records</h5>
+                            <h5>Historical Indian Equity &amp; F&amp;O Trades</h5>
                             <div class="scroller-table-axis">
                                 <table>
                                     <thead>
-                                        <tr><th>Asset Target Pair</th><th>Execution Entry Price</th><th>Terminal Exit Settlement</th><th>Net Realized Profit/Loss Delta</th><th>Settlement Closure Mark</th></tr>
+                                        <tr><th>Stock Symbol (NSE)</th><th>Execution Entry Price</th><th>Terminal Exit Price</th><th>Net Realized P&amp;L (₹)</th><th>Settlement Time (IST)</th></tr>
                                     </thead>
                                     <tbody>
                                         {% for trade in data.closed_trades %}
                                         <tr>
-                                            <td><strong>{{ trade.coin }}/INR</strong></td>
+                                            <td><strong>{{ trade.coin }}</strong></td>
                                             <td>{{ trade.entry_price }}</td>
                                             <td>{{ trade.exit_price }}</td>
                                             <td><span class="{% if '-' in trade.pnl %}text-red{% else %}text-green{% endif %} font-600">{{ trade.pnl }}</span></td>
                                             <td class="text-muted text-sm">{{ trade.time }}</td>
                                         </tr>
+                                        {% else %}
+                                        <tr><td colspan="5" class="text-muted" style="text-align:center;padding:20px;">No historical trades yet</td></tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
@@ -1134,48 +1512,48 @@
                             </div>
                         </div>
                         <div class="metric-card span-12 table-container-card">
-                            <h5>VGX Open Positions</h5>
+                            <h5>Grid Momentum Open Positions</h5>
                             <div class="scroller-table-axis">
                                 <table>
-                                    <thead><tr><th>Coin</th><th>Buy Price</th><th>Quantity</th><th>Amount</th><th>Trailing Active</th><th>Source</th></tr></thead>
+                                    <thead><tr><th>Stock Symbol (NSE)</th><th>Buy Price</th><th>Quantity</th><th>Amount (₹)</th><th>Trailing Active</th><th>Source</th></tr></thead>
                                     <tbody>
                                         {% for pos in data.vgx_overview.open_positions %}
                                         <tr>
-                                            <td><strong>{{ pos.coin }}/INR</strong></td>
-                                            <td>{{ pos.buy_price|inr(4) }}</td>
-                                            <td class="font-mono">{{ "%.8f"|format(pos.qty) }}</td>
+                                            <td><strong>{{ pos.coin }} (NSE)</strong></td>
+                                            <td>{{ pos.buy_price|inr(2) }}</td>
+                                            <td class="font-mono">{{ pos.qty }}</td>
                                             <td>{{ pos.amount|inr }}</td>
                                             <td><span class="row-badge-pill {% if pos.trailing_active %}signal-type-elite{% else %}color-indicator-low{% endif %}">{{ 'ACTIVE' if pos.trailing_active else 'WAITING' }}</span></td>
                                             <td class="text-muted">{{ pos.source }}</td>
                                         </tr>
                                         {% else %}
-                                        <tr><td colspan="6" class="text-muted">No open VGX positions — waiting for scanner signals</td></tr>
+                                        <tr><td colspan="6" class="text-muted">No open Grid Momentum positions — waiting for scanner signals</td></tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        <!-- ── VGX Grid Management Panels ─────────────────────── -->
+                        <!-- ── Grid Management Panels ─────────────────────── -->
                         <div class="metric-card span-12">
-                            <h5>Grid Coins <span id="vgx-coin-count" class="card-footer-metric" style="margin-left:6px"></span></h5>
+                            <h5>Grid Stocks (NSE Equities) <span id="vgx-coin-count" class="card-footer-metric" style="margin-left:6px"></span></h5>
                             <div id="vgx-coin-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px;min-height:32px;"></div>
                             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                                 <input id="vgx-coin-input" type="text" maxlength="10"
-                                    placeholder="e.g. DOGE"
-                                    style="width:120px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:0.85rem;text-transform:uppercase;">
-                                <button class="btn-sm btn-outline" onclick="vgxAddCoinTag()">+ Add</button>
-                                <button class="btn-sm btn-primary" style="margin-left:auto" onclick="vgxSaveGridCoins()">Save Coin List</button>
+                                    placeholder="e.g. RELIANCE"
+                                    style="width:140px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:0.85rem;text-transform:uppercase;">
+                                <button class="btn-sm btn-outline" onclick="vgxAddCoinTag()">+ Add Stock</button>
+                                <button class="btn-sm btn-primary" style="margin-left:auto" onclick="vgxSaveGridCoins()">Save Stock List</button>
                             </div>
                             <div id="vgx-coins-msg" style="font-size:0.78rem;margin-top:6px;"></div>
                         </div>
                         <div class="metric-card span-12 table-container-card">
-                            <h5>Manual Base Prices <span class="card-footer-metric" style="margin-left:6px">(grid centre per coin — blank = auto live price)</span></h5>
+                            <h5>Manual Base Prices <span class="card-footer-metric" style="margin-left:6px">(grid centre per stock — blank = auto live price)</span></h5>
                             <div class="scroller-table-axis">
                                 <table id="vgx-base-price-table">
                                     <thead>
                                         <tr>
-                                            <th>Coin</th>
-                                            <th>Base Price</th>
+                                            <th>Stock Symbol</th>
+                                            <th>Base Price (₹)</th>
                                             <th>Set At</th>
                                             <th>Set By</th>
                                             <th>Actions</th>
@@ -1187,9 +1565,9 @@
                                 </table>
                             </div>
                             <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                                <input id="vgx-bp-coin-input" type="text" maxlength="10" placeholder="Coin (e.g. BTC)"
-                                    style="width:110px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:0.85rem;text-transform:uppercase;">
-                                <input id="vgx-bp-price-input" type="number" min="0.0001" step="any" placeholder="Base price"
+                                <input id="vgx-bp-coin-input" type="text" maxlength="10" placeholder="Stock (e.g. INFY)"
+                                    style="width:130px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:0.85rem;text-transform:uppercase;">
+                                <input id="vgx-bp-price-input" type="number" min="0.0001" step="any" placeholder="Base price (₹)"
                                     style="width:150px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:0.85rem;">
                                 <button class="btn-sm btn-primary" onclick="vgxSaveBasePrice()">Set Price</button>
                             </div>
@@ -1439,7 +1817,7 @@
                 <!-- ═══════════════════════════════════════════════════════════ -->
                 <div id="settings-view" class="spa-view-layer view-hidden">
                     <div class="metric-card span-8">
-                        <h3>PROJECT-ALPHA Engine Parameters Preferences</h3>
+                        <h3>PROJECT-BETA Engine Parameters Preferences</h3>
                         <p class="desc-text">Manage threshold properties without altering code interface hooks.</p>
                         <hr class="divider-line">
                         <form class="settings-mock-form" onsubmit="event.preventDefault();">
@@ -1470,35 +1848,46 @@
                 <!-- ═══════════════════════════════════════════════════════════ -->
                 <div id="watchlist-center" class="spa-view-layer view-hidden">
                     <div class="dashboard-grid-matrix">
-                        <h3 style="grid-column:span 12;margin-bottom:0;">Scanner Watchlist</h3>
-                        <p style="grid-column:span 12;color:var(--text-secondary);font-size:0.85rem;">Unified scanner watchlist. All bots read from this single source of truth and apply their own strategy filters.</p>
+                        <h3 style="grid-column:span 12;margin-bottom:0;">NIFTY 50 Stock Watchlist</h3>
+                        <p style="grid-column:span 12;color:var(--text-secondary);font-size:0.85rem;">Unified Indian equities scanner watchlist. All strategies read from this single source of truth and apply their own setup filters.</p>
 
                         <div class="metric-card span-12" style="border:1px solid var(--blue);box-shadow:0 0 8px rgba(59,130,246,0.15);">
-                            <h6 style="color:var(--text-secondary);margin-bottom:4px;">Total Coins</h6>
+                            <h6 style="color:var(--text-secondary);margin-bottom:4px;">Total Stocks Monitored</h6>
                             <h4 class="text-blue" id="total-coin-count">{{ data.scanner_overview.coins_scanned or 0 }}</h4>
                         </div>
 
                         <div class="metric-card span-12">
-                            <h5>Scanner Universe</h5>
+                            <h5>NSE Universe</h5>
                             <div class="scroller-table-axis" style="max-height:400px;">
                                 <table>
-                                    <thead><tr><th>Coin</th><th>Action</th></tr></thead>
+                                    <thead><tr><th>Stock Symbol (NSE)</th><th>Action</th></tr></thead>
                                     <tbody id="scanner-coin-table">
                                         {% for item in data.scanner_overview.coin_pairs %}
                                         <tr>
-                                            <td><strong>{{ item.coin }}/{{ item.quote or 'INR' }}</strong></td>
+                                            <td><strong>{{ item.coin }} (NSE)</strong></td>
                                             <td><button class="btn-remove-coin" data-coin="{{ item.coin }}">REMOVE</button></td>
                                         </tr>
                                         {% else %}
-                                        <tr><td colspan="2" class="text-muted">No coins</td></tr>
+                                        <tr><td colspan="2" class="text-muted">No stocks in watchlist</td></tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                            <datalist id="coindcx-coins"></datalist>
+                            <datalist id="coindcx-coins">
+                                <option value="RELIANCE"></option>
+                                <option value="TCS"></option>
+                                <option value="INFY"></option>
+                                <option value="HDFCBANK"></option>
+                                <option value="ICICIBANK"></option>
+                                <option value="SBIN"></option>
+                                <option value="BHARTIARTL"></option>
+                                <option value="ITC"></option>
+                                <option value="KOTAKBANK"></option>
+                                <option value="LT"></option>
+                            </datalist>
                             <div class="form-element-container" style="margin-top:12px;">
-                                <input type="text" id="scanner-add-input" list="coindcx-coins" placeholder="Enter coin symbol…" autocomplete="off" class="form-select-control" style="width:60%;display:inline-block;">
-                                <button class="btn-commit-mock-state" onclick="addCoin()" style="width:35%;display:inline-block;margin-left:4px;">Add</button>
+                                <input type="text" id="scanner-add-input" list="coindcx-coins" placeholder="Enter NSE stock symbol (e.g. RELIANCE)..." autocomplete="off" class="form-select-control" style="width:60%;display:inline-block;">
+                                <button class="btn-commit-mock-state" onclick="addCoin()" style="width:35%;display:inline-block;margin-left:4px;">Add Symbol</button>
                                 <div id="scanner-pair-preview" style="display:none;font-size:0.82rem;margin-top:5px;min-height:1.2em;font-weight:500;letter-spacing:0.01em;"></div>
                                 <div id="scanner-add-error" style="display:none;color:#ff4444;font-size:0.78rem;margin-top:4px;"></div>
                             </div>
@@ -1506,7 +1895,123 @@
                     </div>
                 </div>
 
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!--  BETA PIPELINE VIEW — 13-Stage Architecture Inspector       -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="beta-pipeline-view" class="spa-view-layer view-hidden">
+                    <div class="v2-section-label">⚡ BETA 13-Stage Automated Trading &amp; Intelligence Pipeline</div>
+                    
+                    <div class="beta-deep-grid">
+                        <!-- Stage 1: Market Data -->
+                        <div class="stage-card span-4" id="card-stage-1">
+                            <div class="stage-card-header"><span class="badge-num">1</span> <h5>Market Data Feed</h5> <span class="stage-live-badge status-live">ONLINE</span></div>
+                            <div class="stage-metric-row"><span class="label">Feed Type:</span> <span class="val font-mono">NSE OHLCV / VWAP</span></div>
+                            <div class="stage-metric-row"><span class="label">Symbols Tracked:</span> <span class="val font-mono" id="bp-s1-symbols">30 Stocks</span></div>
+                            <div class="stage-metric-row"><span class="label">Feed Latency:</span> <span class="val font-mono text-green">&lt; 15ms</span></div>
+                        </div>
+
+                        <!-- Stage 2: Scanner -->
+                        <div class="stage-card span-4" id="card-stage-2">
+                            <div class="stage-card-header"><span class="badge-num">2</span> <h5>Setup Scanner</h5> <span class="stage-live-badge status-live">ACTIVE</span></div>
+                            <div class="stage-metric-row"><span class="label">Universe:</span> <span class="val font-mono">NIFTY 50 / 100</span></div>
+                            <div class="stage-metric-row"><span class="label">Setups Monitored:</span> <span class="val font-mono">VCP, Pocket Pivot, NR7</span></div>
+                            <div class="stage-metric-row"><span class="label">Qualified Candidates:</span> <span class="val font-mono text-green" id="bp-s2-candidates">0 Found</span></div>
+                        </div>
+
+                        <!-- Stage 3: Signal Engine -->
+                        <div class="stage-card span-4" id="card-stage-3">
+                            <div class="stage-card-header"><span class="badge-num">3</span> <h5>Signal Scorecard</h5> <span class="stage-live-badge status-live">ACTIVE</span></div>
+                            <div class="stage-metric-row"><span class="label">Framework:</span> <span class="val font-mono">100-Pt 4-Pillar Model</span></div>
+                            <div class="stage-metric-row"><span class="label">Min Threshold:</span> <span class="val font-mono text-amber" id="bp-s3-thresh">70.0 / 100</span></div>
+                            <div class="stage-metric-row"><span class="label">Signals Passed:</span> <span class="val font-mono text-green" id="bp-s3-passed">0 Approved</span></div>
+                        </div>
+
+                        <!-- Stage 4: AI Intelligence -->
+                        <div class="stage-card span-4" id="card-stage-4">
+                            <div class="stage-card-header"><span class="badge-num">4</span> <h5>AI Thesis Advisor</h5> <span class="stage-live-badge status-live">READY</span></div>
+                            <div class="stage-metric-row"><span class="label">Advisory Layer:</span> <span class="val font-mono">AI Thesis Validator</span></div>
+                            <div class="stage-metric-row"><span class="label">Theses Confirmed:</span> <span class="val font-mono text-green" id="bp-s4-confirmed">0 Confirmed</span></div>
+                            <div class="stage-metric-row"><span class="label">Min Confidence:</span> <span class="val font-mono">70% Required</span></div>
+                        </div>
+
+                        <!-- Stage 5: Trade Constructor -->
+                        <div class="stage-card span-4" id="card-stage-5">
+                            <div class="stage-card-header"><span class="badge-num">5</span> <h5>Trade Constructor</h5> <span class="stage-live-badge status-live">READY</span></div>
+                            <div class="stage-metric-row"><span class="label">Target R:R:</span> <span class="val font-mono text-green">Min 1:2.0+</span></div>
+                            <div class="stage-metric-row"><span class="label">Sizing Engine:</span> <span class="val font-mono">F&amp;O Lot Quantized</span></div>
+                            <div class="stage-metric-row"><span class="label">Plans Generated:</span> <span class="val font-mono" id="bp-s5-plans">0 Ready</span></div>
+                        </div>
+
+                        <!-- Stage 6: Risk Engine -->
+                        <div class="stage-card span-4" id="card-stage-6">
+                            <div class="stage-card-header"><span class="badge-num">6</span> <h5>Risk Management (RMS)</h5> <span class="stage-live-badge status-live">GATE ACTIVE</span></div>
+                            <div class="stage-metric-row"><span class="label">Session Clock:</span> <span class="val font-mono text-blue">09:15 - 15:15 IST</span></div>
+                            <div class="stage-metric-row"><span class="label">Circuit Breaker:</span> <span class="val font-mono text-green">Max ₹3,000 Loss</span></div>
+                            <div class="stage-metric-row"><span class="label">Rate Limiter:</span> <span class="val font-mono">5 orders/sec</span></div>
+                        </div>
+
+                        <!-- Stage 7: Execution Engine -->
+                        <div class="stage-card span-4" id="card-stage-7">
+                            <div class="stage-card-header"><span class="badge-num">7</span> <h5>Auto Execution Engine</h5> <span class="stage-live-badge status-live">ONLINE</span></div>
+                            <div class="stage-metric-row"><span class="label">Tick Normalization:</span> <span class="val font-mono">₹0.05 NSE Steps</span></div>
+                            <div class="stage-metric-row"><span class="label">Execution Mode:</span> <span class="val font-mono text-blue">PAPER / LIVE ROUTER</span></div>
+                            <div class="stage-metric-row"><span class="label">Orders Routed:</span> <span class="val font-mono text-green" id="bp-s7-orders">0 Executed</span></div>
+                        </div>
+
+                        <!-- Stage 8: Position Manager -->
+                        <div class="stage-card span-4" id="card-stage-8">
+                            <div class="stage-card-header"><span class="badge-num">8</span> <h5>Position &amp; Portfolio Bot</h5> <span class="stage-live-badge status-live">MONITORING</span></div>
+                            <div class="stage-metric-row"><span class="label">Trailing SL:</span> <span class="val font-mono text-green">Dynamic ₹0.05</span></div>
+                            <div class="stage-metric-row"><span class="label">Intraday Square-Off:</span> <span class="val font-mono text-amber">15:15 IST MIS</span></div>
+                            <div class="stage-metric-row"><span class="label">Open Positions:</span> <span class="val font-mono" id="bp-s8-pos">0 Active</span></div>
+                        </div>
+
+                        <!-- Stage 9: Trade Journal -->
+                        <div class="stage-card span-4" id="card-stage-9">
+                            <div class="stage-card-header"><span class="badge-num">9</span> <h5>Trade Audit Journal</h5> <span class="stage-live-badge status-live">RECORDING</span></div>
+                            <div class="stage-metric-row"><span class="label">Persistence:</span> <span class="val font-mono">SQLite WAL + CSV</span></div>
+                            <div class="stage-metric-row"><span class="label">Statutory Charges:</span> <span class="val font-mono">0.05% STT/GST/Txn</span></div>
+                            <div class="stage-metric-row"><span class="label">Journaled Trades:</span> <span class="val font-mono" id="bp-s9-entries">0 Records</span></div>
+                        </div>
+
+                        <!-- Stage 10: Analytics -->
+                        <div class="stage-card span-4" id="card-stage-10">
+                            <div class="stage-card-header"><span class="badge-num">10</span> <h5>Performance Analytics</h5> <span class="stage-live-badge status-live">CALCULATED</span></div>
+                            <div class="stage-metric-row"><span class="label">Win Rate:</span> <span class="val font-mono text-green" id="bp-s10-winrate">0.0%</span></div>
+                            <div class="stage-metric-row"><span class="label">Profit Factor:</span> <span class="val font-mono" id="bp-s10-pf">0.00</span></div>
+                            <div class="stage-metric-row"><span class="label">Trade Expectancy:</span> <span class="val font-mono" id="bp-s10-exp">₹0.00</span></div>
+                        </div>
+
+                        <!-- Stage 11: Learning Engine -->
+                        <div class="stage-card span-4" id="card-stage-11">
+                            <div class="stage-card-header"><span class="badge-num">11</span> <h5>Learning &amp; Attribution</h5> <span class="stage-live-badge status-live">LEARNING</span></div>
+                            <div class="stage-metric-row"><span class="label">Top Alpha Setup:</span> <span class="val font-mono text-green" id="bp-s11-best">Minervini VCP</span></div>
+                            <div class="stage-metric-row"><span class="label">Edge Decay Check:</span> <span class="val font-mono text-green">HEALTHY (No Decay)</span></div>
+                        </div>
+
+                        <!-- Stage 12: Backtest / Test -->
+                        <div class="stage-card span-4" id="card-stage-12">
+                            <div class="stage-card-header"><span class="badge-num">12</span> <h5>Walk-Forward Backtest</h5> <span class="stage-live-badge status-live">TESTED</span></div>
+                            <div class="stage-metric-row"><span class="label">Simulation Horizon:</span> <span class="val font-mono">250 Days Historical</span></div>
+                            <div class="stage-metric-row"><span class="label">Slippage &amp; Taxes:</span> <span class="val font-mono">Simulated</span></div>
+                        </div>
+
+                        <!-- Stage 13: Improved Strategy (Feedback Loop ↺) -->
+                        <div class="stage-card span-12" id="card-stage-13" style="border:1px solid #10b981;background:rgba(16,185,129,0.05);">
+                            <div class="stage-card-header"><span class="badge-num">13</span> <h5>Strategy Tuning &amp; Closed Feedback Loop (↺)</h5> <span class="stage-live-badge status-live">CALIBRATED</span></div>
+                            <p class="desc-text" style="margin-bottom:10px;">Post-trade feedback dynamically tunes scorecard weights, setup filters, and minimum R:R multipliers based on real-time execution outcomes.</p>
+                            <div class="layout-matrix-inner-row">
+                                <div class="nested-status-well"><h6>Score Threshold</h6><h4 class="text-amber" id="bp-s13-thresh">70.0 / 100</h4></div>
+                                <div class="nested-status-well"><h6>Target R:R Multiplier</h6><h4 class="text-green" id="bp-s13-rr">1.0x (1:2.0)</h4></div>
+                                <div class="nested-status-well"><h6>AI Confidence Gate</h6><h4 class="text-blue" id="bp-s13-ai">70% Minimum</h4></div>
+                                <div class="nested-status-well"><h6>Feedback Loop Status</h6><h4 class="text-green">CONTINUOUS ↺</h4></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </main>
+
         </div><!-- /.main-workspace-wrapper -->
     </div><!-- /.ultimate-shell -->
 

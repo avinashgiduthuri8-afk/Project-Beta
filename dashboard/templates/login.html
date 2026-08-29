@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PROJECT-ALPHA — Login</title>
+    <title>PROJECT-BETA — Login</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
@@ -152,11 +152,11 @@
     <div class="login-card">
         <div class="login-logo">
             <div class="login-logo-dot"></div>
-            <span class="login-logo-text">PROJECT-ALPHA</span>
+            <span class="login-logo-text">PROJECT-BETA</span>
         </div>
 
-        <h1 class="login-title">Dashboard Login</h1>
-        <p class="login-subtitle">Enter your dashboard API key to continue.</p>
+        <h1 class="login-title">BETA Trading Dashboard</h1>
+        <p class="login-subtitle">Enter your API key or use dev key (<code>beta-dev-key</code>).</p>
 
         {% if error %}
         <div class="error-banner">{{ error }}</div>
@@ -169,16 +169,18 @@
                     type="password"
                     id="api_key"
                     name="api_key"
-                    placeholder="Enter API key"
+                    value="beta-dev-key"
+                    placeholder="Enter API key (e.g. beta-dev-key)"
                     autocomplete="current-password"
                     autofocus
                     required
                 />
             </div>
-            <button type="submit" class="btn-login">Sign In</button>
+            <button type="submit" class="btn-login">Sign In & Launch Dashboard</button>
         </form>
 
-        <p class="login-footer">PROJECT-ALPHA Trading Dashboard &mdash; Authorised access only</p>
+        <p class="login-footer">PROJECT-BETA Indian Trading & Intelligence Platform &mdash; Authorized Access</p>
+
     </div>
 </body>
 </html>

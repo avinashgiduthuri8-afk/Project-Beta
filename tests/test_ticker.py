@@ -12,17 +12,17 @@ def test_candle_builder_aggregation():
     closed_candles = []
     builder = CandleBuilder(timeframe_minutes=1, on_candle_close=lambda c: closed_candles.append(c))
 
-    # Ticks within 10:00:00 - 10:00:59
+    # Ticks within 10:00:00 - 10:00:59 with cumulative exchange volume
     t1 = Tick(token="1", symbol="INFY", ltp=1800.0, volume=10, timestamp=datetime(2026, 8, 26, 10, 0, 5))
-    t2 = Tick(token="1", symbol="INFY", ltp=1810.0, volume=20, timestamp=datetime(2026, 8, 26, 10, 0, 30))
-    t3 = Tick(token="1", symbol="INFY", ltp=1795.0, volume=15, timestamp=datetime(2026, 8, 26, 10, 0, 55))
+    t2 = Tick(token="1", symbol="INFY", ltp=1810.0, volume=25, timestamp=datetime(2026, 8, 26, 10, 0, 30))
+    t3 = Tick(token="1", symbol="INFY", ltp=1795.0, volume=45, timestamp=datetime(2026, 8, 26, 10, 0, 55))
 
     builder.process_tick(t1)
     builder.process_tick(t2)
     builder.process_tick(t3)
 
     # Next minute tick closes previous candle
-    t4 = Tick(token="1", symbol="INFY", ltp=1805.0, volume=10, timestamp=datetime(2026, 8, 26, 10, 1, 5))
+    t4 = Tick(token="1", symbol="INFY", ltp=1805.0, volume=55, timestamp=datetime(2026, 8, 26, 10, 1, 5))
     closed = builder.process_tick(t4)
 
     assert closed is not None
@@ -32,6 +32,7 @@ def test_candle_builder_aggregation():
     assert closed.close == 1795.0
     assert closed.volume == 45
     assert len(closed_candles) == 1
+
 
 
 def test_event_bus_pub_sub(event_bus):

@@ -1366,3 +1366,279 @@ tr:last-child td { border-bottom: none; }
     .compact-stat-grid { grid-template-columns: repeat(2, 1fr); }
     .cache-row { grid-template-columns: 80px 1fr 36px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   BETA 13-STAGE PIPELINE STYLES
+═══════════════════════════════════════════════════════════════ */
+.beta-pipeline-card {
+    background: linear-gradient(135deg, rgba(17,17,24,0.95), rgba(13,13,21,0.98));
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    position: relative;
+    overflow: hidden;
+}
+
+.beta-pipeline-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #00d4a0, #a78bfa, #f59e0b);
+}
+
+.beta-pipeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.beta-title-group h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.01em;
+}
+
+.beta-pipeline-sub {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    display: block;
+    margin-top: 3px;
+    line-height: 1.4;
+}
+
+.beta-controls-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.beta-action-btn {
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 7px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all var(--speed) ease;
+}
+
+.btn-auto-on {
+    background: rgba(0,212,160,0.15);
+    color: #00d4a0;
+    border: 1px solid rgba(0,212,160,0.4);
+}
+.btn-auto-on:hover {
+    background: rgba(0,212,160,0.25);
+}
+
+.btn-auto-off {
+    background: rgba(244,63,94,0.15);
+    color: #f43f5e;
+    border: 1px solid rgba(244,63,94,0.4);
+}
+.btn-auto-off:hover {
+    background: rgba(244,63,94,0.25);
+}
+
+.btn-run-cycle {
+    background: rgba(59,130,246,0.15);
+    color: #3b82f6;
+    border: 1px solid rgba(59,130,246,0.4);
+}
+.btn-run-cycle:hover {
+    background: rgba(59,130,246,0.25);
+}
+
+.btn-calibrate {
+    background: rgba(167,139,250,0.15);
+    color: #a78bfa;
+    border: 1px solid rgba(167,139,250,0.4);
+}
+.btn-calibrate:hover {
+    background: rgba(167,139,250,0.25);
+}
+
+.status-pulse-dot {
+    width: 7px;
+    height: 7px;
+    background-color: currentColor;
+    border-radius: 50%;
+    animation: pulseGlow 1.8s infinite;
+}
+
+@keyframes pulseGlow {
+    0% { transform: scale(0.9); opacity: 0.8; }
+    50% { transform: scale(1.3); opacity: 1; filter: drop-shadow(0 0 4px currentColor); }
+    100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+/* 13-Stage Flowchart Grid */
+.beta-flowchart-grid {
+    display: grid;
+    grid-template-columns: repeat(25, minmax(0, auto));
+    align-items: center;
+    gap: 4px;
+    background: rgba(10,10,15,0.6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 10px;
+    overflow-x: auto;
+}
+
+.stage-step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    min-width: 95px;
+    text-align: center;
+    transition: transform var(--speed) ease, border-color var(--speed) ease;
+}
+
+.stage-step:hover {
+    transform: translateY(-2px);
+    border-color: var(--blue);
+}
+
+.stage-badge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+}
+
+.stage-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #00d4a0;
+    box-shadow: 0 0 6px #00d4a0;
+}
+
+.stage-name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+}
+
+.stage-detail {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+.stage-arrow {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+/* Telemetry strip */
+.beta-telemetry-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+}
+
+.tel-label {
+    color: var(--text-secondary);
+    margin-right: 4px;
+}
+
+/* Deep Grid View */
+.beta-deep-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.stage-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: transform var(--speed) ease, border-color var(--speed) ease;
+}
+
+.stage-card:hover {
+    border-color: var(--border-hover);
+}
+
+.stage-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.stage-card-header h5 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    flex-grow: 1;
+}
+
+.badge-num {
+    background: rgba(59,130,246,0.15);
+    color: #3b82f6;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+}
+
+.stage-live-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(0,212,160,0.12);
+    color: #00d4a0;
+}
+
+.stage-metric-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    margin-bottom: 6px;
+}
+
+.stage-metric-row .label {
+    color: var(--text-secondary);
+}
+

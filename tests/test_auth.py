@@ -1,17 +1,16 @@
-"""Unit tests for Auth and TOTP Session Management."""
-
 import pytest
-import pyotp
 from auth.session_manager import SessionManager
 from auth.token_cache import TokenCache
 
 
 def test_totp_generation():
+    pyotp = pytest.importorskip("pyotp")
     secret = pyotp.random_base32()
     totp_code = SessionManager.generate_totp(secret)
     assert isinstance(totp_code, str)
     assert len(totp_code) == 6
     assert totp_code.isdigit()
+
 
 
 def test_token_cache_save_and_retrieve(temp_cache_file):

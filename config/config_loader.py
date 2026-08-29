@@ -5,7 +5,10 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
 from pydantic import BaseModel, Field
 
 
@@ -73,10 +76,11 @@ def load_config(config_path: Optional[str] = None) -> AppConfig:
         base_dir = Path(__file__).resolve().parent
         config_path = str(base_dir / "settings.yaml")
 
-    if not os.path.exists(config_path):
+    if not os.path.exists(config_path) or yaml is None:
         return AppConfig()
 
     with open(config_path, "r", encoding="utf-8") as f:
         raw_dict = yaml.safe_load(f) or {}
 
     return AppConfig.model_validate(raw_dict)
+

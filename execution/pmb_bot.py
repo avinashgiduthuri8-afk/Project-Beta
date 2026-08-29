@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any, Callable
 from core.models import Position, AccountBalance, Order
 from core.enums import OrderSide, OrderType, ProductType, Exchange
 from oms.execution_router import ExecutionRouter
@@ -39,6 +39,11 @@ class PortfolioManagementBot:
         self.max_daily_loss = max_daily_loss
         self.portfolio_profit_target = portfolio_profit_target
         self.circuit_breaker_active = False
+        self.liquidation_callbacks: List[Callable[[], None]] = []
+
+    def register_liquidation_callback(self, cb: Callable[[], None]) -> None:
+        """Register a callback to notify sub-bots (MTB, MRB) on emergency liquidation."""
+        self.liquidation_callbacks.append(cb)
 
     def check_portfolio_health(self, balance: AccountBalance, positions: List[Position]) -> Dict[str, Any]:
         """Evaluate account-wide P&L, drawdown limits, and margin health."""
@@ -77,6 +82,13 @@ class PortfolioManagementBot:
                 self.order_manager.register_order(order)
                 closed_orders.append(order)
 
+        # Notify sub-bots to clear local state
+        for cb in self.liquidation_callbacks:
+            try:
+                cb()
+            except Exception as e:
+                logger.error(f"[PMB] Error in liquidation callback: {e}")
+
         return closed_orders
 
     def emergency_liquidate_all(self, positions: List[Position], reason: str = "Emergency") -> List[Order]:
@@ -91,6 +103,14 @@ class PortfolioManagementBot:
                 order = self.router.route_order(req)
                 self.order_manager.register_order(order)
                 liquidated_orders.append(order)
+
+        # Notify sub-bots to clear local state
+        for cb in self.liquidation_callbacks:
+            try:
+                cb()
+            except Exception as e:
+                logger.error(f"[PMB] Error in liquidation callback: {e}")
+
         return liquidated_orders
 
     def _create_request(self, symbol: str, side: OrderSide, quantity: int, exchange: Exchange, product_type: ProductType, tag: str) -> Any:
@@ -106,3 +126,4 @@ class PortfolioManagementBot:
             quantity=quantity,
             tag=tag,
         )
+

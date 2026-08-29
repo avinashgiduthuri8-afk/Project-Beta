@@ -119,9 +119,10 @@ class DataProviderManager:
 
     def get_candles(self, symbol: str, timeframe: str = "1d", lookback_days: int = 250) -> List[Candle]:
         candles = self.primary_provider.get_historical_candles(symbol, timeframe, lookback_days)
-        if len(candles) < 200:
+        if timeframe == "1d" and len(candles) < 200:
             logger.warning(f"Insufficient historical bars ({len(candles)}) for {symbol}. EMA200 requires >= 200 bars.")
         return candles
+
 
     def is_tick_fresh(self, tick: Tick) -> bool:
         """Verify tick latency is within acceptable tolerance."""

@@ -30,8 +30,8 @@ class VGXStorageError(RuntimeError):
     Not raised for a missing/empty file (fresh start is not an error).
     """
 
-# Default coin list — used when grid_coins key is absent from storage.
-_DEFAULT_GRID_COINS: list = ["BTC", "ETH", "SOL", "BNB", "XRP", "ZEC"]
+# Default stock list — used when grid_coins key is absent from storage.
+_DEFAULT_GRID_COINS: list = ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK", "SBIN", "TATAMOTORS", "BHARTIARTL"]
 
 # ============================================================
 # RUNTIME VARIABLES

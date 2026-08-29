@@ -23,7 +23,11 @@ from typing import Callable, Optional
 
 import requests
 import pandas as _pd
-import ta as _ta
+try:
+    import ta as _ta
+except ImportError:
+    _ta = None
+
 
 
 # =============================================================================

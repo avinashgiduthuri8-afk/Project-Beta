@@ -59,8 +59,8 @@ setInterval(function() {
     el.textContent = _countdownStr(window._nextCleanupTs);
 }, 1000);
 
-// Populate the shared CoinDCX datalist once on page load
-(async function loadCoinDCXCoins() {
+// Populate the shared stock datalist once on page load
+(async function loadStockSymbols() {
     try {
         const resp = await authenticatedFetch("/api/supported-coins");
         const data = await resp.json();
@@ -70,7 +70,7 @@ setInterval(function() {
             .map(c => `<option value="${escHtml(c)}"></option>`)
             .join("");
     } catch (e) {
-        console.warn("[ProjectA] Could not load CoinDCX coin list:", e.message);
+        console.warn("[ProjectBeta] Could not load stock list:", e.message);
     }
 })();
 
@@ -1899,6 +1899,412 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     // ── End VGX Grid Management ────────────────────────────────────────────
 
-    // ── End Pair Preview ───────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════════
+    //  BETA 13-STAGE END-TO-END PIPELINE TELEMETRY & AUTO-EXECUTION ENGINE
+    // ═══════════════════════════════════════════════════════════════════════
+
+    window.toggleBetaAutoExecution = async function() {
+        try {
+            var resp = await authenticatedFetch("/api/v1/beta/pipeline/toggle_auto", { method: "POST" });
+            var data = await resp.json();
+            var btn = document.getElementById("beta-toggle-auto-btn");
+            var lbl = document.getElementById("beta-auto-label");
+            if (data.auto_execution_enabled) {
+                if (btn) { btn.className = "beta-action-btn btn-auto-on"; }
+                if (lbl) { lbl.textContent = "AUTO-EXECUTION: ACTIVE"; }
+            } else {
+                if (btn) { btn.className = "beta-action-btn btn-auto-off"; }
+                if (lbl) { lbl.textContent = "AUTO-EXECUTION: PAUSED"; }
+            }
+            await refreshBetaPipelineTelemetry();
+        } catch (e) {
+            console.error("[BetaPipeline] Failed to toggle auto execution:", e);
+        }
+    };
+
+    window.triggerBetaCycleNow = async function() {
+        var btn = document.getElementById("beta-run-cycle-btn");
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = "<span>⏳ Executing 13 Stages…</span>";
+        }
+        try {
+            var resp = await authenticatedFetch("/api/v1/beta/pipeline/run_cycle", { method: "POST" });
+            var data = await resp.json();
+            console.log("[BetaPipeline] 13-Stage Cycle Executed:", data);
+            await refreshBetaPipelineTelemetry();
+        } catch (e) {
+            console.error("[BetaPipeline] Cycle execution error:", e);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = "<span>▶ Run 13-Stage Cycle</span>";
+            }
+        }
+    };
+
+    window.calibrateBetaStrategy = async function() {
+        var btn = document.getElementById("beta-calibrate-btn");
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = "<span>↺ Calibrating…</span>";
+        }
+        try {
+            await triggerBetaCycleNow();
+            await refreshBetaPipelineTelemetry();
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = "<span>↺ Strategy Feedback</span>";
+            }
+        }
+    };
+
+    async function refreshBetaPipelineTelemetry() {
+        try {
+            var resp = await authenticatedFetch("/api/v1/beta/pipeline/status");
+            if (!resp.ok) return;
+            var data = await resp.json();
+            var stages = data.stages || {};
+
+            // 1. Update strip metrics
+            var s1 = stages["1_market_data"] || {};
+            var s2 = stages["2_scanner"] || {};
+            var s3 = stages["3_signal_engine"] || {};
+            var s4 = stages["4_ai_intelligence"] || {};
+            var s5 = stages["5_trade_constructor"] || {};
+            var s6 = stages["6_risk_engine"] || {};
+            var s7 = stages["7_execution_engine"] || {};
+            var s8 = stages["8_position_manager"] || {};
+            var s9 = stages["9_trade_journal"] || {};
+            var s10 = stages["10_analytics"] || {};
+            var s11 = stages["11_learning_engine"] || {};
+            var s13 = stages["13_improved_strategy"] || {};
+
+            var sessionEl = document.getElementById("tel-session");
+            if (sessionEl) sessionEl.textContent = data.market_session + " (" + (data.is_trading_active ? "Trading Active" : "Closed") + ")";
+
+            var plansEl = document.getElementById("tel-plans");
+            if (plansEl) plansEl.textContent = (s5.active_plans ? s5.active_plans.length : 0) + " Created";
+
+            var rmsEl = document.getElementById("tel-rms");
+            if (rmsEl) rmsEl.textContent = s6.last_rms_decision || "Passed";
+
+            var posEl = document.getElementById("tel-positions");
+            if (posEl) posEl.textContent = (s8.open_positions_count || 0) + " Active";
+
+            var scoreThreshEl = document.getElementById("tel-score-thresh");
+            if (scoreThreshEl && s13.weights) scoreThreshEl.textContent = s13.weights.min_score_threshold + "/100";
+
+            // 2. Update deep view cards if present
+            var s1Sym = document.getElementById("bp-s1-symbols");
+            if (s1Sym) s1Sym.textContent = (s1.symbols_tracked || 30) + " Stocks";
+
+            var s2Cand = document.getElementById("bp-s2-candidates");
+            if (s2Cand) s2Cand.textContent = (s2.candidates_found || 0) + " Found";
+
+            var s3Passed = document.getElementById("bp-s3-passed");
+            if (s3Passed) s3Passed.textContent = (s3.signals_passed || 0) + " Approved";
+
+            var s4Conf = document.getElementById("bp-s4-confirmed");
+            if (s4Conf) s4Conf.textContent = (s4.theses_confirmed || 0) + " Confirmed";
+
+            var s5Plans = document.getElementById("bp-s5-plans");
+            if (s5Plans) s5Plans.textContent = (s5.plans_constructed || 0) + " Ready";
+
+            var s7Orders = document.getElementById("bp-s7-orders");
+            if (s7Orders) s7Orders.textContent = (s7.orders_routed || 0) + " Executed";
+
+            var s8Pos = document.getElementById("bp-s8-pos");
+            if (s8Pos) s8Pos.textContent = (s8.open_positions_count || 0) + " Active";
+
+            var s9Entries = document.getElementById("bp-s9-entries");
+            if (s9Entries) s9Entries.textContent = (s9.total_journaled_entries || 0) + " Records";
+
+            var s10Wr = document.getElementById("bp-s10-winrate");
+            if (s10Wr) s10Wr.textContent = (s10.win_rate_pct || 0) + "%";
+
+            var s10Pf = document.getElementById("bp-s10-pf");
+            if (s10Pf) s10Pf.textContent = Number(s10.profit_factor || 0).toFixed(2);
+
+            var s10Exp = document.getElementById("bp-s10-exp");
+            if (s10Exp) s10Exp.textContent = "₹" + Number(s10.expectancy_inr || 0).toFixed(2);
+
+            var s11Best = document.getElementById("bp-s11-best");
+            if (s11Best) s11Best.textContent = s11.best_setup || "Minervini VCP";
+
+            var s13Thresh = document.getElementById("bp-s13-thresh");
+            if (s13Thresh && s13.weights) s13Thresh.textContent = s13.weights.min_score_threshold + " / 100";
+
+            var s13Rr = document.getElementById("bp-s13-rr");
+            if (s13Rr && s13.weights) s13Rr.textContent = (s13.weights.target_rr_multiplier || 1.0) + "x (1:2.0)";
+        } catch (e) {
+            console.warn("[BetaPipeline] Telemetry refresh warning:", e.message);
+        }
+    }
+
+    // Auto-refresh BETA telemetry every 5 seconds
+    setInterval(refreshBetaPipelineTelemetry, 5000);
+    setTimeout(refreshBetaPipelineTelemetry, 500);
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  STOCK INTELLIGENCE & RESEARCH CONTROLLER
+    // ═══════════════════════════════════════════════════════════════════════
+
+    window._currentInspectedStock = "RELIANCE";
+
+    window.selectStockSearch = function(sym) {
+        var input = document.getElementById("stock-search-input");
+        if (input) input.value = sym;
+        searchStockDeepDive(sym);
+    };
+
+    window.searchStockDeepDive = async function(symbolOverride) {
+        var input = document.getElementById("stock-search-input");
+        var sym = (symbolOverride || (input ? input.value : "") || "RELIANCE").trim().toUpperCase();
+        if (!sym) sym = "RELIANCE";
+        window._currentInspectedStock = sym;
+
+        try {
+            var resp = await authenticatedFetch("/api/v1/beta/stock/" + encodeURIComponent(sym));
+            var json = await resp.json();
+            if (json.status !== "success" || !json.data) return;
+            var d = json.data;
+            var p = d.profile;
+
+            // Header elements
+            var elSym = document.getElementById("si-symbol");
+            if (elSym) elSym.textContent = d.symbol;
+            var elName = document.getElementById("si-name");
+            if (elName) elName.textContent = p.name;
+            var elTier = document.getElementById("si-tier-badge");
+            if (elTier) {
+                elTier.textContent = d.score_tier + " SCORE " + d.total_score + "/100";
+                elTier.className = "row-badge-pill " + (d.score_tier === "ELITE" ? "signal-type-elite" : "color-indicator-low");
+            }
+
+            // Valuation
+            var elLtp = document.getElementById("si-ltp");
+            if (elLtp) elLtp.textContent = "₹" + Number(p.ltp).toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2});
+            var elChg = document.getElementById("si-change");
+            if (elChg) {
+                var prefix = p.day_change >= 0 ? "+" : "";
+                elChg.textContent = prefix + "₹" + Number(p.day_change).toFixed(2) + " (" + prefix + Number(p.day_change_pct).toFixed(2) + "%)";
+                elChg.className = (p.day_change >= 0 ? "text-green" : "text-red") + " font-600";
+            }
+            var elDr = document.getElementById("si-day-range");
+            if (elDr) elDr.textContent = "₹" + Number(p.day_low).toFixed(0) + " - ₹" + Number(p.day_high).toFixed(0);
+            var el52 = document.getElementById("si-52w-range");
+            if (el52) el52.textContent = "₹" + Number(p.low_52w).toFixed(0) + " - ₹" + Number(p.high_52w).toFixed(0);
+            var elVol = document.getElementById("si-volume");
+            if (elVol) elVol.textContent = p.volume;
+            var elDel = document.getElementById("si-delivery");
+            if (elDel) elDel.textContent = p.delivery_pct + "%";
+            var elSec = document.getElementById("si-sector");
+            if (elSec) elSec.textContent = p.sector;
+            var elBeta = document.getElementById("si-beta");
+            if (elBeta) elBeta.textContent = p.beta;
+
+            // Setup
+            var elSetup = document.getElementById("si-setup-name");
+            if (elSetup) elSetup.textContent = p.setup.replace(/_/g, " ");
+            var elPiv = document.getElementById("si-pivot");
+            if (elPiv) elPiv.textContent = "₹" + Number(p.pivot_buy).toFixed(2);
+            var elSl = document.getElementById("si-stoploss");
+            if (elSl) elSl.textContent = "₹" + Number(p.stop_loss).toFixed(2);
+            var elT1 = document.getElementById("si-target1");
+            if (elT1) elT1.textContent = "₹" + Number(p.target_1).toFixed(2);
+            var elT2 = document.getElementById("si-target2");
+            if (elT2) elT2.textContent = "₹" + Number(p.target_2).toFixed(2);
+            var elContr = document.getElementById("si-contractions");
+            if (elContr && Array.isArray(p.vcp_contractions)) elContr.textContent = p.vcp_contractions.join(" | ");
+
+            // Scorecard
+            var elTotSc = document.getElementById("si-total-score");
+            if (elTotSc) elTotSc.textContent = d.total_score + " / 100";
+            var sc = d.scorecard || {};
+            var elScTech = document.getElementById("si-sc-tech");
+            if (elScTech) elScTech.textContent = (sc.technical ? sc.technical.score : p.score_tech) + " / 25";
+            var elBarTech = document.getElementById("si-bar-tech");
+            if (elBarTech) elBarTech.style.width = ((p.score_tech / 25) * 100) + "%";
+
+            var elScRs = document.getElementById("si-sc-rs");
+            if (elScRs) elScRs.textContent = (sc.relative_strength ? sc.relative_strength.score : p.score_rs) + " / 25";
+            var elBarRs = document.getElementById("si-bar-rs");
+            if (elBarRs) elBarRs.style.width = ((p.score_rs / 25) * 100) + "%";
+
+            var elScVol = document.getElementById("si-sc-vol");
+            if (elScVol) elScVol.textContent = (sc.volume_delivery ? sc.volume_delivery.score : p.score_volume) + " / 25";
+            var elBarVol = document.getElementById("si-bar-vol");
+            if (elBarVol) elBarVol.style.width = ((p.score_volume / 25) * 100) + "%";
+
+            var elScRr = document.getElementById("si-sc-rr");
+            if (elScRr) elScRr.textContent = (sc.risk_reward ? sc.risk_reward.score : p.score_rr) + " / 25";
+            var elBarRr = document.getElementById("si-bar-rr");
+            if (elBarRr) elBarRr.style.width = ((p.score_rr / 25) * 100) + "%";
+
+            // Technicals
+            var elE20 = document.getElementById("si-ema20");
+            if (elE20) elE20.textContent = "₹" + Number(p.ema_20).toFixed(2);
+            var elE50 = document.getElementById("si-ema50");
+            if (elE50) elE50.textContent = "₹" + Number(p.ema_50).toFixed(2);
+            var elE200 = document.getElementById("si-ema200");
+            if (elE200) elE200.textContent = "₹" + Number(p.ema_200).toFixed(2);
+            var elRsi = document.getElementById("si-rsi");
+            if (elRsi) elRsi.textContent = p.rsi_14;
+            var elRsNifty = document.getElementById("si-rs-nifty");
+            if (elRsNifty) elRsNifty.textContent = (p.rs_nifty > 0 ? "+" : "") + p.rs_nifty + "%";
+            var elSupp = document.getElementById("si-support");
+            if (elSupp) elSupp.textContent = p.key_support;
+            var elRes = document.getElementById("si-resistance");
+            if (elRes) elRes.textContent = p.key_resistance;
+
+            // AI Verdict
+            var elAi = document.getElementById("si-ai-verdict");
+            if (elAi) {
+                elAi.textContent = p.ai_verdict + " (" + p.ai_confidence + "%)";
+                elAi.className = "row-badge-pill " + (p.ai_verdict.includes("STRONG") ? "signal-type-elite" : "color-indicator-low");
+            }
+            var elCat = document.getElementById("si-catalysts");
+            if (elCat && Array.isArray(p.bullish_catalysts)) {
+                elCat.innerHTML = p.bullish_catalysts.map(function(c) { return "<li>" + escHtml(c) + "</li>"; }).join("");
+            }
+            var elRsk = document.getElementById("si-risks");
+            if (elRsk && Array.isArray(p.risk_factors)) {
+                elRsk.innerHTML = p.risk_factors.map(function(r) { return "<li>" + escHtml(r) + "</li>"; }).join("");
+            }
+        } catch (e) {
+            console.error("[StockResearch] Search failed:", e);
+        }
+    };
+
+    window.backtestCurrentStock = async function() {
+        var sym = window._currentInspectedStock || "RELIANCE";
+        var btn = document.getElementById("btn-stock-backtest");
+        if (btn) btn.innerHTML = "<span>⏳ Simulating 250 Sessions…</span>";
+        var panel = document.getElementById("si-backtest-panel");
+        if (panel) panel.classList.remove("view-hidden");
+
+        try {
+            var resp = await authenticatedFetch("/api/v1/beta/stock/" + encodeURIComponent(sym) + "/backtest", { method: "POST" });
+            var json = await resp.json();
+            if (json.status !== "success" || !json.data) return;
+            var bt = json.data;
+
+            var elTitle = document.getElementById("bt-symbol-title");
+            if (elTitle) elTitle.textContent = bt.symbol;
+            var elTt = document.getElementById("bt-total-trades");
+            if (elTt) elTt.textContent = bt.total_trades;
+            var elWr = document.getElementById("bt-win-rate");
+            if (elWr) elWr.textContent = bt.win_rate_pct + "%";
+            var elPf = document.getElementById("bt-profit-factor");
+            if (elPf) elPf.textContent = bt.profit_factor;
+            var elPnl = document.getElementById("bt-net-pnl");
+            if (elPnl) elPnl.textContent = "+₹" + Number(bt.net_pnl_inr).toLocaleString("en-IN", {minimumFractionDigits:2});
+            var elDd = document.getElementById("bt-drawdown");
+            if (elDd) elDd.textContent = bt.max_drawdown_pct + "%";
+            var elRr = document.getElementById("bt-rr");
+            if (elRr) elRr.textContent = bt.risk_reward_ratio;
+
+            var tbody = document.getElementById("bt-trades-tbody");
+            if (tbody && Array.isArray(bt.recent_trades)) {
+                tbody.innerHTML = bt.recent_trades.map(function(t) {
+                    var isWin = t.result === "WIN";
+                    return "<tr>" +
+                        "<td><strong class='font-mono'>" + escHtml(t.trade_id) + "</strong></td>" +
+                        "<td>" + escHtml(t.date) + "</td>" +
+                        "<td>" + escHtml(t.setup) + "</td>" +
+                        "<td><span class='text-blue font-600'>" + escHtml(t.type) + "</span></td>" +
+                        "<td>" + t.holding_days + " days</td>" +
+                        "<td class='" + (isWin ? "text-green" : "text-red") + " font-600'>" + (isWin ? "+" : "") + t.return_pct + "%</td>" +
+                        "<td class='" + (isWin ? "text-green" : "text-red") + " font-600'>" + (isWin ? "+₹" : "-₹") + Math.abs(t.pnl_inr).toFixed(2) + "</td>" +
+                        "<td><span class='row-badge-pill " + (isWin ? "signal-type-elite" : "color-indicator-error") + "'>" + t.result + "</span></td>" +
+                    "</tr>";
+                }).join("");
+            }
+            showToast("Backtest for " + sym + " Completed: " + bt.win_rate_pct + "% Win Rate", "success");
+        } catch (e) {
+            console.error("[StockResearch] Backtest failed:", e);
+        } finally {
+            if (btn) btn.innerHTML = "<span>↺ Run Walk-Forward Backtest</span>";
+        }
+    };
+
+    window.predictCurrentStockTrend = async function() {
+        var sym = window._currentInspectedStock || "RELIANCE";
+        var btn = document.getElementById("btn-stock-predict");
+        if (btn) btn.innerHTML = "<span>🧠 Forecasting Neural Trend…</span>";
+        var panel = document.getElementById("si-predict-panel");
+        if (panel) panel.classList.remove("view-hidden");
+
+        try {
+            var resp = await authenticatedFetch("/api/v1/beta/stock/" + encodeURIComponent(sym) + "/predict", { method: "POST" });
+            var json = await resp.json();
+            if (json.status !== "success" || !json.data) return;
+            var pr = json.data;
+
+            var elTitle = document.getElementById("pr-symbol-title");
+            if (elTitle) elTitle.textContent = pr.symbol;
+            
+            var el1dDir = document.getElementById("pr-1d-dir");
+            if (el1dDir) el1dDir.textContent = pr.trend_1d.direction;
+            var el1dTgt = document.getElementById("pr-1d-tgt");
+            if (el1dTgt) el1dTgt.textContent = "₹" + Number(pr.trend_1d.target).toFixed(2);
+            var el1dRet = document.getElementById("pr-1d-ret");
+            if (el1dRet) el1dRet.textContent = "+" + pr.trend_1d.expected_return_pct + "%";
+
+            var el5dDir = document.getElementById("pr-5d-dir");
+            if (el5dDir) el5dDir.textContent = pr.trend_5d.direction;
+            var el5dTgt = document.getElementById("pr-5d-tgt");
+            if (el5dTgt) el5dTgt.textContent = "₹" + Number(pr.trend_5d.target).toFixed(2);
+            var el5dRet = document.getElementById("pr-5d-ret");
+            if (el5dRet) el5dRet.textContent = "+" + pr.trend_5d.expected_return_pct + "%";
+
+            var el10dDir = document.getElementById("pr-10d-dir");
+            if (el10dDir) el10dDir.textContent = pr.trend_10d.direction;
+            var el10dTgt = document.getElementById("pr-10d-tgt");
+            if (el10dTgt) el10dTgt.textContent = "₹" + Number(pr.trend_10d.target).toFixed(2);
+            var el10dRet = document.getElementById("pr-10d-ret");
+            if (el10dRet) el10dRet.textContent = "+" + pr.trend_10d.expected_return_pct + "%";
+
+            var elSl = document.getElementById("pr-sl");
+            if (elSl) elSl.textContent = "₹" + Number(pr.invalidation_stop_loss).toFixed(2);
+            var elConf = document.getElementById("pr-conf");
+            if (elConf) elConf.textContent = pr.model_confidence_pct + "%";
+            var elSum = document.getElementById("pr-summary");
+            if (elSum) elSum.textContent = pr.summary;
+
+            showToast("AI Trend Forecast for " + sym + " Generated (" + pr.model_confidence_pct + "% Confidence)", "success");
+        } catch (e) {
+            console.error("[StockResearch] Predict failed:", e);
+        } finally {
+            if (btn) btn.innerHTML = "<span>🧠 Predict Stock Trend</span>";
+        }
+    };
+
+    window.toggleCurrentStockWatchlist = async function() {
+        var sym = window._currentInspectedStock || "RELIANCE";
+        try {
+            var resp = await authenticatedFetch("/api/v1/beta/stock/" + encodeURIComponent(sym) + "/watchlist_toggle", { method: "POST" });
+            var json = await resp.json();
+            if (json.status === "success") {
+                showToast("✓ Added " + sym + " to Active Scanner Watchlist", "success");
+            } else {
+                showToast("Error updating watchlist: " + (json.message || "failed"), "error");
+            }
+        } catch (e) {
+            showToast("Network error updating watchlist", "error");
+        }
+    };
+
+    // Auto-search default stock when research tab opens
+    document.querySelectorAll(".nav-anchor[data-target='stock-research-view']").forEach(function(link) {
+        link.addEventListener("click", function() {
+            setTimeout(function() {
+                searchStockDeepDive(window._currentInspectedStock || "RELIANCE");
+            }, 100);
+        });
+    });
 
 });
+

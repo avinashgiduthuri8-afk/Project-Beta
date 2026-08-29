@@ -41,9 +41,10 @@ class PositionSizer:
         max_qty_by_margin = capital / margin_per_unit if margin_per_unit > 0 else raw_qty
         final_qty = min(raw_qty, max_qty_by_margin)
 
-        # Lot size quantization
+        # Lot size quantization (strict floor so max risk is never exceeded)
         if lot_size > 1:
-            lots = round(final_qty / lot_size)
-            return max(lot_size if lots == 0 and final_qty >= (lot_size * 0.5) else 0, lots * lot_size)
+            lots = math.floor(final_qty / lot_size)
+            return max(0, lots * lot_size)
 
-        return max(1, math.floor(final_qty))
+        return max(0, math.floor(final_qty))
+

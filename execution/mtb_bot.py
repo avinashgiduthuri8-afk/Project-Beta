@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import logging
+import threading
 from typing import Dict, Optional
 from core.models import Tick, Candle, Order, Position
-from core.enums import OrderSide, OrderType, ProductType, Exchange
+from core.enums import OrderSide, OrderType, ProductType, Exchange, OrderStatus
 from oms.execution_router import ExecutionRouter
 from oms.order_manager import OrderManager
 from risk.position_sizer import PositionSizer
@@ -37,18 +38,29 @@ class MomentumTradingBot:
         self.risk_per_trade_pct = risk_per_trade_pct
         self.trailing_sl_pct = trailing_sl_pct
         self.target_rr = target_rr
+        self._lock = threading.Lock()
 
         # Tracking state: symbol -> {"entry": float, "sl": float, "target": float, "side": OrderSide, "qty": int}
         self.active_trades: Dict[str, Dict] = {}
+
+    def reset(self) -> None:
+        """Clear active trade state."""
+        with self._lock:
+            self.active_trades.clear()
+            logger.info("[MTB] Active trades reset.")
 
     def on_candle(self, candle: Candle, capital: float = 100000.0, lot_size: int = 1) -> Optional[Order]:
         """Process completed candle and trigger momentum breakout entries."""
         if not candle.is_closed or not candle.vwap:
             return None
 
+        if not self.market_clock.is_normal_trading_active():
+            return None
+
         symbol = candle.symbol
-        if symbol in self.active_trades:
-            return None  # Already in an active MTB trade
+        with self._lock:
+            if symbol in self.active_trades:
+                return None  # Already in an active MTB trade
 
         # 1. Bullish Momentum Breakout: Close > VWAP and Close > Open (Green Candle)
         if candle.close > candle.vwap and candle.open <= candle.vwap and candle.close > candle.open:
@@ -74,14 +86,16 @@ class MomentumTradingBot:
             order = self.router.route_order(req, lot_size=lot_size)
             self.order_manager.register_order(order)
 
-            self.active_trades[symbol] = {
-                "entry": entry_price,
-                "sl": sl_price,
-                "target": target_price,
-                "side": OrderSide.BUY,
-                "qty": quantity,
-                "lot_size": lot_size,
-            }
+            if order.status in (OrderStatus.COMPLETE, OrderStatus.OPEN, OrderStatus.TRIGGER_PENDING):
+                with self._lock:
+                    self.active_trades[symbol] = {
+                        "entry": entry_price,
+                        "sl": sl_price,
+                        "target": target_price,
+                        "side": OrderSide.BUY,
+                        "qty": quantity,
+                        "lot_size": lot_size,
+                    }
             return order
 
         # 2. Bearish Momentum Breakdown: Close < VWAP and Close < Open (Red Candle)
@@ -108,14 +122,16 @@ class MomentumTradingBot:
             order = self.router.route_order(req, lot_size=lot_size)
             self.order_manager.register_order(order)
 
-            self.active_trades[symbol] = {
-                "entry": entry_price,
-                "sl": sl_price,
-                "target": target_price,
-                "side": OrderSide.SELL,
-                "qty": quantity,
-                "lot_size": lot_size,
-            }
+            if order.status in (OrderStatus.COMPLETE, OrderStatus.OPEN, OrderStatus.TRIGGER_PENDING):
+                with self._lock:
+                    self.active_trades[symbol] = {
+                        "entry": entry_price,
+                        "sl": sl_price,
+                        "target": target_price,
+                        "side": OrderSide.SELL,
+                        "qty": quantity,
+                        "lot_size": lot_size,
+                    }
             return order
 
         return None
@@ -123,10 +139,11 @@ class MomentumTradingBot:
     def on_tick(self, tick: Tick) -> Optional[Order]:
         """Manage active trailing stop-loss and profit target executions on live ticks."""
         symbol = tick.symbol
-        if symbol not in self.active_trades:
-            return None
+        with self._lock:
+            if symbol not in self.active_trades:
+                return None
+            trade = dict(self.active_trades[symbol])
 
-        trade = self.active_trades[symbol]
         ltp = tick.ltp
 
         # Trailing Stop & Target for LONG
@@ -135,6 +152,9 @@ class MomentumTradingBot:
             if ltp > trade["entry"]:
                 new_sl = self.router.normalize_tick_size(ltp * (1.0 - (self.trailing_sl_pct / 100.0)))
                 if new_sl > trade["sl"]:
+                    with self._lock:
+                        if symbol in self.active_trades:
+                            self.active_trades[symbol]["sl"] = new_sl
                     trade["sl"] = new_sl
 
             # Target or SL Hit
@@ -144,7 +164,8 @@ class MomentumTradingBot:
                 req = self._create_request(symbol, OrderSide.SELL, trade["qty"], ltp)
                 order = self.router.route_order(req, lot_size=trade["lot_size"])
                 self.order_manager.register_order(order)
-                del self.active_trades[symbol]
+                with self._lock:
+                    self.active_trades.pop(symbol, None)
                 return order
 
         # Trailing Stop & Target for SHORT
@@ -153,6 +174,9 @@ class MomentumTradingBot:
             if ltp < trade["entry"]:
                 new_sl = self.router.normalize_tick_size(ltp * (1.0 + (self.trailing_sl_pct / 100.0)))
                 if new_sl < trade["sl"]:
+                    with self._lock:
+                        if symbol in self.active_trades:
+                            self.active_trades[symbol]["sl"] = new_sl
                     trade["sl"] = new_sl
 
             # Target or SL Hit
@@ -162,7 +186,8 @@ class MomentumTradingBot:
                 req = self._create_request(symbol, OrderSide.BUY, trade["qty"], ltp)
                 order = self.router.route_order(req, lot_size=trade["lot_size"])
                 self.order_manager.register_order(order)
-                del self.active_trades[symbol]
+                with self._lock:
+                    self.active_trades.pop(symbol, None)
                 return order
 
         return None
@@ -180,3 +205,4 @@ class MomentumTradingBot:
             price=price,
             tag="MTB_Momentum",
         )
+

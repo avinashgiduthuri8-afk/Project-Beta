@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import List, Tuple, Optional
+from core.enums import ProductType
 from core.interfaces import BaseRiskEngine
 from core.models import OrderRequest, AccountBalance, Position, TradePlan
 from risk.market_clock import MarketClock
@@ -63,6 +64,12 @@ class RiskEngine(BaseRiskEngine):
             if not has_open_pos:
                 return False, "RMS Rejected: Outside normal trading window (09:15 - 15:15 IST)."
 
+        # Determine effective price for market/limit orders
+        effective_price = request.price
+        if effective_price is None or effective_price <= 0:
+            matching_pos = next((p for p in current_positions if p.symbol == request.symbol and p.ltp > 0), None)
+            effective_price = matching_pos.ltp if matching_pos else 100.0
+
         # 4. Max Open Positions Cap
         active_positions = [p for p in current_positions if p.quantity != 0]
         is_new_symbol = not any(p.symbol == request.symbol for p in active_positions)
@@ -72,16 +79,18 @@ class RiskEngine(BaseRiskEngine):
         # 5. Sector Concentration Check
         if is_new_symbol and candidate_sector != "GENERAL":
             sector_positions = [p for p in active_positions if getattr(p, "sector", "") == candidate_sector]
-            total_active_val = sum(abs(p.quantity * p.ltp) for p in active_positions) + (request.price or 100.0) * request.quantity
-            sector_val = sum(abs(p.quantity * p.ltp) for p in sector_positions) + (request.price or 100.0) * request.quantity
+            total_active_val = sum(abs(p.quantity * p.ltp) for p in active_positions) + effective_price * request.quantity
+            sector_val = sum(abs(p.quantity * p.ltp) for p in sector_positions) + effective_price * request.quantity
             if total_active_val > 0:
                 sector_pct = (sector_val / total_active_val) * 100.0
                 if sector_pct > self.max_sector_exposure_pct and len(active_positions) >= 2:
                     return False, f"RMS Rejected: Sector '{candidate_sector}' exposure ({sector_pct:.1f}%) exceeds {self.max_sector_exposure_pct}% cap."
 
         # 6. Margin Sufficiency Check
-        margin_required = (request.price or 100.0) * request.quantity * 0.20
+        margin_multiplier = 1.0 if request.product_type == ProductType.CNC else (0.25 if request.product_type == ProductType.NRML else 0.20)
+        margin_required = effective_price * request.quantity * margin_multiplier
         if margin_required > current_balance.available_margin:
             return False, f"RMS Rejected: Insufficient margin. Required ₹{margin_required:.2f}, Available ₹{current_balance.available_margin:.2f}"
 
         return True, "RMS Approved"
+

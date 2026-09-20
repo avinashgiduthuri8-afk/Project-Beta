@@ -24,6 +24,7 @@ class OrderLifecycleState(str, Enum):
     CANCELLED = "CANCELLED"
     FAILED = "FAILED"
 
+
 # Allowed state transition map
 ALLOWED_TRANSITIONS: Dict[OrderLifecycleState, Set[OrderLifecycleState]] = {
     OrderLifecycleState.SIGNAL_RECEIVED: {
@@ -74,6 +75,7 @@ ALLOWED_TRANSITIONS: Dict[OrderLifecycleState, Set[OrderLifecycleState]] = {
         OrderLifecycleState.CLOSED,
     },
     # Terminal states: no further transitions allowed
+    OrderLifecycleState.FILLED: set(),
     OrderLifecycleState.CLOSED: set(),
     OrderLifecycleState.REJECTED: set(),
     OrderLifecycleState.CANCELLED: set(),
@@ -81,6 +83,7 @@ ALLOWED_TRANSITIONS: Dict[OrderLifecycleState, Set[OrderLifecycleState]] = {
 }
 
 TERMINAL_STATES = {
+    OrderLifecycleState.FILLED,
     OrderLifecycleState.CLOSED,
     OrderLifecycleState.REJECTED,
     OrderLifecycleState.CANCELLED,
@@ -132,10 +135,14 @@ class OrderLifecycleTracker:
             "reason": reason,
         })
 
+    def transition_to(self, new_state: OrderLifecycleState, reason: str = "", broker_order_id: Optional[str] = None) -> bool:
+        """Transitions order to a new state if valid.
     async def transition_to(self, new_state: OrderLifecycleState, reason: str = "", broker_order_id: Optional[str] = None, filled_quantity: int = 0) -> bool:
         """Transitions order to a new state if valid and fires EventBus events."""
         from v2.bus import bus
 
+        Returns True if transition succeeded, False if invalid transition attempt.
+        """
         if broker_order_id:
             self.broker_order_id = broker_order_id
 
@@ -182,6 +189,7 @@ class OrderLifecycleTracker:
         return self.current_state in TERMINAL_STATES
 
     def is_successful(self) -> bool:
+        return self.current_state == OrderLifecycleState.FILLED
         return self.current_state in {OrderLifecycleState.FILLED, OrderLifecycleState.CLOSED}
 
     def to_dict(self) -> Dict[str, Any]:

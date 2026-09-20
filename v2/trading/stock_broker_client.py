@@ -269,6 +269,7 @@ class StockBrokerClient:
                     val_resp["lifecycle"] = tracker.to_dict()
                     return val_resp
 
+                await tracker.transition_to(OrderLifecycleState.FILLED, reason="Live Order Executed", broker_order_id=val_resp.get("order_id"))
                 target_state = OrderLifecycleState.PARTIALLY_FILLED if val_resp.get("status") == "PARTIALLY_FILLED" else OrderLifecycleState.FILLED
                 await tracker.transition_to(
                     target_state, 

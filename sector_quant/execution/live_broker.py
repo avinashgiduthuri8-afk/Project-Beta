@@ -85,6 +85,12 @@ class LiveBrokerExecutionHandler(ExecutionHandler):
 
     def execute_order(self, event: OrderEvent) -> None:
         """Transmits OrderEvent to live broker and sets up fill listener."""
+        from v2.core.config import get_config
+        cfg = get_config().apply_override()
+        if not cfg.v2_trading_enabled:
+            logger.error(f"HARD GATE BLOCKED ORDER: Trading is disabled (v2_trading_enabled=false)")
+            return
+
         if not self.client.is_connected():
             self.client.connect()
 

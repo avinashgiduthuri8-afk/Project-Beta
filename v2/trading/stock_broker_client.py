@@ -103,37 +103,81 @@ class StockBrokerClient:
         """Enforces integer share precision (whole shares only for stock equities)."""
         return max(1, math.floor(qty))
 
-    def validate_execution_response(self, response: Dict[str, Any]) -> Tuple[bool, str, Dict[str, Any]]:
+    def validate_execution_response(self, response: Any) -> Tuple[bool, str, Dict[str, Any]]:
         """Authoritative validation of broker order responses (BETA-CODE-03).
 
-        Invariants:
-        1. Must contain non-empty order_id.
-        2. Must contain recognized status (ACCEPTED, PENDING, FILLED, COMPLETE, REJECTED, CANCELLED, FAILED).
-        3. FAILED, REJECTED, or CANCELLED responses are marked invalid for position creation.
+        Normalizes raw broker payloads (or internal Order objects) into a standard dictionary contract.
+        Validates the state and determines if a position can be safely opened.
         """
-        if not isinstance(response, dict):
-            return False, "Invalid execution response payload: Not a dictionary", {}
+        # 1. Normalize payload into a dictionary contract
+        normalized = {}
+        if isinstance(response, dict):
+            normalized = response.copy()
+        elif hasattr(response, "__dict__"):
+            # e.g., v1 Order model object
+            normalized = {
+                "order_id": getattr(response, "order_id", None),
+                "status": getattr(response, "status", None),
+                "filled_quantity": getattr(response, "filled_quantity", 0),
+                "average_price": getattr(response, "average_price", 0.0),
+                "reason": getattr(response, "status_message", ""),
+            }
+            if hasattr(response, "status") and hasattr(response.status, "value"):
+                normalized["status"] = response.status.value
+        else:
+            return False, f"Invalid execution response type: {type(response)}", {}
 
-        order_id = response.get("order_id")
+        # 2. Extract and validate Order ID
+        order_id = normalized.get("order_id")
         if not order_id:
-            reason = response.get("reason") or response.get("error_details") or "Missing order_id in broker response"
+            reason = normalized.get("reason") or normalized.get("error_details") or "Missing order_id in broker response"
             logger.error(f"Execution Response Validation Failed: {reason}")
-            return False, str(reason), response
+            normalized["status"] = "FAILED"
+            normalized["reason"] = reason
+            return False, str(reason), normalized
 
-        status = str(response.get("status", "")).upper()
-        valid_statuses = {"ACCEPTED", "PENDING", "SUBMITTED", "FILLED", "COMPLETE", "REJECTED", "CANCELLED", "FAILED"}
+        # 3. Normalize Status
+        raw_status = str(normalized.get("status", "")).upper()
+        # Map common broker statuses to standard states
+        status_map = {
+            "COMPLETE": "FILLED",
+            "COMPLETED": "FILLED",
+            "DONE": "FILLED",
+            "SUBMITTED": "PENDING",
+            "NEW": "ACCEPTED",
+            "OPEN": "PENDING",
+            "TRIGGER_PENDING": "PENDING",
+        }
+        status = status_map.get(raw_status, raw_status)
+        normalized["status"] = status
 
+        # 4. Support valid states
+        valid_statuses = {"ACCEPTED", "PENDING", "FILLED", "PARTIALLY_FILLED", "REJECTED", "CANCELLED", "FAILED"}
         if status not in valid_statuses:
-            reason = f"Unrecognized broker order status '{status}'"
+            reason = f"Unrecognized broker order status '{status}' (raw: {raw_status})"
             logger.error(f"Execution Response Validation Failed: {reason}")
-            return False, reason, response
+            normalized["status"] = "FAILED"
+            normalized["reason"] = reason
+            return False, reason, normalized
 
+        # 5. Handle Terminal / Failure States
         if status in {"REJECTED", "CANCELLED", "FAILED"}:
-            reason = response.get("reason") or f"Broker order execution failed with status {status}"
+            reason = normalized.get("reason") or f"Broker order execution failed with status {status}"
             logger.warning(f"Broker Order Execution Rejected/Failed: {reason}")
-            return False, str(reason), response
+            normalized["reason"] = str(reason)
+            # Cannot create OPEN position from invalid/rejected response
+            return False, str(reason), normalized
 
-        return True, "Execution Response Validated", response
+        # 6. Handle Partial Fills explicitly (does not count as fully filled)
+        if status == "PARTIALLY_FILLED":
+            filled_qty = normalized.get("filled_quantity", 0)
+            reason = f"Order {order_id} partially filled ({filled_qty} shares)"
+            logger.info(f"Execution Response: {reason}")
+            normalized["reason"] = reason
+            return True, reason, normalized
+
+        # 7. Success for ACCEPTED, PENDING, FILLED
+        return True, f"Execution Response Validated ({status})", normalized
 
     async def place_order(
         self,
@@ -171,8 +215,8 @@ class StockBrokerClient:
             price=norm_price,
             strategy_id=strategy_id,
         )
-        tracker.transition_to(OrderLifecycleState.RISK_APPROVED, reason="Risk check passed")
-        tracker.transition_to(OrderLifecycleState.ORDER_CREATED, reason="Order payload constructed")
+        await tracker.transition_to(OrderLifecycleState.RISK_APPROVED, reason="Risk check passed")
+        await tracker.transition_to(OrderLifecycleState.ORDER_CREATED, reason="Order payload constructed")
 
         # BETA-CODE-01 & BETA-CODE-02: Mode & Enable Gate checks
         if self.mode == "LIVE":
@@ -181,7 +225,7 @@ class StockBrokerClient:
             if not cfg.v2_trading_enabled:
                 reason = "Trading is disabled by configuration (v2_trading_enabled=false)"
                 logger.error(f"LIVE Order Blocked at Execution Boundary: {reason}")
-                tracker.transition_to(OrderLifecycleState.REJECTED, reason=reason)
+                await tracker.transition_to(OrderLifecycleState.REJECTED, reason=reason)
                 return {
                     "order_id": None,
                     "status": "REJECTED",
@@ -198,7 +242,7 @@ class StockBrokerClient:
             if not self._connected or self.live_adapter is None:
                 reason = "LIVE mode execution failed: Live broker adapter is unavailable or disconnected"
                 logger.error(f"LIVE Order Execution Error: {reason}")
-                tracker.transition_to(OrderLifecycleState.FAILED, reason=reason)
+                await tracker.transition_to(OrderLifecycleState.FAILED, reason=reason)
                 return {
                     "order_id": None,
                     "status": "FAILED",
@@ -210,7 +254,7 @@ class StockBrokerClient:
 
             # Dispatch order to live adapter
             try:
-                tracker.transition_to(OrderLifecycleState.SUBMITTED, reason="Dispatched to Live Broker")
+                await tracker.transition_to(OrderLifecycleState.SUBMITTED, reason="Dispatched to Live Broker")
                 live_resp = await asyncio.to_thread(
                     self.live_adapter.place_order,
                     symbol=clean_symbol,
@@ -221,17 +265,23 @@ class StockBrokerClient:
                 )
                 valid, val_reason, val_resp = self.validate_execution_response(live_resp)
                 if not valid:
-                    tracker.transition_to(OrderLifecycleState.FAILED, reason=val_reason)
+                    await tracker.transition_to(OrderLifecycleState.FAILED, reason=val_reason)
                     val_resp["lifecycle"] = tracker.to_dict()
                     return val_resp
 
-                tracker.transition_to(OrderLifecycleState.FILLED, reason="Live Order Executed", broker_order_id=val_resp.get("order_id"))
+                target_state = OrderLifecycleState.PARTIALLY_FILLED if val_resp.get("status") == "PARTIALLY_FILLED" else OrderLifecycleState.FILLED
+                await tracker.transition_to(
+                    target_state, 
+                    reason="Live Order Executed", 
+                    broker_order_id=val_resp.get("order_id"),
+                    filled_quantity=val_resp.get("filled_quantity", 0)
+                )
                 val_resp["lifecycle"] = tracker.to_dict()
                 return val_resp
             except Exception as e:
                 reason = f"Live broker dispatch exception: {e}"
                 logger.error(reason, exc_info=True)
-                tracker.transition_to(OrderLifecycleState.FAILED, reason=reason)
+                await tracker.transition_to(OrderLifecycleState.FAILED, reason=reason)
                 return {
                     "order_id": None,
                     "status": "FAILED",
@@ -242,8 +292,8 @@ class StockBrokerClient:
                 }
 
         # Explicit PAPER Simulation Execution Mode
-        tracker.transition_to(OrderLifecycleState.SUBMITTED, reason="Simulated Paper Order Submitted")
-        tracker.transition_to(OrderLifecycleState.ACKNOWLEDGED, reason="Simulated Broker Acknowledged")
+        await tracker.transition_to(OrderLifecycleState.SUBMITTED, reason="Simulated Paper Order Submitted")
+        await tracker.transition_to(OrderLifecycleState.ACKNOWLEDGED, reason="Simulated Broker Acknowledged")
 
         order_record = {
             "order_id": order_id,
@@ -261,7 +311,7 @@ class StockBrokerClient:
             "timestamp": now.isoformat(),
         }
 
-        tracker.transition_to(OrderLifecycleState.FILLED, reason="Simulated Paper Order Filled")
+        await tracker.transition_to(OrderLifecycleState.FILLED, reason="Simulated Paper Order Filled")
         order_record["lifecycle"] = tracker.to_dict()
 
         self._simulated_orders[order_id] = order_record

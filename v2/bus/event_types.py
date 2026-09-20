@@ -61,3 +61,13 @@ class EventType(str, Enum):
     TRADING_ENABLED          = "config.trading_enabled"
     TRADING_DISABLED         = "config.trading_disabled"
     EMERGENCY_STOP_TRIGGERED = "config.emergency_stop"
+
+    # ── Order lifecycle (BETA-CODE-04) ───────────────────────────────────────
+    ORDER_CREATED         = "order.created"
+    ORDER_SUBMITTED       = "order.submitted"
+    ORDER_ACKNOWLEDGED    = "order.acknowledged"
+    ORDER_FILLED          = "order.filled"
+    ORDER_PARTIALLY_FILLED= "order.partially_filled"
+    ORDER_REJECTED        = "order.rejected"
+    ORDER_CANCELLED       = "order.cancelled"
+    ORDER_FAILED          = "order.failed"

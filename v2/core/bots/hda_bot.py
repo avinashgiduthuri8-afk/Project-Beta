@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 import pandas as pd
 
 
-class HDABot:
+
 from v2.core.bots.base import BotArchetype
 from v2.core.types import BotName
 
@@ -25,7 +25,7 @@ class HDABot(BotArchetype):
         target_pct: float = 0.05,
         stop_pct: float = 0.02,
     ):
-        self.name = "HDA"
+
         self.min_delivery_pct = min_delivery_pct
         self.volume_surge_mult = volume_surge_mult
         self.target_pct = target_pct

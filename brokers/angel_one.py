@@ -65,6 +65,24 @@ class AngelOneBroker(BaseBroker):
         return []
 
     def place_order(self, request: OrderRequest) -> Order:
+        from v2.core.config import get_config
+        cfg = get_config().apply_override()
+        if not cfg.v2_trading_enabled:
+            logger.error("HARD GATE BLOCKED ORDER: Trading is disabled (v2_trading_enabled=false)")
+            return Order(
+                order_id="BLOCKED",
+                client_order_id=request.client_order_id,
+                symbol=request.symbol,
+                exchange=request.exchange,
+                side=request.side,
+                order_type=request.order_type,
+                product_type=request.product_type,
+                quantity=request.quantity,
+                price=request.price,
+                status=OrderStatus.REJECTED,
+                status_message="Trading disabled by v2_trading_enabled gate",
+            )
+
         logger.info(f"Angel One placing order: {request.side.value} {request.quantity}x {request.symbol}")
         return Order(
             order_id="ANGEL-ORD-9876",

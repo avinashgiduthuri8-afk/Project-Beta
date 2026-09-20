@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 
-class BBSBot:
+
 from v2.core.bots.base import BotArchetype
 from v2.core.types import BotName
 
@@ -28,7 +28,7 @@ class BBSBot(BotArchetype):
         target_pct: float = 0.04,
         stop_pct: float = 0.018,
     ):
-        self.name = "BBS"
+
         self.bb_period = bb_period
         self.bb_std = bb_std
         self.kc_period = kc_period

@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 
-class VCPBot:
+
 from v2.core.bots.base import BotArchetype
 from v2.core.types import BotName
 
@@ -24,7 +24,7 @@ class VCPBot(BotArchetype):
         target_pct: float = 0.06,
         stop_pct: float = 0.02,
     ):
-        self.name = "VCP"
+
         self.target_pct = target_pct
         self.stop_pct = stop_pct
 

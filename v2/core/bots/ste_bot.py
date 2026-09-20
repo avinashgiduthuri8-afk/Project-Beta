@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 
 
-class STEBot:
 from v2.core.bots.base import BotArchetype
 from v2.core.types import BotName
 
@@ -26,7 +25,8 @@ class STEBot(BotArchetype):
         target_pct: float = 0.04,
         stop_pct: float = 0.02,
     ):
-        self.name = "STE"
+        pass
+
         self.atr_period = atr_period
         self.factor = factor
         self.target_pct = target_pct

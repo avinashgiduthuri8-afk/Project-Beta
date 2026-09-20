@@ -125,15 +125,24 @@ class ExecutionPipelineOrchestrator:
         stage_trace["stage_7_router"] = order_resp
 
         # BETA-CODE-03: Validate Execution Response before position opening
-        valid, val_reason, _ = self.broker.validate_execution_response(order_resp)
+        valid, val_reason, val_resp = self.broker.validate_execution_response(order_resp)
         if not valid:
             stage_trace["final_status"] = f"REJECTED_AT_STAGE_7: {val_reason}"
             return stage_trace
 
+        if val_resp.get("status") not in {"FILLED", "PARTIALLY_FILLED"}:
+            stage_trace["final_status"] = f"AWAITING_FILL: Order status is {val_resp.get('status')}"
+            return stage_trace
+
+        # Handle partial fills explicitly
+        actual_qty = quantity
+        if val_resp.get("status") == "PARTIALLY_FILLED" and val_resp.get("filled_quantity", 0) > 0:
+            actual_qty = val_resp["filled_quantity"]
+
         # STAGE 8: Position Manager Initialization
         pos_record = {
             "symbol": symbol,
-            "quantity": quantity,
+            "quantity": actual_qty,
             "entry_price": ltp,
             "current_price": ltp,
             "unrealized_pnl": 0.0,

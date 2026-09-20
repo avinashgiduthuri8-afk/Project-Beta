@@ -6,5 +6,6 @@ Responsible for:
 - Computing AUM, daily PnL, invested capital
 - Publishing POSITION_OPENED / POSITION_CLOSED / PORTFOLIO_UPDATED
 
-Not implemented yet. No imports from V1.
-"""
+from v2.services.portfolio_service.service import PortfolioService
+
+__all__ = ["PortfolioService"]

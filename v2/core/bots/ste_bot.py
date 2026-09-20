@@ -8,7 +8,16 @@ import pandas as pd
 
 
 class STEBot:
+from v2.core.bots.base import BotArchetype
+from v2.core.types import BotName
+
+
+class STEBot(BotArchetype):
     """SuperTrend Momentum Archetype (Trend-Following)."""
+
+    @property
+    def name(self) -> BotName:
+        return BotName.STE
 
     def __init__(
         self,
@@ -46,6 +55,7 @@ class STEBot:
 
             return {
                 "bot": self.name,
+                "bot": self.name.value,
                 "symbol": symbol,
                 "direction": "BUY",
                 "entry_price": latest_close,

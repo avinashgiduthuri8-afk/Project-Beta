@@ -10,6 +10,7 @@ import pandas as pd
 from v2.core.market_session import MarketSessionGuard
 from v2.services.scanner_service.confluence_engine import C2ConfluenceEngine
 from v2.services.ai_intelligence_service.circuit_breaker import CircuitBreaker, FallbackEvaluator
+from v2.services.ai_intelligence_service.service import AIIntelligenceService
 from v2.services.risk_service.capital_guard import RMSCapitalGuard
 from v2.trading.stock_broker_client import StockBrokerClient
 from v2.analytics.tax_ledger import EquityTaxLedger
@@ -27,12 +28,14 @@ class ExecutionPipelineOrchestrator:
         confluence_engine: Optional[C2ConfluenceEngine] = None,
         capital_guard: Optional[RMSCapitalGuard] = None,
         circuit_breaker: Optional[CircuitBreaker] = None,
+        ai_service: Optional[AIIntelligenceService] = None,
     ):
         self.broker = broker_client or StockBrokerClient(mode="PAPER")
         self.market_guard = market_guard or MarketSessionGuard("NSE")
         self.confluence_engine = confluence_engine or C2ConfluenceEngine()
         self.capital_guard = capital_guard or RMSCapitalGuard()
         self.circuit_breaker = circuit_breaker or CircuitBreaker()
+        self.ai_service = ai_service or AIIntelligenceService()
         self.tax_ledger = EquityTaxLedger()
 
         self.journal: List[Dict[str, Any]] = []
@@ -77,6 +80,14 @@ class ExecutionPipelineOrchestrator:
             ai_eval = FallbackEvaluator.evaluate_setup(symbol, c2_result["total_score"], ltp)
         else:
             ai_eval = FallbackEvaluator.evaluate_setup(symbol, c2_result["total_score"], ltp)
+        
+        # Use AIIntelligenceService (which internally handles the CircuitBreaker logic)
+        ai_eval = await self.ai_service.evaluate_setup(
+            symbol=symbol,
+            confluence_score=c2_result["total_score"],
+            ltp=ltp,
+            df=df
+        )
 
         stage_trace["stage_4_ai"] = ai_eval
         if ai_eval["verdict"] != "CONFIRMED":
@@ -112,6 +123,12 @@ class ExecutionPipelineOrchestrator:
             product="MIS",
         )
         stage_trace["stage_7_router"] = order_resp
+
+        # BETA-CODE-03: Validate Execution Response before position opening
+        valid, val_reason, _ = self.broker.validate_execution_response(order_resp)
+        if not valid:
+            stage_trace["final_status"] = f"REJECTED_AT_STAGE_7: {val_reason}"
+            return stage_trace
 
         # STAGE 8: Position Manager Initialization
         pos_record = {

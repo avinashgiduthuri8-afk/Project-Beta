@@ -8,7 +8,16 @@ import pandas as pd
 
 
 class BBSBot:
+from v2.core.bots.base import BotArchetype
+from v2.core.types import BotName
+
+
+class BBSBot(BotArchetype):
     """Bollinger-Keltner Volatility Squeeze Archetype."""
+
+    @property
+    def name(self) -> BotName:
+        return BotName.BBS
 
     def __init__(
         self,
@@ -64,6 +73,7 @@ class BBSBot:
 
             return {
                 "bot": self.name,
+                "bot": self.name.value,
                 "symbol": symbol,
                 "direction": "BUY",
                 "entry_price": latest_close,

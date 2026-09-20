@@ -40,6 +40,7 @@ class EventType(str, Enum):
     ALERT_GENERATED   = "alert.generated"
 
     # ── NEW V2.1: Trade lifecycle ────────────────────────────────────────────
+    MARKET_TICK    = "market.tick"       # Ticker stream: new market price
     TRADE_APPROVED = "trade.approved"    # RiskService: capital check passed
     TRADE_DENIED   = "trade.denied"      # RiskService: capital check failed
     TRADE_EXECUTED = "trade.executed"    # TradingService: order placed

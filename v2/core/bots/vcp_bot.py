@@ -8,7 +8,16 @@ import pandas as pd
 
 
 class VCPBot:
+from v2.core.bots.base import BotArchetype
+from v2.core.types import BotName
+
+
+class VCPBot(BotArchetype):
     """Minervini Volatility Contraction Pattern (VCP) Archetype."""
+
+    @property
+    def name(self) -> BotName:
+        return BotName.VCP
 
     def __init__(
         self,
@@ -43,6 +52,7 @@ class VCPBot:
 
             return {
                 "bot": self.name,
+                "bot": self.name.value,
                 "symbol": symbol,
                 "direction": "BUY",
                 "entry_price": latest_close,

@@ -85,6 +85,35 @@ async def lifespan(app: FastAPI):
     await _scanner_service.start()
 
     # 4. Scheduler
+    # 4. Core Trading Execution Services
+    from v2.trading.position_manager import PositionManager
+    from v2.repository.position_repo import PositionRepository
+    from v2.services.portfolio_service.service import PortfolioService
+    from v2.core.pipeline_orchestrator import ExecutionPipelineOrchestrator
+    from v2.core.bots.registry import BotRegistry
+    from v2.market_data.ticker_stream import TickerStream
+    from v2.execution.bot_runner import BotExecutionEngine
+
+    position_repo = PositionRepository(conn)
+    # stock broker is mocked by default in orchestrator if not provided
+    position_manager = PositionManager(position_repo, None)
+    portfolio_service = PortfolioService(position_manager=position_manager)
+    
+    orchestrator = ExecutionPipelineOrchestrator()
+    registry = BotRegistry()
+    ticker_stream = TickerStream(db=_db, symbols=["RELIANCE", "TCS", "HDFCBANK", "INFY"])
+    
+    global _execution_engine
+    _execution_engine = BotExecutionEngine(
+        orchestrator=orchestrator,
+        registry=registry,
+        portfolio_service=portfolio_service,
+        ticker_stream=ticker_stream
+    )
+    await _execution_engine.initialize()
+    await _execution_engine.start()
+
+    # 5. Scheduler
     _scheduler = BackgroundScheduler(bus)
     register_all_jobs(
         scheduler       = _scheduler,
@@ -94,13 +123,18 @@ async def lifespan(app: FastAPI):
     await _scheduler.start()
 
     # 5. Wire subscriber registry
+    # 6. Wire subscriber registry
     register_all_subscribers(bus, scanner_service=_scanner_service)
 
     # 6. Wire API router state
+    # 7. Wire API router state
     init_router(
         scanner_service = _scanner_service,
         scheduler       = _scheduler,
         config          = cfg,
+        portfolio_service = portfolio_service,
+        position_manager = position_manager,
+        event_log_repo = event_log_repo,
     )
 
     logger.info("V2 startup complete")
@@ -113,6 +147,8 @@ async def lifespan(app: FastAPI):
         await _scheduler.stop()
     if _scanner_service:
         await _scanner_service.stop()
+    if '_execution_engine' in globals() and _execution_engine:
+        await _execution_engine.stop()
     if _db:
         await _db.close()
     logger.info("V2 shutdown complete")

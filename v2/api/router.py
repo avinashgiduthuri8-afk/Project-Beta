@@ -36,14 +36,29 @@ router = APIRouter()
 _scanner_service = None
 _scheduler = None
 _config = None
+_portfolio_service = None
+_position_manager = None
+_event_log_repo = None
 
 
 def init_router(scanner_service, scheduler, config) -> None:
+def init_router(
+    scanner_service, 
+    scheduler, 
+    config, 
+    portfolio_service=None, 
+    position_manager=None, 
+    event_log_repo=None
+) -> None:
     """Called by app_v2.py lifespan after services are started."""
     global _scanner_service, _scheduler, _config
+    global _scanner_service, _scheduler, _config, _portfolio_service, _position_manager, _event_log_repo
     _scanner_service = scanner_service
     _scheduler = scheduler
     _config = config
+    _portfolio_service = portfolio_service
+    _position_manager = position_manager
+    _event_log_repo = event_log_repo
 
 
 # ── Health (no auth) ──────────────────────────────────────────────────────────
@@ -188,3 +203,41 @@ async def scheduler_jobs() -> list[JobStatusSchema]:
     if _scheduler is None:
         return []
     return [JobStatusSchema(**j) for j in _scheduler.get_status()]
+
+# -- Portfolio & Positions --------------------------------------------------
+
+@router.get(
+    "/portfolio",
+    dependencies=[Depends(require_api_key)],
+    tags=["portfolio"],
+)
+async def get_portfolio():
+    if not _portfolio_service:
+        raise HTTPException(status_code=503, detail="Portfolio service not initialized.")
+    return {
+        "aum": _portfolio_service.get_total_aum(),
+        "cash": _portfolio_service.get_available_cash(),
+    }
+
+@router.get(
+    "/positions",
+    dependencies=[Depends(require_api_key)],
+    tags=["portfolio"],
+)
+async def get_positions():
+    if not _position_manager:
+        raise HTTPException(status_code=503, detail="Position manager not initialized.")
+    positions = _position_manager.get_active_positions()
+    return {"active_positions": [p.__dict__ for p in positions]}
+
+@router.get(
+    "/events",
+    dependencies=[Depends(require_api_key)],
+    tags=["system"],
+)
+async def get_events(limit: int = 50):
+    if not _event_log_repo:
+        raise HTTPException(status_code=503, detail="Event log repo not initialized.")
+    events = await _event_log_repo.get_recent(limit=limit)
+    return {"events": [e.__dict__ for e in events]}
+

@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS positions (
     exchange_order_id TEXT,
     client_order_id TEXT,
     filled_qty REAL
+    filled_qty REAL,
+    exit_order_id TEXT
 );
 
 -- 3. Trades Table (Realized Settlements)

@@ -34,23 +34,27 @@ def _dt(s: str | None) -> Optional[datetime]:
 def _row_to_position(row: aiosqlite.Row) -> Position:
     d = dict(row)
     return Position(
-        id            = d["id"],
-        bot           = BotName(d["bot"]),
-        coin          = d["coin"],
-        pair          = d["pair"],
-        qty           = d["qty"],
-        entry_price   = d["entry_price"],
-        entry_time    = _dt(d["entry_time"]),
-        mode          = BotMode(d["mode"]),
-        status        = PositionStatus(d.get("status", "OPEN")),
-        current_price = d.get("current_price"),
-        unrealised_pnl= d.get("unrealised_pnl"),
-        stop_loss     = d.get("stop_loss"),
-        take_profit   = d.get("take_profit"),
-        signal_id     = d.get("signal_id"),
-        closed_at     = _dt(d.get("closed_at")),
-        exit_price    = d.get("exit_price"),
-        exit_reason   = ExitReason(d["exit_reason"]) if d.get("exit_reason") else None,
+        id                = d["id"],
+        bot               = BotName(d["bot"]),
+        coin              = d["coin"],
+        pair              = d["pair"],
+        qty               = d["qty"],
+        entry_price       = d["entry_price"],
+        entry_time        = _dt(d["entry_time"]),
+        mode              = BotMode(d["mode"]),
+        status            = PositionStatus(d.get("status", "OPEN")),
+        current_price     = d.get("current_price"),
+        unrealised_pnl    = d.get("unrealised_pnl"),
+        stop_loss         = d.get("stop_loss"),
+        take_profit       = d.get("take_profit"),
+        signal_id         = d.get("signal_id"),
+        closed_at         = _dt(d.get("closed_at")),
+        exit_price        = d.get("exit_price"),
+        exit_reason       = ExitReason(d["exit_reason"]) if d.get("exit_reason") else None,
+        filled_qty        = d.get("filled_qty"),
+        exchange_order_id = d.get("exchange_order_id"),
+        client_order_id   = d.get("client_order_id"),
+        exit_order_id     = d.get("exit_order_id"),
     )
 
 
@@ -64,6 +68,9 @@ class PositionRepository(BaseRepository):
              current_price, unrealised_pnl, stop_loss, take_profit,
              mode, signal_id, status)
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+             mode, signal_id, status, filled_qty, exchange_order_id,
+             client_order_id, exit_order_id)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
             (
                 position.id,
@@ -73,6 +80,7 @@ class PositionRepository(BaseRepository):
                 position.qty,
                 position.entry_price,
                 position.entry_time.isoformat(),
+                position.entry_time.isoformat() if isinstance(position.entry_time, datetime) else str(position.entry_time),
                 position.current_price,
                 position.unrealised_pnl,
                 position.stop_loss,
@@ -80,9 +88,43 @@ class PositionRepository(BaseRepository):
                 position.mode.value,
                 position.signal_id,
                 position.status.value,
+                position.filled_qty,
+                position.exchange_order_id,
+                position.client_order_id,
+                position.exit_order_id,
             ),
         )
         return position.id
+
+    async def update(self, position: Position) -> None:
+        closed_at_str = position.closed_at.isoformat() if position.closed_at else None
+        await self._execute(
+            """
+            UPDATE positions
+            SET status=?, qty=?, entry_price=?, filled_qty=?,
+                current_price=?, unrealised_pnl=?, stop_loss=?, take_profit=?,
+                exchange_order_id=?, client_order_id=?, exit_order_id=?,
+                exit_price=?, exit_reason=?, closed_at=?
+            WHERE id=?
+            """,
+            (
+                position.status.value,
+                position.qty,
+                position.entry_price,
+                position.filled_qty,
+                position.current_price,
+                position.unrealised_pnl,
+                position.stop_loss,
+                position.take_profit,
+                position.exchange_order_id,
+                position.client_order_id,
+                position.exit_order_id,
+                position.exit_price,
+                position.exit_reason.value if position.exit_reason else None,
+                closed_at_str,
+                position.id,
+            ),
+        )
 
     async def update_price(
         self, position_id: str, price: float, unrealised_pnl: float
@@ -124,6 +166,21 @@ class PositionRepository(BaseRepository):
         else:
             rows = await self._fetchall(
                 "SELECT * FROM positions WHERE status='OPEN' ORDER BY entry_time DESC"
+            )
+        return [_row_to_position(r) for r in rows]
+
+    async def get_active(self, bot: Optional[BotName] = None) -> list[Position]:
+        """Returns all non-CLOSED positions (PENDING, OPEN, CLOSING)."""
+        if bot:
+            rows = await self._fetchall(
+                "SELECT * FROM positions WHERE status IN ('PENDING', 'OPEN', 'CLOSING') "
+                "AND bot=? ORDER BY entry_time DESC",
+                (bot.value,),
+            )
+        else:
+            rows = await self._fetchall(
+                "SELECT * FROM positions WHERE status IN ('PENDING', 'OPEN', 'CLOSING') "
+                "ORDER BY entry_time DESC"
             )
         return [_row_to_position(r) for r in rows]
 

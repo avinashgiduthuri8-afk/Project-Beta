@@ -9,6 +9,10 @@ import asyncio
 from datetime import datetime
 from enum import Enum
 from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
+
+from v2.core.config import get_config
+from v2.trading.order_lifecycle import OrderLifecycleState, OrderLifecycleTracker
 
 logger = logging.getLogger(__name__)
 
@@ -40,11 +44,13 @@ class StockBrokerClient:
         access_token: Optional[str] = None,
         mode: str = "PAPER",
         default_exchange: str = "NSE",
+        live_adapter: Optional[Any] = None,
     ):
         self.api_key = api_key or os.getenv("BROKER_API_KEY", "MOCK_KEY")
         self.access_token = access_token or os.getenv("BROKER_ACCESS_TOKEN", "MOCK_TOKEN")
         self.mode = mode.upper()
         self.default_exchange = default_exchange.upper()
+        self.live_adapter = live_adapter
         self._connected = False
         self._order_sequence = 10000
 
@@ -55,16 +61,33 @@ class StockBrokerClient:
     def connect(self) -> bool:
         """Authenticates with stock broker API or initializes paper simulator."""
         if self.mode == "LIVE":
-            try:
-                # In live mode with KiteConnect or Alpaca API:
-                # self.kite = KiteConnect(api_key=self.api_key)
-                # self.kite.set_access_token(self.access_token)
-                logger.info(f"Connected to Stock Broker API ({self.default_exchange}) [LIVE MODE]")
-                self._connected = True
-                return True
-            except Exception as e:
-                logger.error(f"Failed connecting to live stock broker API: {e}", exc_info=True)
-                return False
+            if self.live_adapter is not None:
+                # Check if already connected
+                try:
+                    if getattr(self.live_adapter, "is_connected", lambda: False)():
+                        self._connected = True
+                        logger.info(f"Connected to Stock Broker API ({self.default_exchange}) [LIVE MODE]")
+                        return True
+                except Exception as e:
+                    logger.error(f"Error checking live adapter connection state: {e}", exc_info=True)
+
+                # Attempt to connect
+                if hasattr(self.live_adapter, "connect"):
+                    try:
+                        ok = self.live_adapter.connect()
+                        if ok:
+                            self._connected = True
+                            logger.info(f"Connected to Stock Broker API via adapter [LIVE MODE]")
+                            return True
+                    except Exception as e:
+                        logger.error(f"Failed connecting to live stock broker API: {e}", exc_info=True)
+                        self._connected = False
+                        return False
+
+            # No valid configured live adapter available in LIVE mode
+            logger.error(f"LIVE mode connection failed: No valid live broker adapter configured for {self.default_exchange}. Failing closed.")
+            self._connected = False
+            return False
         else:
             logger.info("Initialized Stock Broker Client [PAPER SIMULATION MODE]")
             self._connected = True
@@ -80,6 +103,38 @@ class StockBrokerClient:
         """Enforces integer share precision (whole shares only for stock equities)."""
         return max(1, math.floor(qty))
 
+    def validate_execution_response(self, response: Dict[str, Any]) -> Tuple[bool, str, Dict[str, Any]]:
+        """Authoritative validation of broker order responses (BETA-CODE-03).
+
+        Invariants:
+        1. Must contain non-empty order_id.
+        2. Must contain recognized status (ACCEPTED, PENDING, FILLED, COMPLETE, REJECTED, CANCELLED, FAILED).
+        3. FAILED, REJECTED, or CANCELLED responses are marked invalid for position creation.
+        """
+        if not isinstance(response, dict):
+            return False, "Invalid execution response payload: Not a dictionary", {}
+
+        order_id = response.get("order_id")
+        if not order_id:
+            reason = response.get("reason") or response.get("error_details") or "Missing order_id in broker response"
+            logger.error(f"Execution Response Validation Failed: {reason}")
+            return False, str(reason), response
+
+        status = str(response.get("status", "")).upper()
+        valid_statuses = {"ACCEPTED", "PENDING", "SUBMITTED", "FILLED", "COMPLETE", "REJECTED", "CANCELLED", "FAILED"}
+
+        if status not in valid_statuses:
+            reason = f"Unrecognized broker order status '{status}'"
+            logger.error(f"Execution Response Validation Failed: {reason}")
+            return False, reason, response
+
+        if status in {"REJECTED", "CANCELLED", "FAILED"}:
+            reason = response.get("reason") or f"Broker order execution failed with status {status}"
+            logger.warning(f"Broker Order Execution Rejected/Failed: {reason}")
+            return False, str(reason), response
+
+        return True, "Execution Response Validated", response
+
     async def place_order(
         self,
         symbol: str,
@@ -90,6 +145,7 @@ class StockBrokerClient:
         order_type: str = "MARKET",
         exchange: Optional[str] = None,
         trigger_price: Optional[float] = None,
+        strategy_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Dispatches an order to the stock broker or paper trading engine."""
         if not self._connected:
@@ -106,23 +162,89 @@ class StockBrokerClient:
         order_id = f"STK_ORD_{self._order_sequence}"
         now = datetime.now()
 
-        if self.mode == "LIVE":
-            # Live broker payload constructor:
-            # resp = await asyncio.to_thread(
-            #     self.kite.place_order,
-            #     variety="regular",
-            #     exchange=exch,
-            #     tradingsymbol=clean_symbol,
-            #     transaction_type=transaction_type.upper(),
-            #     quantity=norm_qty,
-            #     product=product.upper(),
-            #     order_type=order_type.upper(),
-            #     price=norm_price,
-            # )
-            # return {"order_id": resp, "status": "COMPLETE", ...}
-            pass
+        # Initialize Order Lifecycle Tracker (BETA-CODE-04)
+        tracker = OrderLifecycleTracker(
+            order_id=order_id,
+            symbol=clean_symbol,
+            transaction_type=transaction_type,
+            quantity=norm_qty,
+            price=norm_price,
+            strategy_id=strategy_id,
+        )
+        tracker.transition_to(OrderLifecycleState.RISK_APPROVED, reason="Risk check passed")
+        tracker.transition_to(OrderLifecycleState.ORDER_CREATED, reason="Order payload constructed")
 
-        # Paper Simulation Response
+        # BETA-CODE-01 & BETA-CODE-02: Mode & Enable Gate checks
+        if self.mode == "LIVE":
+            # BETA-CODE-02: Trading Enable Gate Check
+            cfg = get_config().apply_override()
+            if not cfg.v2_trading_enabled:
+                reason = "Trading is disabled by configuration (v2_trading_enabled=false)"
+                logger.error(f"LIVE Order Blocked at Execution Boundary: {reason}")
+                tracker.transition_to(OrderLifecycleState.REJECTED, reason=reason)
+                return {
+                    "order_id": None,
+                    "status": "REJECTED",
+                    "reason": reason,
+                    "symbol": clean_symbol,
+                    "timestamp": now.isoformat(),
+                    "lifecycle": tracker.to_dict(),
+                }
+
+            # BETA-CODE-01: Fail-Safe LIVE Execution (NEVER fall through to paper!)
+            if not self._connected:
+                self.connect()
+
+            if not self._connected or self.live_adapter is None:
+                reason = "LIVE mode execution failed: Live broker adapter is unavailable or disconnected"
+                logger.error(f"LIVE Order Execution Error: {reason}")
+                tracker.transition_to(OrderLifecycleState.FAILED, reason=reason)
+                return {
+                    "order_id": None,
+                    "status": "FAILED",
+                    "reason": reason,
+                    "symbol": clean_symbol,
+                    "timestamp": now.isoformat(),
+                    "lifecycle": tracker.to_dict(),
+                }
+
+            # Dispatch order to live adapter
+            try:
+                tracker.transition_to(OrderLifecycleState.SUBMITTED, reason="Dispatched to Live Broker")
+                live_resp = await asyncio.to_thread(
+                    self.live_adapter.place_order,
+                    symbol=clean_symbol,
+                    quantity=norm_qty,
+                    side=transaction_type.upper(),
+                    order_type=order_type.upper(),
+                    price=norm_price,
+                )
+                valid, val_reason, val_resp = self.validate_execution_response(live_resp)
+                if not valid:
+                    tracker.transition_to(OrderLifecycleState.FAILED, reason=val_reason)
+                    val_resp["lifecycle"] = tracker.to_dict()
+                    return val_resp
+
+                tracker.transition_to(OrderLifecycleState.FILLED, reason="Live Order Executed", broker_order_id=val_resp.get("order_id"))
+                val_resp["lifecycle"] = tracker.to_dict()
+                return val_resp
+            except Exception as e:
+                reason = f"Live broker dispatch exception: {e}"
+                logger.error(reason, exc_info=True)
+                tracker.transition_to(OrderLifecycleState.FAILED, reason=reason)
+                return {
+                    "order_id": None,
+                    "status": "FAILED",
+                    "reason": reason,
+                    "symbol": clean_symbol,
+                    "timestamp": now.isoformat(),
+                    "lifecycle": tracker.to_dict(),
+                }
+
+        # Explicit PAPER Simulation Execution Mode
+        tracker.transition_to(OrderLifecycleState.SUBMITTED, reason="Simulated Paper Order Submitted")
+        tracker.transition_to(OrderLifecycleState.ACKNOWLEDGED, reason="Simulated Broker Acknowledged")
+
         order_record = {
             "order_id": order_id,
             "exchange": exch,
@@ -138,6 +260,9 @@ class StockBrokerClient:
             "average_price": norm_price or 100.0,
             "timestamp": now.isoformat(),
         }
+
+        tracker.transition_to(OrderLifecycleState.FILLED, reason="Simulated Paper Order Filled")
+        order_record["lifecycle"] = tracker.to_dict()
 
         self._simulated_orders[order_id] = order_record
 
@@ -157,6 +282,22 @@ class StockBrokerClient:
 
     async def cancel_order(self, order_id: str) -> bool:
         """Cancels a pending stock order."""
+        if self.mode == "LIVE":
+            if not self._connected:
+                self.connect()
+            if not self._connected or self.live_adapter is None:
+                logger.error(f"LIVE mode execution failed: Cannot cancel order {order_id}, live broker adapter unavailable")
+                return False
+            try:
+                if hasattr(self.live_adapter, "cancel_order"):
+                    return await asyncio.to_thread(self.live_adapter.cancel_order, order_id)
+                else:
+                    logger.error(f"Live broker adapter does not support cancel_order.")
+                    return False
+            except Exception as e:
+                logger.error(f"Live broker cancel exception: {e}", exc_info=True)
+                return False
+
         if order_id in self._simulated_orders:
             self._simulated_orders[order_id]["status"] = "CANCELLED"
             logger.info(f"Cancelled order: {order_id}")
@@ -165,6 +306,22 @@ class StockBrokerClient:
 
     async def get_ltp(self, symbol: str, exchange: Optional[str] = None) -> float:
         """Fetches live Last Traded Price (LTP) for a symbol."""
+        if self.mode == "LIVE":
+            if not self._connected:
+                self.connect()
+            if not self._connected or self.live_adapter is None:
+                logger.error(f"LIVE mode execution failed: Cannot fetch LTP for {symbol}, live broker adapter unavailable")
+                return 0.0
+            try:
+                if hasattr(self.live_adapter, "get_ltp"):
+                    return await asyncio.to_thread(self.live_adapter.get_ltp, symbol, exchange)
+                else:
+                    logger.error("Live broker adapter does not support get_ltp.")
+                    return 0.0
+            except Exception as e:
+                logger.error(f"Failed to fetch live LTP for {symbol}: {e}", exc_info=True)
+                return 0.0
+
         # Simulated price lookup
         return 100.0
 

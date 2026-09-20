@@ -6,11 +6,13 @@ from v2.trading.stock_broker_client import (
     OrderType,
     TransactionType,
 )
+from v2.trading.position_manager import PositionManager
 
 __all__ = [
     "StockBrokerClient",
     "ProductType",
     "OrderType",
     "TransactionType",
+    "PositionManager",
 ]
 

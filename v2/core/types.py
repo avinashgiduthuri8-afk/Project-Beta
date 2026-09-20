@@ -19,6 +19,10 @@ class BotName(str, Enum):
     MTB = "MTB"
     PMB = "PMB"
     VGX = "VGX"
+    STE = "STE"
+    HDA = "HDA"
+    VCP = "VCP"
+    BBS = "BBS"
 
 
 class BotMode(str, Enum):
@@ -88,6 +92,7 @@ class ExitReason(str, Enum):
 
 
 class PositionStatus(str, Enum):
+    PENDING = "PENDING"
     OPEN    = "OPEN"
     CLOSING = "CLOSING"
     CLOSED  = "CLOSED"
@@ -144,10 +149,33 @@ class Position:
     closed_at:       Optional[datetime] = None
     exit_price:      Optional[float] = None
     exit_reason:     Optional[ExitReason] = None
+    id:                str
+    bot:               BotName
+    coin:              str
+    pair:              str
+    qty:               float
+    entry_price:       float
+    entry_time:        datetime
+    mode:              BotMode
+    status:            PositionStatus = PositionStatus.OPEN
+    current_price:     Optional[float] = None
+    unrealised_pnl:    Optional[float] = None
+    stop_loss:         Optional[float] = None
+    take_profit:       Optional[float] = None
+    signal_id:         Optional[str]   = None
+    closed_at:         Optional[datetime] = None
+    exit_price:        Optional[float] = None
+    exit_reason:       Optional[ExitReason] = None
+    filled_qty:        Optional[float] = None
+    exchange_order_id: Optional[str] = None
+    client_order_id:   Optional[str] = None
+    exit_order_id:     Optional[str] = None
 
     @property
     def deployed_capital(self) -> float:
         return self.qty * self.entry_price
+        qty_to_use = self.filled_qty if self.filled_qty is not None else self.qty
+        return qty_to_use * self.entry_price
 
 
 @dataclass
@@ -167,6 +195,23 @@ class Trade:
     exit_reason: ExitReason
     mode:        BotMode
     signal_id:   Optional[str] = None
+    id:                str
+    position_id:       str
+    bot:               BotName
+    coin:              str
+    pair:              str
+    entry_price:       float
+    exit_price:        float
+    qty:               float
+    pnl:               float
+    pnl_pct:           float
+    entry_time:        datetime
+    exit_time:         datetime
+    exit_reason:       ExitReason
+    mode:              BotMode
+    signal_id:         Optional[str] = None
+    exchange_order_id: Optional[str] = None
+    client_order_id:   Optional[str] = None
 
 
 @dataclass
@@ -175,12 +220,21 @@ class BotSnapshot:
     mode:            BotMode
     status:          BotStatus
     cash_balance:    float
+    bot:              BotName
+    mode:             BotMode
+    status:           BotStatus
+    cash_balance:     float
     deployed_capital: float
     open_positions:  int
     total_pnl:       float
     last_cycle_at:   Optional[datetime]
     health_score:    int           # 0–100
     captured_at:     datetime
+    open_positions:   int
+    total_pnl:        float
+    last_cycle_at:    Optional[datetime]
+    health_score:     int           # 0–100
+    captured_at:      datetime
 
 
 @dataclass
@@ -194,3 +248,4 @@ class PortfolioSnapshot:
     capital_utilisation:  float    # percent
     positions_by_bot:     dict     # BotName → list[Position]
     captured_at:          datetime
+

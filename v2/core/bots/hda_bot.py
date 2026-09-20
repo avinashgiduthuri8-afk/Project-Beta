@@ -7,7 +7,16 @@ import pandas as pd
 
 
 class HDABot:
+from v2.core.bots.base import BotArchetype
+from v2.core.types import BotName
+
+
+class HDABot(BotArchetype):
     """High-Delivery Absorption Archetype (Orderflow Accumulation)."""
+
+    @property
+    def name(self) -> BotName:
+        return BotName.HDA
 
     def __init__(
         self,
@@ -46,6 +55,7 @@ class HDABot:
 
             return {
                 "bot": self.name,
+                "bot": self.name.value,
                 "symbol": symbol,
                 "direction": "BUY",
                 "entry_price": latest_close,

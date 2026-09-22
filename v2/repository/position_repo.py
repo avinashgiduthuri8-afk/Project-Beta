@@ -36,8 +36,7 @@ def _row_to_position(row: aiosqlite.Row) -> Position:
     return Position(
         id                = d["id"],
         bot               = BotName(d["bot"]),
-        coin              = d["coin"],
-        pair              = d["pair"],
+        symbol = d["coin"], side = d.get("side", "BUY"),
         qty               = d["qty"],
         entry_price       = d["entry_price"],
         entry_time        = _dt(d["entry_time"]),
@@ -51,7 +50,7 @@ def _row_to_position(row: aiosqlite.Row) -> Position:
         closed_at         = _dt(d.get("closed_at")),
         exit_price        = d.get("exit_price"),
         exit_reason       = ExitReason(d["exit_reason"]) if d.get("exit_reason") else None,
-        filled_qty        = d.get("filled_qty"),
+        filled_qty = d.get("filled_qty", 0.0),
         exchange_order_id = d.get("exchange_order_id"),
         client_order_id   = d.get("client_order_id"),
         exit_order_id     = d.get("exit_order_id"),
@@ -64,20 +63,18 @@ class PositionRepository(BaseRepository):
         await self._execute(
             """
             INSERT INTO positions
-            (id, bot, coin, pair, qty, entry_price, entry_time,
+            (id, bot, coin, pair, side, qty, filled_qty, entry_price, entry_time,
              current_price, unrealised_pnl, stop_loss, take_profit,
              mode, signal_id, status)
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-             mode, signal_id, status, filled_qty, exchange_order_id,
+             mode, signal_id, status, exchange_order_id,
              client_order_id, exit_order_id)
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
             (
                 position.id,
                 position.bot.value,
-                position.coin,
-                position.pair,
-                position.qty,
+                position.symbol, position.symbol, position.side, position.qty, position.filled_qty,
                 position.entry_price,
                 position.entry_time.isoformat(),
                 position.entry_time.isoformat() if isinstance(position.entry_time, datetime) else str(position.entry_time),
@@ -88,7 +85,6 @@ class PositionRepository(BaseRepository):
                 position.mode.value,
                 position.signal_id,
                 position.status.value,
-                position.filled_qty,
                 position.exchange_order_id,
                 position.client_order_id,
                 position.exit_order_id,
@@ -101,17 +97,14 @@ class PositionRepository(BaseRepository):
         await self._execute(
             """
             UPDATE positions
-            SET status=?, qty=?, entry_price=?, filled_qty=?,
+            SET status=?, qty=?, entry_price=?, filled_qty=?, side=?,
                 current_price=?, unrealised_pnl=?, stop_loss=?, take_profit=?,
                 exchange_order_id=?, client_order_id=?, exit_order_id=?,
                 exit_price=?, exit_reason=?, closed_at=?
             WHERE id=?
             """,
             (
-                position.status.value,
-                position.qty,
-                position.entry_price,
-                position.filled_qty,
+                position.status.value, position.qty, position.entry_price, position.filled_qty, position.side,
                 position.current_price,
                 position.unrealised_pnl,
                 position.stop_loss,

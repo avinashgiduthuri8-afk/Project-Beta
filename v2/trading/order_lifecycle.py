@@ -135,14 +135,12 @@ class OrderLifecycleTracker:
             "reason": reason,
         })
 
-    def transition_to(self, new_state: OrderLifecycleState, reason: str = "", broker_order_id: Optional[str] = None) -> bool:
-        """Transitions order to a new state if valid.
     async def transition_to(self, new_state: OrderLifecycleState, reason: str = "", broker_order_id: Optional[str] = None, filled_quantity: int = 0) -> bool:
-        """Transitions order to a new state if valid and fires EventBus events."""
-        from v2.bus import bus
-
+        """Transitions order to a new state if valid and fires EventBus events.
+        
         Returns True if transition succeeded, False if invalid transition attempt.
         """
+        from v2.bus import bus
         if broker_order_id:
             self.broker_order_id = broker_order_id
 

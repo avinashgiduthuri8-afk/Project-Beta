@@ -132,50 +132,31 @@ class Signal:
 
 @dataclass
 class Position:
-    id:              str
-    bot:             BotName
-    coin:            str
-    pair:            str
-    qty:             float
-    entry_price:     float
-    entry_time:      datetime
-    mode:            BotMode
-    status:          PositionStatus = PositionStatus.OPEN
-    current_price:   Optional[float] = None
-    unrealised_pnl:  Optional[float] = None
-    stop_loss:       Optional[float] = None
-    take_profit:     Optional[float] = None
-    signal_id:       Optional[str]   = None
-    closed_at:       Optional[datetime] = None
-    exit_price:      Optional[float] = None
-    exit_reason:     Optional[ExitReason] = None
     id:                str
     bot:               BotName
-    coin:              str
-    pair:              str
+    symbol:            str  # Replaces coin/pair for unification
+    side:              str  # "BUY" or "SELL"
     qty:               float
+    filled_qty:        float
     entry_price:       float
     entry_time:        datetime
     mode:              BotMode
     status:            PositionStatus = PositionStatus.OPEN
+    client_order_id:   Optional[str] = None
+    exchange_order_id: Optional[str] = None
+    exit_order_id:     Optional[str] = None
     current_price:     Optional[float] = None
     unrealised_pnl:    Optional[float] = None
     stop_loss:         Optional[float] = None
     take_profit:       Optional[float] = None
-    signal_id:         Optional[str]   = None
+    signal_id:         Optional[str] = None
     closed_at:         Optional[datetime] = None
     exit_price:        Optional[float] = None
     exit_reason:       Optional[ExitReason] = None
-    filled_qty:        Optional[float] = None
-    exchange_order_id: Optional[str] = None
-    client_order_id:   Optional[str] = None
-    exit_order_id:     Optional[str] = None
 
     @property
     def deployed_capital(self) -> float:
-        return self.qty * self.entry_price
-        qty_to_use = self.filled_qty if self.filled_qty is not None else self.qty
-        return qty_to_use * self.entry_price
+        return self.filled_qty * self.entry_price
 
 
 @dataclass

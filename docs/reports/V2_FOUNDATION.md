@@ -88,7 +88,7 @@ bus.unsubscribe(EventType.SIGNAL_GENERATED, my_async_handler)
 
 # Inspect
 bus.subscriber_count(EventType.SIGNAL_GENERATED)  # → int
-bus.all_subscriptions()                             # → dict[str, list[str]]
+bus.all_subscriptions()  # → dict[str, list[str]]
 ```
 
 Handler signature:

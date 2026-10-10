@@ -218,8 +218,8 @@ CoinDCX REST API (polled every 300s)
 **A1. Deduplicate candle fetches in `analyze_coin()`**
 ```python
 # CURRENT (2 separate fetches for same coin):
-hist = historical_pattern_score(coin, current_price)   # fetches candles internally
-perf = get_historical_performance(coin)                 # fetches candles AGAIN
+hist = historical_pattern_score(coin, current_price)  # fetches candles internally
+perf = get_historical_performance(coin)  # fetches candles AGAIN
 
 # RECOMMENDED (1 fetch, shared):
 candles = _fetch_daily_candles_for_coin(coin)  # single fetch
@@ -247,10 +247,11 @@ The current ticker cache returns stale data on fetch failure (already implemente
 ```python
 _WATCHLIST_TTL = 30  # seconds
 
+
 def all(self) -> list[str]:
     now = time.monotonic()
     if now - self._last_loaded < _WATCHLIST_TTL:
-        return list(self._coins)   # fast path: no disk read
+        return list(self._coins)  # fast path: no disk read
     self._coins = self._load()
     self._last_loaded = now
     return list(self._coins)
@@ -270,7 +271,7 @@ Replace the full-list EMA computation every tick with a running state:
 # Instead of: ema(prices, EMA_FAST_PERIOD)  [O(N) every tick]
 # Maintain per-coin state:
 class CoinState:
-    ema_fast: float   # updated with: ema_fast = α * price + (1 - α) * ema_fast
+    ema_fast: float  # updated with: ema_fast = α * price + (1 - α) * ema_fast
     ema_slow: float
 ```
 **Library option:** `talipp` (528 stars, MIT) provides drop-in incremental EMA.  
@@ -283,12 +284,16 @@ Replace the O(N²) `_sr_quality_score` with a binned approach:
 # RECOMMENDED: O(N log N) — sort once, use bisect to count touches in range
 import bisect
 
+
 def _sr_quality_score_fast(closes, current_price, max_pts=25):
     sorted_closes = sorted(c for c in closes if c > 0)
     levels = []
     for ref in sorted_closes:
         band = ref * 0.015
-        lo, hi = bisect.bisect_left(sorted_closes, ref - band), bisect.bisect_right(sorted_closes, ref + band)
+        lo, hi = (
+            bisect.bisect_left(sorted_closes, ref - band),
+            bisect.bisect_right(sorted_closes, ref + band),
+        )
         touches = hi - lo
         if touches >= 3 and not any(abs(ref - lv) / ref <= 0.015 for lv in levels):
             levels.append(ref)
@@ -309,7 +314,7 @@ _pending_history_entries.append(entry)
 if _pending_history_entries:
     history = _read_history()
     for entry in _pending_history_entries:
-        if not any(h.get('id') == entry['id'] for h in history):
+        if not any(h.get("id") == entry["id"] for h in history):
             history.append(entry)
     _write_history(history)
     _pending_history_entries.clear()
@@ -336,7 +341,9 @@ This eliminates the full history read (and full history O(N) filter) from these 
 # CURRENT: threading.Lock + time.sleep() inside asyncio.to_thread
 # RECOMMENDED: aiolimiter (755 stars, MIT)
 from aiolimiter import AsyncLimiter
+
 _rate_limiter = AsyncLimiter(8, 1)  # 8 per second
+
 
 async def _limited_get_async(url: str, **kwargs):
     async with _rate_limiter:
@@ -353,6 +360,7 @@ Or keep `_limited_get` synchronous but remove the sleep — let the caller (alre
 ```python
 _LAST_BACKUP_TIME: dict[str, float] = {}
 _BACKUP_MIN_INTERVAL = 300  # 5 minutes
+
 
 def write_json_safely(path: Path, data) -> None:
     with _write_json_lock:
@@ -380,6 +388,7 @@ Currently `live_signals.json` is written every scan cycle (300s). This is alread
 _PERF_STATS_CACHE: dict = {}
 _PERF_STATS_CACHE_AT: float = 0.0
 _PERF_STATS_TTL = 60.0  # seconds
+
 
 def get_performance_stats() -> dict:
     now = time.monotonic()

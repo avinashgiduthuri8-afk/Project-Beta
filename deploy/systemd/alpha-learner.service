@@ -1,0 +1,24 @@
+[Unit]
+Description=PROJECT-ALPHA Autonomous Learner & Canary Calibration Service
+After=network.target alpha-paper.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/project-alpha
+Environment=PYTHONPATH=/opt/project-alpha:/opt/project-alpha/shared:/opt/project-alpha/services
+Environment=MODE=LEARNER
+Environment=DB_PATH=learner/data/alpha_learner.db
+Environment=PAPER_DB_PATH=paper/data/alpha_paper.db
+Environment=SCANNER_DB_PATH=scanner/data/alpha_scanner.db
+EnvironmentFile=-/opt/project-alpha/.env
+EnvironmentFile=-/opt/project-alpha/deploy/env/learner.env
+ExecStart=/opt/project-alpha/.venv/bin/python3 -m services.learner.main
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

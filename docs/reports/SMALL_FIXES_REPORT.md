@@ -51,9 +51,11 @@ Added after each `BOT_MODE = os.getenv(...)` line:
 _VALID_BOT_MODES = {"PAPER", "LIVE", "PAUSED", "DISABLED"}
 if BOT_MODE not in _VALID_BOT_MODES:
     import logging as _logging
+
     _logging.getLogger(__name__).warning(
         "Invalid <BOT>_BOT_MODE %r — must be one of %s; forcing DISABLED",
-        BOT_MODE, sorted(_VALID_BOT_MODES),
+        BOT_MODE,
+        sorted(_VALID_BOT_MODES),
     )
     BOT_MODE = "DISABLED"
 ```
@@ -94,9 +96,9 @@ All `print()` calls replaced with appropriate logger calls:
 Added three `asyncio.Lock()` instances:
 
 ```python
-_SNAPSHOT_CACHE_LOCK = asyncio.Lock()   # guards _SNAPSHOT_CACHE writes
-_ALERT_LOG_LOCK      = asyncio.Lock()   # guards _ALERT_LOG mutations
-_ERROR_LOG_LOCK      = asyncio.Lock()   # guards _ERROR_LOG mutations
+_SNAPSHOT_CACHE_LOCK = asyncio.Lock()  # guards _SNAPSHOT_CACHE writes
+_ALERT_LOG_LOCK = asyncio.Lock()  # guards _ALERT_LOG mutations
+_ERROR_LOG_LOCK = asyncio.Lock()  # guards _ERROR_LOG mutations
 ```
 
 - `_cached_snapshot()`: write to `_SNAPSHOT_CACHE` wrapped in `async with _SNAPSHOT_CACHE_LOCK`
@@ -119,10 +121,13 @@ Circuit-breaker JSON file read wrapped with `asyncio.to_thread`:
 with open(CIRCUIT_BREAKER_FILE) as _f:
     _cb = _json.load(_f)
 
+
 # After
 def _read_cb_file():
     with open(CIRCUIT_BREAKER_FILE) as _f:
         return _json.load(_f)
+
+
 _cb = await asyncio.to_thread(_read_cb_file)
 ```
 
@@ -135,10 +140,13 @@ Pre-load of persisted signals wrapped with `asyncio.to_thread`:
 with open(LIVE_SIGNALS_FILE, "r", encoding="utf-8") as _f:
     _pre = _json.load(_f).get("signals", [])
 
+
 # After
 def _read_live_signals():
     with open(LIVE_SIGNALS_FILE, "r", encoding="utf-8") as _f:
         return _json.load(_f).get("signals", [])
+
+
 _pre = await asyncio.to_thread(_read_live_signals)
 ```
 

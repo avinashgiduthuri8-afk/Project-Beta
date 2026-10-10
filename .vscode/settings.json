@@ -1,0 +1,10 @@
+{
+  "git.autofetch": false,
+  "git.autoStash": false,
+  "git.autorefresh": true,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
+}

@@ -28,7 +28,7 @@ def buy_position(coin, price, amount, source="SCANNER"):
         return False
     # GAP: Another thread could add position here
     storage.virtual_balance -= amount  # MODIFY
-    storage.positions[pos_key] = ...   # WRITE
+    storage.positions[pos_key] = ...  # WRITE
 ```
 
 ### After (Thread-Safe)
@@ -59,10 +59,10 @@ def buy_position(coin, price, amount, source="SCANNER"):
 
 ### Configuration
 ```python
-DAILY_LOSS_LIMIT_PCT = 3.0     # Daily: No new trades
-WEEKLY_LOSS_LIMIT_PCT = 8.0    # Weekly: Pause trading
+DAILY_LOSS_LIMIT_PCT = 3.0  # Daily: No new trades
+WEEKLY_LOSS_LIMIT_PCT = 8.0  # Weekly: Pause trading
 MONTHLY_LOSS_LIMIT_PCT = 12.0  # Monthly: Manual review
-MAX_DRAWDOWN_PCT = 20.0        # Emergency Stop
+MAX_DRAWDOWN_PCT = 20.0  # Emergency Stop
 ```
 
 ### Trading States
@@ -96,11 +96,11 @@ def analyze_coin(coin: str, history=None) -> dict:
 ```python
 # market_analysis.py - REAL MARKET INTELLIGENCE
 def analyze_coin(coin: str, history: List[Dict]) -> CoinAnalysisResult:
-    trend = analyze_trend(history)        # EMA crossover, momentum
-    volume = analyze_volume(history)      # Volume spike detection
-    volatility = analyze_volatility()     # Risk level classification
-    regime = detect_market_regime()       # Bull/Bear/Sideways/Breakout
-    score = calculate_coin_score()        # 0-100 comprehensive score
+    trend = analyze_trend(history)  # EMA crossover, momentum
+    volume = analyze_volume(history)  # Volume spike detection
+    volatility = analyze_volatility()  # Risk level classification
+    regime = detect_market_regime()  # Bull/Bear/Sideways/Breakout
+    score = calculate_coin_score()  # 0-100 comprehensive score
     return CoinAnalysisResult(...)
 ```
 

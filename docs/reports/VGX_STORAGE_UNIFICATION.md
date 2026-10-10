@@ -27,10 +27,11 @@ If the process was launched from any directory other than the project root, the 
 - Added `get_vgx_storage_file()` — a canonical helper that returns `STORAGE_FILE`.  All callers should use this helper instead of building paths manually.
 
 ```python
-_VGX_ROOT      = _pathlib.Path(__file__).resolve().parent
-STORAGE_DIR    = str(_VGX_ROOT / "storage")
-STORAGE_FILE   = str(_VGX_ROOT / "storage" / f"{PROJECT_NAME}.json")
+_VGX_ROOT = _pathlib.Path(__file__).resolve().parent
+STORAGE_DIR = str(_VGX_ROOT / "storage")
+STORAGE_FILE = str(_VGX_ROOT / "storage" / f"{PROJECT_NAME}.json")
 STORAGE_BACKUP = str(_VGX_ROOT / "storage" / f"{PROJECT_NAME}_backup.json")
+
 
 def get_vgx_storage_file() -> str:
     """Canonical absolute path to TradingBotCrypto.json. Use this everywhere."""

@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  alpha-scanner:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: alpha-scanner
+    restart: unless-stopped
+    command: ["python", "-m", "services.scanner.main"]
+    env_file:
+      - ../env/scanner.env.example
+    volumes:
+      - scanner_data:/opt/project-alpha/scanner/data
+      - learner_data:/opt/project-alpha/learner/data:ro
+
+  alpha-paper:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: alpha-paper
+    restart: unless-stopped
+    command: ["python", "-m", "services.paper_bot.main"]
+    env_file:
+      - ../env/paper.env.example
+    volumes:
+      - scanner_data:/opt/project-alpha/scanner/data:ro
+      - paper_data:/opt/project-alpha/paper/data
+
+  alpha-learner:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: alpha-learner
+    restart: unless-stopped
+    command: ["python", "-m", "services.learner.main"]
+    env_file:
+      - ../env/learner.env.example
+    volumes:
+      - scanner_data:/opt/project-alpha/scanner/data:ro
+      - paper_data:/opt/project-alpha/paper/data:ro
+      - learner_data:/opt/project-alpha/learner/data
+
+volumes:
+  scanner_data:
+    name: project_alpha_scanner_data
+  paper_data:
+    name: project_alpha_paper_data
+  learner_data:
+    name: project_alpha_learner_data

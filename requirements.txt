@@ -1,35 +1,18 @@
-# Configuration & Auth
-pyyaml
-pyotp
-
-fastapi==0.116.1
-uvicorn==0.35.0
-starlette
-jinja2==3.1.6
-python-multipart
-itsdangerous
-pydantic
-pydantic-settings
-httpx
-aiofiles
-
-# Data & analysis
+# Data & Analysis
 numpy
 pandas
-ta
-yfinance
 
-# Telegram
-python-telegram-bot
+# HTTP & Async
+httpx
 
-# HTTP & networking
-requests==2.32.4
+# Settings & Validation
+pydantic
+pydantic-settings
 
-# System monitoring
-psutil
-
-# Database (V2)
+# Database
 aiosqlite
 
 # Testing
 pytest
+pytest-asyncio>=0.23.0,<1.5.0
+anyio

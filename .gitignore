@@ -7,12 +7,22 @@ credentials.json
 *.key
 .credentials
 
-# Python
+# Python & Virtual Environments
+.venv/
+venv/
+env/
+!deploy/env/
+deploy/env/*
+!deploy/env/scanner.env.example
+!deploy/env/paper.env.example
+!deploy/env/learner.env.example
 __pycache__/
 *.pyc
+*.pyo
 
 # Backup files
 *.json.bak
+backups/
 
 # Runtime state files — never commit; regenerated at startup
 bots/scanner_bot/attached_assets/*.ipynb
@@ -25,16 +35,50 @@ storage/*.json
 v2/data/*.db
 v2/data/*.db-shm
 v2/data/*.db-wal
+# Runtime databases and config overrides
+data/
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/*.json
+data/config_override.json
+*.db-journal
+*.sqlite
+*.sqlite3
+*.db
+scanner/data/
+paper/data/
+live/data/
+learner/data/
 
 # Logs
 logs/*.log
 *.log
 
 # Test artifacts
-.pytest_temp/
+.pytest_t*
+.pytest_temp*
+pytest_temp*
+temp_pytest*
 .pytest_cache/
+.pytest_tmp*
+.test_dbs/
+.test_tmp*
+tests_tmp*
+temp_*
+*.tmp
+
+# Scratch scripts
+scratch/
+*.temp
+*.bak
+local_overrides.json
+/file
 
 # Platform artifacts (Replit / Emergent)
 .replit
 .emergent/
 skills-lock.json
+PROJECT-ALPHA/
+_debug_inspect.py
+scratch_*.py

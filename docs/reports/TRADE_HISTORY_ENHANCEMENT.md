@@ -47,6 +47,7 @@ For MTB: `return_pct` is already stored precisely by `close_position()`, so it i
 def _compute_holding_time(entry_ts: str, exit_ts: str) -> str:
     """Return human-readable duration between two ISO-8601 timestamps."""
 
+
 def _enrich_closed_trades(trades: list[dict], all_trades: list[dict]) -> list[dict]:
     """Add pnl_pct, holding_time, entry_price to closed trade records."""
 ```
@@ -58,10 +59,14 @@ Both are pure functions that do not write to any storage.
 ```python
 _pmb_all = await asyncio.to_thread(_pmb_st.load_trades)
 _mtb_all = await asyncio.to_thread(_mtb_st.load_trades)
-pmb_state = {**pmb_state,
-             "closed_trades": _enrich_closed_trades(pmb_state["closed_trades"], _pmb_all)}
-mtb_state = {**mtb_state,
-             "closed_trades": _enrich_closed_trades(mtb_state["closed_trades"], _mtb_all)}
+pmb_state = {
+    **pmb_state,
+    "closed_trades": _enrich_closed_trades(pmb_state["closed_trades"], _pmb_all),
+}
+mtb_state = {
+    **mtb_state,
+    "closed_trades": _enrich_closed_trades(mtb_state["closed_trades"], _mtb_all),
+}
 ```
 
 The enrichment is **best-effort** — if it raises an exception, the original raw data is served unchanged (the `try/except` in the caller ensures this).

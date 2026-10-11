@@ -8,17 +8,19 @@ Never accesses LIVE trading state or Live DB.
 
 from datetime import datetime, timezone
 import inspect
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from core.bus.event_bus import EventBus
 from core.bus.event_types import EventType
 from core.logging import get_logger
 from core.types import BotMode, BotName
-from execution.auto_trader import AutoTradeRouter
 from execution.position_manager import PositionManager
 from execution.trading.precision_rules import extract_base_coin
 from shared.mode_guard import ModeIsolationError, validate_execution_mode
 
 logger = get_logger("paper.execution.router")
+
+if TYPE_CHECKING:
+    from execution.auto_trader import AutoTradeRouter
 
 
 class PaperExecutionRouter:
@@ -30,7 +32,7 @@ class PaperExecutionRouter:
     def __init__(
         self,
         bus: EventBus,
-        auto_trader: AutoTradeRouter,
+        auto_trader: "AutoTradeRouter",
         position_manager: PositionManager | None = None,
         capital_guard: Any | None = None,
         position_repo: Any | None = None,

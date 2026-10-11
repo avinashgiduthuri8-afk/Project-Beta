@@ -20,8 +20,7 @@ class SignalDispatcher:
 
     async def dispatch(self, signal: Signal) -> dict[str, Any]:
         """
-        Dispatches signal to PAPER and/or LIVE execution targets.
-        Every signal payload MUST carry an explicit mode ("PAPER" or "LIVE").
+        Dispatch a signal to the sole Beta v1 execution target: PAPER.
         """
         dispatched = {}
 
@@ -34,17 +33,8 @@ class SignalDispatcher:
             )
         dispatched["paper"] = paper_signal.id
 
-        # 2. Dispatch Live Signal (mode = LIVE)
-        live_signal = self._clone_signal_for_mode(signal, BotMode.LIVE)
-        if self.bus:
-            await self.bus.publish(
-                EventType.SIGNAL_GENERATED,
-                self._signal_to_dict(live_signal),
-            )
-        dispatched["live"] = live_signal.id
-
         logger.info(
-            "Dispatched signal %s to PAPER and LIVE execution targets.",
+            "Dispatched signal %s to PAPER execution.",
             signal.id,
             extra={"coin": signal.coin, "score": signal.score},
         )

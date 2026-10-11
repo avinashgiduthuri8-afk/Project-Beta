@@ -30,7 +30,7 @@ import json
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -62,6 +62,20 @@ class AppConfig(BaseSettings):
         default="data/project_beta.db",
         validation_alias=AliasChoices("DB_PATH", "V2_DB_PATH", "db_path", "v2_db_path"),
         description="Path to the canonical SQLite database file.",
+    )
+
+    execution_mode: Literal["PAPER"] = Field(
+        default="PAPER",
+        validation_alias=AliasChoices("EXECUTION_MODE", "execution_mode"),
+    )
+    market_data_provider: Literal["YAHOO", "DHAN"] = Field(
+        default="YAHOO",
+        validation_alias=AliasChoices(
+            "MARKET_DATA_PROVIDER",
+            "PUBLIC_MARKET_DATA_PROVIDER",
+            "market_data_provider",
+            "public_market_data_provider",
+        ),
     )
 
     # ── Unified Capital Pool & Sizing ─────────────────────────────────────────
@@ -914,6 +928,26 @@ class AppConfig(BaseSettings):
                 raise SecurityConfigError(
                     f"LIVE trading mode blocked: valid Beta-only {broker} credentials are required."
                 )
+
+    def validate_v1_safety(self) -> None:
+        """Fail closed if configuration attempts to enable order execution."""
+        if self.execution_mode != "PAPER":
+            raise ValueError("Beta v1 is paper-only")
+        if self.market_data_provider not in {"YAHOO", "DHAN"}:
+            raise ValueError("Beta v1 supports only YAHOO or DHAN market data")
+
+    @field_validator("execution_mode", mode="before")
+    @classmethod
+    def validate_execution_mode_v1(cls, value: Any) -> str:
+        mode = str(value or "").strip().upper()
+        if mode != "PAPER":
+            raise ValueError("Beta v1 is paper-only")
+        return mode
+
+    @field_validator("market_data_provider", mode="before")
+    @classmethod
+    def normalize_market_data_provider(cls, value: Any) -> str:
+        return str(value or "").strip().upper()
 
     def get_sanitized_config_dict(self) -> dict:
         """Return dict of config values with secret keys safely redacted and legacy aliases supported."""

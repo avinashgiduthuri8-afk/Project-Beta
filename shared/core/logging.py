@@ -1,5 +1,5 @@
 """
-PROJECT-ALPHA Structured Logger Factory.
+Project Beta structured logger factory.
 
 Returns a standard logging.Logger whose handlers emit JSON-formatted
 lines — forward-compatible with Loki, Datadog, and CloudWatch.
@@ -7,7 +7,7 @@ lines — forward-compatible with Loki, Datadog, and CloudWatch.
 Usage:
     from core.logging import get_logger
     logger = get_logger("scanner.service")
-    logger.info("Signal generated", extra={"coin": "BTC", "score": 87})
+    logger.info("Signal generated", extra={"symbol": "NSE:RELIANCE", "score": 87})
 """
 
 from __future__ import annotations

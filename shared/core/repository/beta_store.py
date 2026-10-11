@@ -56,6 +56,7 @@ class BetaStore:
                 quantity INTEGER NOT NULL CHECK(quantity > 0),
                 entry_price TEXT NOT NULL,
                 charges TEXT NOT NULL,
+                charge_breakdown TEXT NOT NULL DEFAULT '{}',
                 opened_at TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'OPEN'
             );
@@ -69,6 +70,9 @@ class BetaStore:
                 entry_price TEXT NOT NULL,
                 exit_price TEXT NOT NULL,
                 net_pnl TEXT NOT NULL,
+                entry_charges TEXT NOT NULL DEFAULT '0',
+                exit_charges TEXT NOT NULL DEFAULT '0',
+                charges_json TEXT NOT NULL DEFAULT '{}',
                 exit_timestamp TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS beta_learning_audit (

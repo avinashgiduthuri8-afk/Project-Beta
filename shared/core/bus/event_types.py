@@ -1,7 +1,7 @@
 """
-PROJECT-ALPHA Event Type Definitions.
+Project Beta event type definitions.
 
-Event names used by the PROJECT-ALPHA event bus. Pure enum constants.
+Event names used by the Project Beta event bus. Pure enum constants.
 Import from this module to publish or subscribe to events.
 """
 

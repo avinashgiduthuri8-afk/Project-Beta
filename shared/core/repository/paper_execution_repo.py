@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from decimal import Decimal
+import json
 from typing import Any
 
 import aiosqlite
+
+from execution.indian_charges import IndianEquityChargeModel
 
 
 class PaperExecutionRepository:
@@ -37,10 +40,11 @@ class PaperExecutionRepository:
             await self.conn.execute("INSERT INTO beta_consumed_signals(signal_id,consumed_at) VALUES(?,?)", (signal_id, now))
             await self.conn.execute(
                 """INSERT INTO beta_positions
-                (id,signal_id,symbol,exchange,quantity,entry_price,charges,opened_at,status)
-                VALUES(?,?,?,?,?,?,?,?, 'OPEN')""",
+                (id,signal_id,symbol,exchange,quantity,entry_price,charges,charge_breakdown,opened_at,status)
+                VALUES(?,?,?,?,?,?,?,?,?, 'OPEN')""",
                 (position["id"], signal_id, position["symbol"], position["exchange"],
-                 position["quantity"], str(position["entry_price"]), str(position["charges"]), position["opened_at"]),
+                 position["quantity"], str(position["entry_price"]), str(position["charges"]),
+                 position.get("charge_breakdown", "{}"), position["opened_at"]),
             )
             await self.conn.execute("UPDATE beta_paper_account SET cash=? WHERE singleton=1", (str(balance - cash_debit),))
             await self.conn.commit()
@@ -62,18 +66,29 @@ class PaperExecutionRepository:
         data = dict(row)
         quantity = int(data["quantity"])
         entry = Decimal(data["entry_price"])
-        net_pnl = (Decimal(exit_price) - entry) * quantity - Decimal(data["charges"])
+        entry_charges = Decimal(data["charges"])
+        exit_breakdown = IndianEquityChargeModel().estimate(
+            "SELL", Decimal(exit_price), quantity, data["exchange"]
+        )
+        exit_charges = exit_breakdown.total
+        net_pnl = (Decimal(exit_price) - entry) * quantity - entry_charges - exit_charges
+        charges_json = json.dumps({
+            "entry": json.loads(data.get("charge_breakdown") or "{}"),
+            "exit": {key: str(value) for key, value in exit_breakdown.as_dict().items()},
+        })
         journal_id = f"journal-{position_id}"
         await self.conn.execute("UPDATE beta_positions SET status='CLOSED' WHERE id=?", (position_id,))
         await self.conn.execute(
             """INSERT OR IGNORE INTO beta_journal
-            (id,position_id,symbol,exchange,strategy,quantity,entry_price,exit_price,net_pnl,exit_timestamp)
-            VALUES(?,?,?,?,?,?,?,?,?,?)""",
+            (id,position_id,symbol,exchange,strategy,quantity,entry_price,exit_price,net_pnl,
+             entry_charges,exit_charges,charges_json,exit_timestamp)
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (journal_id, position_id, data["symbol"], data["exchange"], strategy, quantity,
-             str(entry), str(exit_price), str(net_pnl), closed_at.isoformat()),
+             str(entry), str(exit_price), str(net_pnl), str(entry_charges), str(exit_charges),
+             charges_json, closed_at.isoformat()),
         )
-        proceeds = Decimal(exit_price) * quantity
+        proceeds = Decimal(exit_price) * quantity - exit_charges
         balance = await self.cash()
         await self.conn.execute("UPDATE beta_paper_account SET cash=? WHERE singleton=1", (str(balance + proceeds),))
         await self.conn.commit()
-        return {"journal_id": journal_id, "net_pnl": net_pnl}
+        return {"journal_id": journal_id, "net_pnl": net_pnl, "exit_charges": exit_charges}

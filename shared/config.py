@@ -1,5 +1,5 @@
 """
-PROJECT-ALPHA — Shared Configuration Utilities.
+Project Beta shared configuration utilities.
 """
 
 from core.config import AppConfig, get_config

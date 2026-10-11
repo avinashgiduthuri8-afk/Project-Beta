@@ -1,5 +1,5 @@
 """
-PROJECT-ALPHA Event Bus.
+Project Beta event bus.
 
 Provides publish / subscribe / unsubscribe primitives.
 No production implementation yet — all methods are stubs that log intent.
@@ -10,7 +10,7 @@ Usage:
 
     bus = EventBus()
     bus.subscribe(EventType.SIGNAL_GENERATED, my_handler)
-    await bus.publish(EventType.SIGNAL_GENERATED, payload={"coin": "BTC"})
+    await bus.publish(EventType.SIGNAL_GENERATED, payload={"symbol": "NSE:RELIANCE"})
 """
 
 from __future__ import annotations

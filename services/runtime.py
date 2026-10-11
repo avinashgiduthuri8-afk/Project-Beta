@@ -15,7 +15,9 @@ from core.repository.paper_execution_repo import PaperExecutionRepository
 from core.repository.quote_repo import QuoteRepository
 from services.learner.indian_service import IndianLearnerService
 from market.models import MarketQuote
-from market.provider import YahooMarketDataProvider
+from market.dhan_feed import DhanMarketFeed
+from market.instruments import DhanInstrumentMaster
+from market.provider import DhanMarketDataProvider, YahooMarketDataProvider
 from market.symbols import StockSymbol
 from services.paper_bot.indian_service import IndianPaperService
 from services.scanner.indian_service import IndianScannerService
@@ -36,13 +38,20 @@ async def _connection(path: str, read_only: bool = False) -> aiosqlite.Connectio
 async def run_scanner() -> None:
     cfg = get_config()
     cfg.validate_v1_safety()
-    if cfg.market_data_provider != "YAHOO":
-        raise RuntimeError("Dhan WebSocket requires an explicit subscription universe; use YAHOO until configured")
     conn = await _connection(cfg.scanner_db_path)
     store = BetaStore(conn)
     await store.initialize()
-    provider = YahooMarketDataProvider()
-    scanner = IndianScannerService(provider, store, map(StockSymbol.parse, DEFAULT_UNIVERSE), quote_repo=QuoteRepository(conn))
+    symbols = tuple(map(StockSymbol.parse, DEFAULT_UNIVERSE))
+    if cfg.market_data_provider == "DHAN":
+        master = DhanInstrumentMaster()
+        await master.refresh()
+        symbols = tuple(master.resolve(symbol) for symbol in symbols)
+        feed = DhanMarketFeed(cfg.dhan_client_id or "", cfg.dhan_access_token or "")
+        await feed.start(symbols, lambda quote: asyncio.sleep(0))
+        provider = DhanMarketDataProvider(feed, YahooMarketDataProvider())
+    else:
+        provider = YahooMarketDataProvider()
+    scanner = IndianScannerService(provider, store, symbols, quote_repo=QuoteRepository(conn))
     try:
         while True:
             await scanner.poll()

@@ -1,7 +1,7 @@
 """
-PROJECT-ALPHA — Market Data Validation Engine (Skill 04).
+Project Beta market-data validation engine.
 
-Detects corrupted, missing, inverted, or anomalous OHLCV market data from CoinDCX:
+Detects corrupted, missing, inverted, or anomalous OHLCV equity data:
   1. Price Bounds: Strict positive values (open, high, low, close > 0).
   2. Structural Geometry: High >= max(Open, Close), Low <= min(Open, Close), High >= Low.
   3. Volume Bounds: Volume >= 0.
@@ -57,7 +57,7 @@ class CandleValidationResult:
 
 class MarketDataValidator:
     """
-    Market Data Validator for CoinDCX candle feeds and backtesting data.
+    Market-data validator for NSE/BSE candle feeds and backtesting data.
     Enforces financial geometry invariants and flags feed anomalies.
     """
 

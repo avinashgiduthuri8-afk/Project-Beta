@@ -1,11 +1,11 @@
 """
-PROJECT-ALPHA — Autonomous Learner Configuration (Stages 8–10).
+Project Beta autonomous learner configuration (stages 8–10).
 
 Learner configuration explicitly declares:
   MODE = "LEARNER"
-  DB_PATH = "learner/data/alpha_learner.db"
-  PAPER_DB_PATH = "paper/data/alpha_paper.db"
-  SCANNER_DB_PATH = "scanner/data/alpha_scanner.db"
+  DB_PATH = "learner/data/beta_learner.db"
+  PAPER_DB_PATH = "paper/data/beta_paper.db"
+  SCANNER_DB_PATH = "scanner/data/beta_scanner.db"
 """
 
 from __future__ import annotations

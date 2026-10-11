@@ -1,5 +1,5 @@
 """
-PROJECT-ALPHA — Scanner Signal Dispatcher.
+Project Beta scanner signal dispatcher.
 
 Dispatches market intelligence signals from Scanner (Brain) to isolated PAPER and LIVE execution services.
 Ensures every emitted signal explicitly carries `mode = PAPER` or `mode = LIVE`.

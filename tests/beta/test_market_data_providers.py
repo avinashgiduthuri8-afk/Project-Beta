@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from decimal import Decimal
+import struct
 
 import pytest
 
@@ -35,3 +36,15 @@ async def test_dhan_disconnect_invalidates_old_generation_quotes():
     assert feed.generation == 1
     assert feed.latest(symbol) is None
     assert not hasattr(feed, "place_order")
+
+
+def test_dhan_binary_ticker_packet_is_decoded_for_subscribed_equity():
+    feed = DhanMarketFeed("client", "token")
+    symbol = StockSymbol("NSE", "HDFCBANK", "1333")
+    feed._symbols = (symbol,)
+    epoch = 1_799_999_999
+    packet = struct.pack("<BHBI fI", 2, 16, 1, 1333, 1700.5, epoch)
+    quote = feed._parse_ticker(packet)
+    assert quote.symbol == symbol
+    assert quote.price == Decimal("1700.5")
+    assert int(quote.timestamp.timestamp()) == epoch

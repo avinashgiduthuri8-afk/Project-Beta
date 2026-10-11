@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 from hashlib import sha256
+import json
 
 from core.repository.paper_execution_repo import PaperExecutionRepository
 from execution.indian_charges import IndianEquityChargeModel
@@ -46,6 +47,7 @@ class IndianPaperService:
             str(signal["id"]),
             {"id": position_id, "symbol": symbol.trading_symbol, "exchange": symbol.exchange,
              "quantity": quantity, "entry_price": fill.price, "charges": charge.total,
+             "charge_breakdown": json.dumps({key: str(value) for key, value in charge.as_dict().items()}),
              "opened_at": now.isoformat()},
             debit,
         )

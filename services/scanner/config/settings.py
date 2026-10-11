@@ -1,5 +1,5 @@
 """
-PROJECT-ALPHA — Scanner Service Configuration.
+Project Beta scanner configuration.
 """
 
 from pydantic import Field, AliasChoices

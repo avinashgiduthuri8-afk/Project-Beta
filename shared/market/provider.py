@@ -8,6 +8,7 @@ from decimal import Decimal
 from typing import Any, Protocol
 
 from .models import MarketQuote
+from .dhan_feed import DhanMarketFeed
 from .public_client import IndianStockPublicClient
 from .symbols import StockSymbol
 
@@ -71,3 +72,28 @@ class YahooMarketDataProvider:
 
     async def close(self) -> None:
         await self.client.close()
+
+
+class DhanMarketDataProvider:
+    """Dhan real-time quotes with Yahoo candles; neither path can place orders."""
+
+    def __init__(self, feed: DhanMarketFeed, candle_provider: YahooMarketDataProvider, quote_wait_seconds: float = 5.0) -> None:
+        self.feed = feed
+        self.candle_provider = candle_provider
+        self.quote_wait_seconds = quote_wait_seconds
+
+    async def get_quote(self, symbol: StockSymbol) -> MarketQuote:
+        deadline = asyncio.get_running_loop().time() + self.quote_wait_seconds
+        while asyncio.get_running_loop().time() < deadline:
+            quote = self.feed.latest(symbol)
+            if quote:
+                return quote
+            await asyncio.sleep(0.05)
+        raise TimeoutError(f"No current Dhan quote for {symbol.canonical}")
+
+    async def get_candles(self, symbol: StockSymbol, timeframe: str, limit: int) -> list[dict[str, Any]]:
+        return await self.candle_provider.get_candles(symbol, timeframe, limit)
+
+    async def close(self) -> None:
+        await self.feed.stop()
+        await self.candle_provider.close()

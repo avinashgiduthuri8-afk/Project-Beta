@@ -277,5 +277,3 @@ class IndianStockPublicClient:
 
 
 # Compatibility name for unchanged callers. It now resolves to Indian equities,
-# never to CoinDCX.
-CoinDCXPublicClient = IndianStockPublicClient

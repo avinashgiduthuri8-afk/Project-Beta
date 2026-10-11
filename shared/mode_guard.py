@@ -1,18 +1,15 @@
 """
-PROJECT-ALPHA — Shared Execution Mode Isolation & Safety Safeguards.
+Project Beta paper-mode isolation safeguards.
 
-Hard safety checks for PAPER and LIVE execution environments:
-- Paper execution layer rejects mode != PAPER
-- Live execution layer rejects mode != LIVE
-- Unknown, missing, invalid or None mode is strictly rejected.
+The execution layer rejects every mode except PAPER.
 """
 
 from typing import Any
 from core.types import BotMode
-from core.exceptions import AlphaError
+from core.exceptions import BetaError
 
 
-class ModeIsolationError(AlphaError):
+class ModeIsolationError(BetaError):
     """Raised when an invalid execution mode crosses service boundary."""
     pass
 
@@ -24,7 +21,7 @@ def validate_execution_mode(
 ) -> str:
     """
     Validates that entity (Signal, Order, Position, Trade, or dict) contains a valid mode
-    matching the expected_mode ("PAPER" or "LIVE").
+    matching the expected PAPER mode.
 
     Raises ModeIsolationError if mode is missing, invalid, or does not match expected_mode.
     """
@@ -32,7 +29,7 @@ def validate_execution_mode(
         expected_mode.value if isinstance(expected_mode, BotMode) else str(expected_mode)
     ).upper()
 
-    if expected_str not in ("PAPER", "LIVE"):
+    if expected_str != "PAPER":
         raise ModeIsolationError(f"[{component}] Invalid service expected_mode configuration: {expected_mode}")
 
     mode_val: str | None = None

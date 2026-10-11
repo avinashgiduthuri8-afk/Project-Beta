@@ -1,9 +1,9 @@
 """
-PROJECT-ALPHA — Paper Trading Configuration.
+Project Beta paper-trading configuration.
 
 Paper configuration MUST explicitly contain:
   MODE = "PAPER"
-  DB_PATH = "paper/data/alpha_paper.db"
+  DB_PATH = "paper/data/beta_paper.db"
 """
 
 from pydantic import Field, AliasChoices

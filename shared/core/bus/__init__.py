@@ -1,5 +1,5 @@
 """
-PROJECT-ALPHA Event Bus — public API.
+Project Beta event bus public API.
 
 Usage:
     from core.bus import bus, EventType

@@ -1,26 +1,5 @@
-"""Project Beta execution package with side-effect-free lazy exports."""
+"""Paper-only execution primitives for Project Beta v1."""
 
-from importlib import import_module
+from .indian_charges import ChargeBreakdown, IndianEquityChargeModel
 
-_EXPORTS = {
-    "AutoTradeRouter": ("execution.auto_trader", "AutoTradeRouter"),
-    "PositionManager": ("execution.position_manager", "PositionManager"),
-    "ReconciliationService": ("execution.reconciliation", "ReconciliationService"),
-    "RestartRecoveryService": ("execution.recovery", "RestartRecoveryService"),
-    "TradingService": ("execution.service", "TradingService"),
-    "BaseBotAdapter": ("execution.adapters", "BaseBotAdapter"),
-    "BBSAdapter": ("execution.adapters", "BBSAdapter"),
-    "HDAAdapter": ("execution.adapters", "HDAAdapter"),
-    "STEAdapter": ("execution.adapters", "STEAdapter"),
-    "StrategyAdapterFactory": ("execution.adapters", "StrategyAdapterFactory"),
-    "VCPAdapter": ("execution.adapters", "VCPAdapter"),
-}
-
-__all__ = sorted(_EXPORTS)
-
-
-def __getattr__(name: str):
-    if name not in _EXPORTS:
-        raise AttributeError(name)
-    module_name, attribute = _EXPORTS[name]
-    return getattr(import_module(module_name), attribute)
+__all__ = ["ChargeBreakdown", "IndianEquityChargeModel"]

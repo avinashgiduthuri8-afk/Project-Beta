@@ -21,7 +21,7 @@ class AppConfig(BaseSettings):
     deployment_mode: Literal["PAPER"] = Field(
         default="PAPER", validation_alias=AliasChoices("DEPLOYMENT_MODE", "deployment_mode")
     )
-    trading_enabled: Literal[False] = Field(
+    trading_enabled: bool = Field(
         default=False, validation_alias=AliasChoices("TRADING_ENABLED", "trading_enabled")
     )
     broker: Literal["PAPER"] = Field(default="PAPER", validation_alias=AliasChoices("BROKER", "broker"))
@@ -49,6 +49,14 @@ class AppConfig(BaseSettings):
         if str(value or "").strip().upper() != "PAPER":
             raise ValueError("Beta v1 is paper-only")
         return "PAPER"
+
+    @field_validator("trading_enabled", mode="before")
+    @classmethod
+    def trading_must_remain_disabled(cls, value: Any) -> bool:
+        enabled = value is True or str(value).strip().lower() in {"1", "true", "yes", "on"}
+        if enabled:
+            raise ValueError("Beta v1 is paper-only")
+        return False
 
     @field_validator("market_data_provider", mode="before")
     @classmethod

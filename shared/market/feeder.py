@@ -15,8 +15,12 @@ from core.bus.event_bus import EventBus
 from core.bus.event_types import EventType
 from core.logging import get_logger
 from core.repository.candle_repo import CandleRepository
+from core.repository.quote_repo import QuoteRepository
 
 from .public_client import IndianStockPublicClient
+from .models import MarketQuote
+from .provider import MarketDataProvider, YahooMarketDataProvider
+from .symbols import StockSymbol
 
 logger = get_logger("scanner.market.feeder")
 
@@ -45,8 +49,12 @@ class MarketFeeder:
         pairs: list[str] | None = None,
         intervals: list[str] | None = None,
         poll_interval: float = 15.0,
+        provider: MarketDataProvider | None = None,
+        quote_repo: QuoteRepository | None = None,
     ) -> None:
         self._client = client or IndianStockPublicClient()
+        self._provider = provider or YahooMarketDataProvider(self._client)
+        self._quote_repo = quote_repo
         self._candle_repo = candle_repo
         self._bus = bus
         self._pairs = [p.upper() for p in (pairs or DEFAULT_PAIRS)]
@@ -185,6 +193,18 @@ class MarketFeeder:
                 return float(candles[-1].get("close") or 0.0)
 
         return None
+
+    async def get_latest_quote(self, symbol: StockSymbol | str) -> MarketQuote | None:
+        """Scanner's single provider entry point; persist evidence for Paper."""
+        stock = symbol if isinstance(symbol, StockSymbol) else StockSymbol.parse(symbol)
+        try:
+            quote = await self._provider.get_quote(stock)
+        except Exception as exc:
+            logger.warning("Market quote unavailable", extra={"symbol": stock.canonical, "error": str(exc)})
+            return None
+        if self._quote_repo:
+            await self._quote_repo.upsert(quote)
+        return quote
 
     def get_cached_candles(self, pair: str, timeframe: str) -> list[dict[str, Any]]:
         """Retrieve in-memory cached candles for instant signal calculation."""

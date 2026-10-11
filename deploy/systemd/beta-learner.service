@@ -1,0 +1,14 @@
+[Unit]
+Description=Project Beta AI Learner (stages 8-10)
+After=beta-paper.service
+
+[Service]
+WorkingDirectory=/opt/project-beta
+EnvironmentFile=/opt/project-beta/.env
+ExecStart=/opt/project-beta/.venv/bin/python -m services.learner.main
+Restart=on-failure
+MemoryMax=640M
+CPUQuota=25%
+
+[Install]
+WantedBy=multi-user.target

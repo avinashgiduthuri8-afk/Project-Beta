@@ -1,0 +1,14 @@
+[Unit]
+Description=Project Beta Paper Trading (stages 6-7)
+After=beta-scanner.service
+
+[Service]
+WorkingDirectory=/opt/project-beta
+EnvironmentFile=/opt/project-beta/.env
+ExecStart=/opt/project-beta/.venv/bin/python -m services.paper_bot.main
+Restart=on-failure
+MemoryMax=640M
+CPUQuota=30%
+
+[Install]
+WantedBy=multi-user.target

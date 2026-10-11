@@ -4,6 +4,7 @@ pandas
 
 # HTTP & Async
 httpx
+websockets>=15,<16
 
 # Settings & Validation
 pydantic

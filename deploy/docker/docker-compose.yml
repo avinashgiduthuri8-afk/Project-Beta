@@ -1,50 +1,40 @@
-version: "3.8"
-
 services:
-  alpha-scanner:
-    build:
-      context: ../..
-      dockerfile: deploy/docker/Dockerfile
-    container_name: alpha-scanner
-    restart: unless-stopped
+  beta-scanner:
+    build: {context: ../.., dockerfile: deploy/docker/Dockerfile}
     command: ["python", "-m", "services.scanner.main"]
-    env_file:
-      - ../env/scanner.env.example
-    volumes:
-      - scanner_data:/opt/project-alpha/scanner/data
-      - learner_data:/opt/project-alpha/learner/data:ro
-
-  alpha-paper:
-    build:
-      context: ../..
-      dockerfile: deploy/docker/Dockerfile
-    container_name: alpha-paper
+    env_file: [../../config/beta.env.example]
+    volumes: [scanner_data:/opt/project-beta/scanner/data]
+    mem_limit: 640m
+    cpus: 0.45
+    logging: &logs {driver: json-file, options: {max-size: "10m", max-file: "3"}}
     restart: unless-stopped
+
+  beta-paper:
+    build: {context: ../.., dockerfile: deploy/docker/Dockerfile}
     command: ["python", "-m", "services.paper_bot.main"]
-    env_file:
-      - ../env/paper.env.example
+    env_file: [../../config/beta.env.example]
     volumes:
-      - scanner_data:/opt/project-alpha/scanner/data:ro
-      - paper_data:/opt/project-alpha/paper/data
-
-  alpha-learner:
-    build:
-      context: ../..
-      dockerfile: deploy/docker/Dockerfile
-    container_name: alpha-learner
+      - scanner_data:/opt/project-beta/scanner/data:ro
+      - paper_data:/opt/project-beta/paper/data
+    mem_limit: 640m
+    cpus: 0.30
+    logging: *logs
     restart: unless-stopped
+
+  beta-learner:
+    build: {context: ../.., dockerfile: deploy/docker/Dockerfile}
     command: ["python", "-m", "services.learner.main"]
-    env_file:
-      - ../env/learner.env.example
+    env_file: [../../config/beta.env.example]
     volumes:
-      - scanner_data:/opt/project-alpha/scanner/data:ro
-      - paper_data:/opt/project-alpha/paper/data:ro
-      - learner_data:/opt/project-alpha/learner/data
+      - scanner_data:/opt/project-beta/scanner/data:ro
+      - paper_data:/opt/project-beta/paper/data:ro
+      - learner_data:/opt/project-beta/learner/data
+    mem_limit: 640m
+    cpus: 0.25
+    logging: *logs
+    restart: unless-stopped
 
 volumes:
-  scanner_data:
-    name: project_alpha_scanner_data
-  paper_data:
-    name: project_alpha_paper_data
-  learner_data:
-    name: project_alpha_learner_data
+  scanner_data: {name: project_beta_scanner_data}
+  paper_data: {name: project_beta_paper_data}
+  learner_data: {name: project_beta_learner_data}

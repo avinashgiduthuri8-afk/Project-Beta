@@ -12,8 +12,9 @@ import aiosqlite
 class IndianLearnerService:
     ALLOWED_STRATEGIES = {"STE", "HDA", "VCP", "BBS", "MTB", "NR7", "PPA", "MRB"}
 
-    def __init__(self, conn: aiosqlite.Connection, min_trades: int = 3) -> None:
+    def __init__(self, conn: aiosqlite.Connection, min_trades: int = 3, write_conn: aiosqlite.Connection | None = None) -> None:
         self.conn = conn
+        self.write_conn = write_conn or conn
         self.min_trades = max(1, min_trades)
 
     @staticmethod
@@ -50,12 +51,12 @@ class IndianLearnerService:
         now = datetime.now(timezone.utc).isoformat()
         for row, (_, pnl) in validated:
             diagnosis = "PROFITABLE_SETUP" if pnl and pnl > 0 else "LOSS_REVIEW"
-            cursor = await self.conn.execute(
+            cursor = await self.write_conn.execute(
                 """INSERT OR IGNORE INTO beta_learning_audit
                 (journal_id,strategy,diagnosis,candidate_multiplier,promoted,created_at)
                 VALUES(?,?,?,?,?,?)""",
                 (row["id"], row["strategy"], diagnosis, json.dumps(calibration), 1, now),
             )
             inserted += max(0, cursor.rowcount)
-        await self.conn.commit()
+        await self.write_conn.commit()
         return {"status": "COMPLETED", "stages": [8, 9, 10], "trade_count": len(rows), "invalid_rows": 0, "new_audits": inserted, "calibration": calibration}

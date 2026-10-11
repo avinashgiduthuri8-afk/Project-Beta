@@ -8,6 +8,7 @@ from hashlib import sha256
 from typing import Callable, Iterable
 
 from core.repository.beta_store import BetaStore
+from core.repository.quote_repo import QuoteRepository
 from market.provider import MarketDataProvider
 from market.session import BSE_SESSION, NSE_SESSION
 from market.symbols import StockSymbol
@@ -25,12 +26,14 @@ class IndianScannerService:
         *,
         clock: Callable[[], datetime] | None = None,
         max_quote_age: timedelta = timedelta(minutes=15),
+        quote_repo: QuoteRepository | None = None,
     ) -> None:
         self.provider = provider
         self.store = store
         self.symbols = tuple(symbols)
         self.clock = clock or (lambda: datetime.now(timezone.utc))
         self.max_quote_age = max_quote_age
+        self.quote_repo = quote_repo
         self.validator = MarketDataValidator()
 
     async def poll(self, max_timestamp_ms: int | None = None) -> dict:
@@ -46,6 +49,8 @@ class IndianScannerService:
 
             # Stage 2: a current, positive provider quote.
             quote = await self.provider.get_quote(symbol)
+            if self.quote_repo:
+                await self.quote_repo.upsert(quote)
             if not quote.is_fresh(now, self.max_quote_age):
                 result["rejections"].append({"symbol": symbol.canonical, "stage": 2, "code": "STALE_MARKET_DATA"})
                 continue

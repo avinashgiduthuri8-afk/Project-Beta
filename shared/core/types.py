@@ -163,6 +163,9 @@ class Signal:
     source_bot: str = "scanner_v1"
     raw_payload: dict = field(default_factory=dict)
     confluence_breakdown: dict | None = field(default_factory=dict)
+    symbol: str | None = None
+    exchange: str = "NSE"
+    security_id: str | None = None
 
     @property
     def is_live(self) -> bool:
@@ -206,6 +209,9 @@ class Position:
     peak_price: float | None = None
     trough_price: float | None = None
     market_regime: str | None = None
+    symbol: str | None = None
+    exchange: str = "NSE"
+    security_id: str | None = None
 
     @property
     def deployed_capital(self) -> float:
@@ -241,6 +247,9 @@ class Trade:
     signal_id: str | None = None
     exchange_order_id: str | None = None
     client_order_id: str | None = None
+    symbol: str | None = None
+    exchange: str = "NSE"
+    security_id: str | None = None
 
 
 @dataclass

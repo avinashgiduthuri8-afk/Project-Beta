@@ -27,7 +27,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 Copy-Item config\beta.env.example .env
-python -m pytest tests\beta -q
+python -m pytest tests -q
 ```
 
 Run services in this order in separate terminals:

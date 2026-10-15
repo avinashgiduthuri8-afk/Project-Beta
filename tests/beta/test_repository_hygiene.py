@@ -8,6 +8,7 @@ def test_no_live_order_or_vps_deployment_surface():
     assert not (ROOT / "services" / "live_bot").exists()
     assert not (ROOT / "services" / "live").exists()
     assert not (ROOT / "shared" / "execution" / "brokers").exists()
+    assert not (ROOT / "tests" / "live_bot").exists()
     deploy_files = [path for path in (ROOT / "deploy").rglob("*") if path.is_file()]
     assert not any("vps" in path.name.lower() for path in deploy_files)
 

@@ -1,5 +1,5 @@
 """
-conftest.py — PROJECT-ALPHA test bootstrap.
+conftest.py — Project Beta test bootstrap.
 
 Sets safe defaults for every environment variable the application reads at
 import time so tests never fail due to missing env vars. Uses setdefault so

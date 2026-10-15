@@ -23,7 +23,7 @@ Run from the repository root:
 
 ```powershell
 python -m compileall -q services shared tests deploy
-python -m pytest tests/beta tests/e2e/test_beta_ten_stage_paper_flow.py tests/shared -q
+python -m pytest tests -q
 ruff check services shared tests deploy --select=E9,F63,F7,F82 --target-version=py312
 git diff --check
 ```

@@ -80,6 +80,8 @@ async def run_paper() -> None:
                 quote = await quotes.get_latest(f"{signal['exchange']}:{signal['symbol']}")
                 if quote:
                     await service.handle_signal({**signal, "mode": "PAPER"}, quote, datetime.now(timezone.utc))
+            # Continuously monitor active swing positions for SL/TP exit triggers
+            await service.evaluate_open_positions(quotes, datetime.now(timezone.utc))
             await asyncio.sleep(cfg.paper_poll_interval)
     finally:
         await scanner_conn.close()

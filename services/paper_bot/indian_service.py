@@ -6,6 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 from hashlib import sha256
 import json
+from typing import Any
 
 from core.repository.paper_execution_repo import PaperExecutionRepository
 from execution.indian_charges import IndianEquityChargeModel
@@ -105,3 +106,41 @@ class IndianPaperService:
             "quantity": quantity,
             "charges": charge.as_dict(),
         }
+
+    async def evaluate_open_positions(self, quotes: Any, now: datetime) -> list[dict[str, Any]]:
+        """
+        Monitors active swing positions across days, weeks, or months.
+        Evaluates current quotes against Stop-Loss and Take-Profit price thresholds.
+        Executes Delivery (CNC) exits and records net P&L in beta_journal.
+        """
+        exits = []
+        open_positions = await self.repo.get_open_positions()
+        for pos in open_positions:
+            quote = await quotes.get_latest(f"{pos['exchange']}:{pos['symbol']}")
+            if not quote:
+                continue
+
+            try:
+                meta = json.loads(pos.get("charge_breakdown") or "{}")
+            except Exception:
+                meta = {}
+
+            sl_str = meta.get("stop_loss")
+            tp_str = meta.get("take_profit")
+            strategy = meta.get("strategy") or "STE"
+
+            should_exit = False
+            exit_reason = None
+
+            if sl_str and quote.price <= Decimal(sl_str):
+                should_exit = True
+                exit_reason = "STOP_LOSS_HIT"
+            elif tp_str and quote.price >= Decimal(tp_str):
+                should_exit = True
+                exit_reason = "TAKE_PROFIT_HIT"
+
+            if should_exit:
+                res = await self.repo.close_position(pos["id"], quote.price, strategy, now)
+                exits.append({**res, "position_id": pos["id"], "reason": exit_reason, "exit_price": str(quote.price)})
+
+        return exits

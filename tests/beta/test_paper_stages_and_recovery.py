@@ -96,3 +96,60 @@ async def test_paper_guarantees_minimum_one_share_for_high_priced_stocks():
     assert cash_left < Decimal("10000") - Decimal("2950")
 
     await conn.close()
+
+
+@pytest.mark.asyncio
+async def test_paper_evaluates_swing_exits_for_tp_and_sl():
+    """Verify that PaperService automatically closes swing positions when TP or SL is triggered."""
+    conn = await aiosqlite.connect(":memory:")
+    conn.row_factory = aiosqlite.Row
+    store = BetaStore(conn)
+    await store.initialize()
+    repo = PaperExecutionRepository(conn)
+    await repo.initialize_account(Decimal("20000"))
+
+    symbol = StockSymbol.parse("NSE:TCS")
+    now = datetime.now(timezone.utc)
+    entry_quote = MarketQuote(symbol, Decimal("3500.00"), now, "YAHOO", 0)
+    signal = {
+        "id": "sig-tcs-1",
+        "symbol": "TCS",
+        "exchange": "NSE",
+        "strategy": "VCP",
+        "price": "3500.00",
+        "mode": "PAPER",
+        "stop_loss": "3300.00",
+        "take_profit": "3800.00",
+        "timeframe": "1d",
+    }
+
+    service = IndianPaperService(repo, allocation=Decimal("10000"))
+    await service.handle_signal(signal, entry_quote, now)
+    assert await repo.position_count() == 1
+
+    class MockQuotes:
+        def __init__(self, current_price):
+            self.quote = MarketQuote(symbol, Decimal(str(current_price)), now, "YAHOO", 0)
+        async def get_latest(self, s):
+            return self.quote
+
+    # 1. Price at ₹3,600 (holding within range over weeks) -> No exit
+    holding_quotes = MockQuotes("3600.00")
+    no_exits = await service.evaluate_open_positions(holding_quotes, now)
+    assert len(no_exits) == 0
+
+    # 2. Price hits Take Profit at ₹3,850 -> Automated Take Profit Exit
+    tp_quotes = MockQuotes("3850.00")
+    tp_exits = await service.evaluate_open_positions(tp_quotes, now)
+    assert len(tp_exits) == 1
+    assert tp_exits[0]["reason"] == "TAKE_PROFIT_HIT"
+    assert Decimal(tp_exits[0]["net_pnl"]) > 0
+
+    # Verify position is closed and journaled
+    open_positions = await repo.get_open_positions()
+    assert len(open_positions) == 0
+
+    async with conn.execute("SELECT COUNT(*) FROM beta_journal") as cursor:
+        assert (await cursor.fetchone())[0] == 1
+
+    await conn.close()

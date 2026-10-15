@@ -58,6 +58,12 @@ class PaperExecutionRepository:
             row = await cursor.fetchone()
         return int(row[0])
 
+    async def get_open_positions(self) -> list[dict[str, Any]]:
+        async with self.conn.execute("SELECT * FROM beta_positions WHERE status='OPEN'") as cursor:
+            rows = await cursor.fetchall()
+        return [dict(row) for row in rows]
+
+
     async def close_position(self, position_id: str, exit_price: Decimal, strategy: str, closed_at: datetime) -> dict[str, Any]:
         async with self.conn.execute("SELECT * FROM beta_positions WHERE id=? AND status='OPEN'", (position_id,)) as cursor:
             row = await cursor.fetchone()

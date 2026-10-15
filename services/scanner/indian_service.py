@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from hashlib import sha256
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Mapping
 
 from core.repository.beta_store import BetaStore
 from core.repository.quote_repo import QuoteRepository
@@ -13,10 +13,13 @@ from market.provider import MarketDataProvider
 from market.session import BSE_SESSION, NSE_SESSION
 from market.symbols import StockSymbol
 from scanner.validation import MarketDataValidator
+from shared.research.indicators import enrich_candles_df
+from shared.strategies.base import BaseStockStrategy
+from shared.strategies.registry import get_active_strategies
 
 
 class IndianScannerService:
-    """Owns market access and writes only qualified paper signals."""
+    """Owns market access, evaluates the 5 active strategies, and writes only qualified paper signals."""
 
     def __init__(
         self,
@@ -27,6 +30,7 @@ class IndianScannerService:
         clock: Callable[[], datetime] | None = None,
         max_quote_age: timedelta = timedelta(minutes=15),
         quote_repo: QuoteRepository | None = None,
+        strategies: Mapping[str, BaseStockStrategy] | None = None,
     ) -> None:
         self.provider = provider
         self.store = store
@@ -35,6 +39,7 @@ class IndianScannerService:
         self.max_quote_age = max_quote_age
         self.quote_repo = quote_repo
         self.validator = MarketDataValidator()
+        self.strategies = dict(strategies) if strategies is not None else get_active_strategies()
 
     async def poll(self, max_timestamp_ms: int | None = None) -> dict:
         stages = [1, 2, 3, 4, 5]
@@ -58,29 +63,43 @@ class IndianScannerService:
             # Stage 3: structurally valid, liquid candles.
             candles = await self.provider.get_candles(symbol, "15m", 120)
             validated = self.validator.validate_series(candles, pair=symbol.canonical)
-            turnover = sum(Decimal(str(c.get("close", 0))) * Decimal(str(c.get("volume", 0))) for c in validated.cleaned_candles[-20:])
+            turnover = sum(
+                Decimal(str(c.get("close", 0))) * Decimal(str(c.get("volume", 0)))
+                for c in validated.cleaned_candles[-20:]
+            )
             if not validated.is_valid or len(validated.cleaned_candles) < 10 or turnover < Decimal("1000000"):
                 result["rejections"].append({"symbol": symbol.canonical, "stage": 3, "code": "INVALID_OR_ILLIQUID_CANDLES"})
                 continue
 
-            # Stage 4: conservative trend/confluence score from closed candles.
-            closes = [Decimal(str(c["close"])) for c in validated.cleaned_candles]
-            momentum = closes[-1] > closes[-5] > closes[-10]
-            score = 90 if momentum else 75
-            if score < 85:
+            # Stage 4: Strategy Evaluation across the 5 approved strategies (STE, HDA, VCP, BBS, NR7)
+            df = enrich_candles_df(validated.cleaned_candles)
+            triggered_signals = []
+            for _, strat in self.strategies.items():
+                sig = strat.evaluate(df, symbol)
+                if sig and sig.score >= 85:
+                    triggered_signals.append(sig)
+
+            if not triggered_signals:
                 result["rejections"].append({"symbol": symbol.canonical, "stage": 4, "code": "LOW_CONFLUENCE"})
                 continue
 
             # Stage 5: deterministic expiry/idempotency boundary and persistence.
             bucket = int(quote.timestamp.timestamp()) // 900
-            signal_id = "sig-" + sha256(f"{symbol.canonical}:STE:{bucket}".encode()).hexdigest()[:20]
-            inserted = await self.store.insert_signal_once(
-                signal_id, symbol, "STE", score, quote.price,
-                quote.timestamp.isoformat(), quote.source,
-            )
-            if inserted:
-                result["qualified"] += 1
-                result["signal_id"] = signal_id
-            else:
-                result["duplicates"] += 1
+            for sig in triggered_signals:
+                signal_id = "sig-" + sha256(f"{symbol.canonical}:{sig.strategy_name}:{bucket}".encode()).hexdigest()[:20]
+                inserted = await self.store.insert_signal_once(
+                    signal_id,
+                    symbol,
+                    sig.strategy_name,
+                    sig.score,
+                    quote.price,
+                    quote.timestamp.isoformat(),
+                    quote.source,
+                )
+                if inserted:
+                    result["qualified"] += 1
+                    result["signal_id"] = signal_id
+                else:
+                    result["duplicates"] += 1
+
         return result

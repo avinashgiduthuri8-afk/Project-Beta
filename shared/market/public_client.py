@@ -118,8 +118,10 @@ class IndianStockPublicClient:
         self._client = None
 
     @staticmethod
-    def normalize_symbol(symbol: str, default_exchange: str = "NSE") -> tuple[str, str]:
+    def normalize_symbol(symbol: str | StockSymbol, default_exchange: str = "NSE") -> tuple[str, str]:
         """Return ``(exchange, tradingsymbol)`` from common broker/display forms."""
+        if hasattr(symbol, "trading_symbol") and hasattr(symbol, "exchange"):
+            return str(symbol.exchange).upper(), str(symbol.trading_symbol).upper()
         clean = str(symbol).strip().upper().replace("/INR", "")
         if clean.startswith("NSE:"):
             return "NSE", clean.split(":", 1)[1]
@@ -132,10 +134,10 @@ class IndianStockPublicClient:
         return default_exchange.upper(), clean
 
     @classmethod
-    def provider_symbol(cls, symbol: str, default_exchange: str = "NSE") -> str:
-        if str(symbol).strip().startswith("^"):
-            return str(symbol).strip().upper()
+    def provider_symbol(cls, symbol: str | StockSymbol, default_exchange: str = "NSE") -> str:
         exchange, trading_symbol = cls.normalize_symbol(symbol, default_exchange)
+        if trading_symbol.startswith("^"):
+            return trading_symbol
         return f"{trading_symbol}.{'BO' if exchange == 'BSE' else 'NS'}"
 
     async def _request_chart(

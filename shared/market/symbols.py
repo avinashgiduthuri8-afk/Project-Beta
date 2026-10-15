@@ -28,6 +28,9 @@ class StockSymbol:
     def canonical(self) -> str:
         return f"{self.exchange}:{self.trading_symbol}"
 
+    def __str__(self) -> str:
+        return self.canonical
+
     @classmethod
     def parse(cls, raw: str, default_exchange: str = "NSE") -> "StockSymbol":
         value = str(raw or "").strip().upper()

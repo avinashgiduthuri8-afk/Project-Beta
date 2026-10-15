@@ -54,3 +54,45 @@ async def test_paper_stages_are_persistently_idempotent_across_restart():
     assert second["reason"] == "SIGNAL_ALREADY_CONSUMED"
     assert await repo.position_count() == 1
     await conn.close()
+
+
+@pytest.mark.asyncio
+async def test_paper_guarantees_minimum_one_share_for_high_priced_stocks():
+    """Verify that high-priced stocks (e.g. ₹2,950) buy at least 1 whole share even if allocation is lower."""
+    conn = await aiosqlite.connect(":memory:")
+    conn.row_factory = aiosqlite.Row
+    store = BetaStore(conn)
+    await store.initialize()
+    repo = PaperExecutionRepository(conn)
+    await repo.initialize_account(Decimal("10000"))  # ₹10,000 account cash
+
+    symbol = StockSymbol.parse("NSE:RELIANCE")
+    now = datetime.now(timezone.utc)
+    # Reliance trading at ₹2,950.00
+    quote = MarketQuote(symbol, Decimal("2950.00"), now, "YAHOO", 0)
+    signal = {
+        "id": "sig-reliance-1",
+        "symbol": "RELIANCE",
+        "exchange": "NSE",
+        "strategy": "VCP",
+        "price": "2950.00",
+        "mode": "PAPER",
+        "stop_loss": "2800.00",
+        "take_profit": "3300.00",
+        "timeframe": "1d",
+    }
+
+    # Allocation budget is only ₹1,000, which is less than 1 share's price (₹2,950)
+    service = IndianPaperService(repo, allocation=Decimal("1000"))
+    result = await service.handle_signal(signal, quote, now)
+
+    assert result["opened"] is True
+    assert result["quantity"] == 1
+    assert Decimal(result["charges"]["total"]) > 0
+    assert await repo.position_count() == 1
+
+    # Verify cash was debited correctly
+    cash_left = await repo.cash()
+    assert cash_left < Decimal("10000") - Decimal("2950")
+
+    await conn.close()

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
 import json
 from typing import Any
@@ -10,6 +10,7 @@ from typing import Any
 import aiosqlite
 
 from execution.indian_charges import IndianEquityChargeModel
+from services.paper_bot.risk import DailyRiskState
 
 
 class PaperExecutionRepository:
@@ -24,6 +25,12 @@ class PaperExecutionRepository:
         async with self.conn.execute("SELECT cash FROM beta_paper_account WHERE singleton=1") as cursor:
             row = await cursor.fetchone()
         return Decimal(row[0]) if row else Decimal("0")
+
+    async def is_signal_consumed(self, signal_id: str) -> bool:
+        async with self.conn.execute(
+            "SELECT 1 FROM beta_consumed_signals WHERE signal_id=?", (signal_id,)
+        ) as cursor:
+            return await cursor.fetchone() is not None
 
     async def open_position_once(self, signal_id: str, position: dict[str, Any], cash_debit: Decimal) -> bool:
         await self.conn.execute("BEGIN IMMEDIATE")
@@ -62,6 +69,69 @@ class PaperExecutionRepository:
         async with self.conn.execute("SELECT * FROM beta_positions WHERE status='OPEN'") as cursor:
             rows = await cursor.fetchall()
         return [dict(row) for row in rows]
+
+    async def save_daily_risk_state(self, state: DailyRiskState, updated_at: datetime) -> None:
+        await self.conn.execute(
+            """INSERT INTO beta_paper_daily_risk
+            (trading_date,realized_pnl,unrealized_pnl,charges,consecutive_losses,state,updated_at)
+            VALUES(?,?,?,?,?,?,?)
+            ON CONFLICT(trading_date) DO UPDATE SET
+            realized_pnl=excluded.realized_pnl, unrealized_pnl=excluded.unrealized_pnl,
+            charges=excluded.charges, consecutive_losses=excluded.consecutive_losses,
+            state=excluded.state, updated_at=excluded.updated_at""",
+            (state.trading_date.isoformat(), str(state.realized_pnl), str(state.unrealized_pnl),
+             str(state.charges), state.consecutive_losses, state.state, updated_at.isoformat()),
+        )
+        await self.conn.commit()
+
+    async def get_daily_risk_state(
+        self, trading_date: date, marks: dict[str, Decimal]
+    ) -> DailyRiskState:
+        date_key = trading_date.isoformat()
+        async with self.conn.execute(
+            "SELECT * FROM beta_paper_daily_risk WHERE trading_date=?", (date_key,)
+        ) as cursor:
+            persisted = await cursor.fetchone()
+        if persisted and persisted["state"] in {"ENTRY_BLOCKED", "EMERGENCY_STOP"}:
+            row = dict(persisted)
+            return DailyRiskState(
+                trading_date, Decimal(row["realized_pnl"]), Decimal(row["unrealized_pnl"]),
+                Decimal(row["charges"]), int(row["consecutive_losses"]), row["state"],
+            )
+
+        async with self.conn.execute(
+            "SELECT * FROM beta_journal WHERE substr(exit_timestamp,1,10)=? ORDER BY exit_timestamp",
+            (date_key,),
+        ) as cursor:
+            journals = [dict(row) for row in await cursor.fetchall()]
+        realized = sum(
+            (((Decimal(row["exit_price"]) - Decimal(row["entry_price"])) * int(row["quantity"])) for row in journals),
+            Decimal("0"),
+        )
+        charges = sum(
+            ((Decimal(row["entry_charges"]) + Decimal(row["exit_charges"])) for row in journals),
+            Decimal("0"),
+        )
+        consecutive = 0
+        for row in reversed(journals):
+            if Decimal(row["net_pnl"]) < 0:
+                consecutive += 1
+            else:
+                break
+        positions = await self.get_open_positions()
+        unrealized = Decimal("0")
+        for position in positions:
+            canonical = f"{position['exchange']}:{position['symbol']}"
+            mark = marks.get(canonical)
+            if mark is not None:
+                unrealized += (Decimal(mark) - Decimal(position["entry_price"])) * int(position["quantity"])
+            if str(position["opened_at"]).startswith(date_key):
+                charges += Decimal(position["charges"])
+        state_name = str(persisted["state"]) if persisted else "ACTIVE"
+        prior_losses = int(persisted["consecutive_losses"]) if persisted else 0
+        return DailyRiskState(
+            trading_date, realized, unrealized, charges, max(consecutive, prior_losses), state_name
+        )
 
 
     async def close_position(self, position_id: str, exit_price: Decimal, strategy: str, closed_at: datetime) -> dict[str, Any]:

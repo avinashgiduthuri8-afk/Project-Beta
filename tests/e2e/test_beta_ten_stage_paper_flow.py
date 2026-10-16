@@ -3,9 +3,9 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
-import aiosqlite
 import pytest
 
+from core.database import open_beta_database
 from core.repository.beta_store import BetaStore
 from core.repository.paper_execution_repo import PaperExecutionRepository
 from core.repository.quote_repo import QuoteRepository
@@ -35,9 +35,8 @@ class OfflineProvider:
         pass
 
 
-async def memory_db():
-    conn = await aiosqlite.connect(":memory:")
-    conn.row_factory = aiosqlite.Row
+async def shared_db(path):
+    conn = await open_beta_database(str(path))
     store = BetaStore(conn)
     await store.initialize()
     return conn, store
@@ -49,12 +48,13 @@ async def count(conn, table):
 
 
 @pytest.mark.asyncio
-async def test_offline_ten_stage_flow_and_restart_idempotency():
+async def test_offline_ten_stage_flow_and_restart_idempotency(tmp_path):
     now = datetime(2026, 10, 9, 5, 0, tzinfo=timezone.utc)  # Friday 10:30 IST
     symbol = StockSymbol.parse("NSE:RELIANCE")
-    scanner_conn, scanner_store = await memory_db()
-    paper_conn, _ = await memory_db()
-    learner_conn, _ = await memory_db()
+    database = tmp_path / "project_beta.db"
+    scanner_conn, scanner_store = await shared_db(database)
+    paper_conn, _ = await shared_db(database)
+    learner_conn, _ = await shared_db(database)
     provider = OfflineProvider(symbol, now)
 
     scanner = IndianScannerService(
@@ -76,16 +76,19 @@ async def test_offline_ten_stage_flow_and_restart_idempotency():
     learner = IndianLearnerService(paper_conn, min_trades=1, write_conn=learner_conn)
     learn_report = await learner.run_cycle()
 
-    assert scan_report["stages"] + paper_report["stages"] + learn_report["stages"] == list(range(1, 11))
+    assert scan_report["stages"] == list(range(1, 9))
+    assert paper_report["stages"] == [6, 7]
+    assert learn_report["stages"] == [8, 9, 10]
+    assert sorted(set(scan_report["stages"] + paper_report["stages"] + learn_report["stages"])) == list(range(1, 11))
     assert paper_report["quantity"] == int(paper_report["quantity"])
     assert Decimal(close["net_pnl"]) < (Decimal("110") - Decimal("100")) * paper_report["quantity"]
     assert close["exit_charges"] > 0
     assert await count(scanner_conn, "beta_signals") == 1
-    assert await count(scanner_conn, "beta_positions") == 0
+    assert await count(scanner_conn, "beta_positions") == 1
     assert await count(paper_conn, "beta_positions") == 1
-    assert await count(paper_conn, "beta_learning_audit") == 0
+    assert await count(paper_conn, "beta_learning_audit") == 1
     assert await count(learner_conn, "beta_learning_audit") == 1
-    assert await count(learner_conn, "beta_journal") == 0
+    assert await count(learner_conn, "beta_journal") == 1
 
     # New service objects simulate a complete restart against durable stores.
     scan_again = await IndianScannerService(provider, scanner_store, [symbol], clock=lambda: now).poll()

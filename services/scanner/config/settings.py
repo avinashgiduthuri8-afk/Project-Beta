@@ -15,11 +15,11 @@ class ScannerConfig(BaseSettings):
 
     mode: str = "SCANNER"
     db_path: str = Field(
-        default="scanner/data/beta_scanner.db",
+        default="data/project_beta.db",
         validation_alias=AliasChoices("SCANNER_DB_PATH", "DB_PATH", "scanner_db_path", "db_path"),
     )
     learner_db_path: str = Field(
-        default="learner/data/beta_learner.db",
+        default="data/project_beta.db",
         validation_alias=AliasChoices("LEARNER_DB_PATH", "learner_db_path"),
     )
     poll_interval: int = 60

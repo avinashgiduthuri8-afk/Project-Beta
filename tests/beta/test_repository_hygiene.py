@@ -22,6 +22,12 @@ def test_active_configuration_contains_no_order_credentials():
         assert forbidden not in text
 
 
+def test_tracked_configuration_contains_no_notification_credentials():
+    example = (ROOT / "config/beta.env.example").read_text(encoding="utf-8")
+    assert "TELEGRAM_BOT_TOKEN=\n" in example
+    assert "TELEGRAM_CHAT_ID=\n" in example
+
+
 def test_active_source_has_no_legacy_exchange_or_order_surface():
     files = [
         path for root in ("services", "shared", "config", "deploy")

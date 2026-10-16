@@ -41,7 +41,12 @@ class DhanInstrumentMaster:
                 continue
             trading_symbol = row.get("SEM_TRADING_SYMBOL") or row.get("SYMBOL_NAME") or ""
             security_id = row.get("SEM_SMST_SECURITY_ID") or row.get("SECURITY_ID")
-            symbol = StockSymbol(exchange, trading_symbol, security_id)
+            try:
+                symbol = StockSymbol(exchange, trading_symbol, security_id)
+            except ValueError:
+                # Public masters can contain headers, placeholders, or symbols
+                # outside Beta's canonical cash-equity grammar. Fail closed.
+                continue
             parsed[symbol.canonical] = symbol
             series = (row.get("SEM_SERIES") or row.get("SERIES") or "EQ").upper()
             universe[symbol.canonical] = UniverseInstrument(

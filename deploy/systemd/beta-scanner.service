@@ -1,14 +1,20 @@
 [Unit]
-Description=Project Beta Scanner (stages 1-5)
+Description=Project Beta Scanner (stages 1-8)
 After=network-online.target
 
 [Service]
+User=project-beta
+Group=project-beta
 WorkingDirectory=/opt/project-beta
 EnvironmentFile=/opt/project-beta/.env
+Environment=PYTHONPATH=/opt/project-beta:/opt/project-beta/services:/opt/project-beta/shared
 ExecStart=/opt/project-beta/.venv/bin/python -m services.scanner.main
 Restart=on-failure
+RestartSec=10
 MemoryMax=640M
 CPUQuota=45%
+NoNewPrivileges=true
+UMask=0027
 
 [Install]
 WantedBy=multi-user.target

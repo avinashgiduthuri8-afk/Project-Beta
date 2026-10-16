@@ -57,7 +57,7 @@ async def test_paper_stages_are_persistently_idempotent_across_restart():
 
 
 @pytest.mark.asyncio
-async def test_paper_guarantees_minimum_one_share_for_high_priced_stocks():
+async def test_paper_rejects_one_share_when_all_in_cost_exceeds_allocation():
     """Verify that high-priced stocks (e.g. ₹2,950) buy at least 1 whole share even if allocation is lower."""
     conn = await aiosqlite.connect(":memory:")
     conn.row_factory = aiosqlite.Row
@@ -86,14 +86,9 @@ async def test_paper_guarantees_minimum_one_share_for_high_priced_stocks():
     service = IndianPaperService(repo, allocation=Decimal("1000"))
     result = await service.handle_signal(signal, quote, now)
 
-    assert result["opened"] is True
-    assert result["quantity"] == 1
-    assert Decimal(result["charges"]["total"]) > 0
-    assert await repo.position_count() == 1
-
-    # Verify cash was debited correctly
-    cash_left = await repo.cash()
-    assert cash_left < Decimal("10000") - Decimal("2950")
+    assert result == {"stages": [6], "opened": False, "reason": "NOT_AFFORDABLE"}
+    assert await repo.position_count() == 0
+    assert await repo.cash() == Decimal("10000")
 
     await conn.close()
 

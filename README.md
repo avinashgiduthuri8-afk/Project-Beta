@@ -38,7 +38,28 @@ python -m services.paper_bot.main
 python -m services.learner.main
 ```
 
-The included Compose and systemd files are local/future-server artifacts only.
-They target a combined envelope of roughly 1 vCPU, 2 GB RAM, and 20 GB SSD,
-with bounded logs and read-only cross-service data mounts. Nothing in this
-repository uploads or deploys to a server.
+The included systemd units run the three services as the unprivileged
+`project-beta` account with bounded CPU and memory. The verified paper release
+is installed under `/opt/project-beta`; deployment remains a deliberate manual
+operation and this repository never pushes or uploads itself.
+
+## Scanner and paper-risk rules
+
+Scanner, Paper, and Learner open separate WAL-enabled connections to the same
+`data/project_beta.db`. Scanner accepts only finite prices satisfying
+`0 < price <= INR 250`; stocks below INR 1 use stricter penny-stock liquidity
+and spread gates. Ranking is deterministic, only the top 50 receive deep
+strategy evaluation, and at most 10 signals are published per cycle. Public or
+delayed data can be stale or incomplete, so no precise movement probability is
+claimed.
+
+Paper independently caps each new position at INR 1,000 including estimated
+buy charges. Daily loss includes realized P&L, unrealized P&L, and charges: warn
+at INR 750, block new entries at INR 900, and persist an emergency stop at INR
+1,000. The starting portfolio limits are three open positions, one per sector,
+and three consecutive losing exits.
+
+Before migration or deployment, back up the shared database with SQLite's
+backup API and verify `PRAGMA quick_check`. Restarting a process or running the
+Learner cannot clear a same-day emergency stop. Credential examples are blank;
+rotate any credential previously exposed outside a secret manager.

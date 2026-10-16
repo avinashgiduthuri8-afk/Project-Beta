@@ -246,7 +246,7 @@ async def test_scanner_evaluates_all_five_strategies():
     scanner = IndianScannerService(DummyProvider(), store, [symbol], clock=lambda: now)
     result = await scanner.poll()
 
-    assert result["stages"] == [1, 2, 3, 4, 5]
+    assert result["stages"] == [1, 2, 3, 4, 5, 6, 7, 8]
     assert result["qualified"] == 1
     assert result["signal_id"].startswith("sig-")
 

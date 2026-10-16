@@ -9,11 +9,14 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 import httpx
 
 from core.logging import get_logger
+
+if TYPE_CHECKING:
+    from market.symbols import StockSymbol
 
 logger = get_logger("market.indian_public_client")
 

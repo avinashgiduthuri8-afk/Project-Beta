@@ -8,6 +8,8 @@ import json
 
 import aiosqlite
 
+from learner.safety import CalibrationSafety
+
 
 class IndianLearnerService:
     ALLOWED_STRATEGIES = {"STE", "HDA", "VCP", "BBS", "MTB", "NR7", "PPA", "MRB"}
@@ -44,8 +46,14 @@ class IndianLearnerService:
         wins = sum(1 for pnl in pnls if pnl > 0)
         win_rate = Decimal(wins) / Decimal(len(pnls))
         multiplier = max(Decimal("0.80"), min(Decimal("1.20"), Decimal("1") + (win_rate - Decimal("0.5")) * Decimal("0.2")))
-        threshold = max(Decimal("75"), min(Decimal("95"), Decimal("90") - win_rate * Decimal("10")))
+        threshold = max(Decimal("85"), min(Decimal("95"), Decimal("90") - win_rate * Decimal("10")))
         calibration = {"strategy": "STE", "weight_multiplier": str(multiplier), "confluence_threshold": str(threshold)}
+        safety = CalibrationSafety().validate(calibration)
+        if not safety.accepted:
+            return {
+                "status": "REJECTED", "stages": [8, 9], "trade_count": len(rows),
+                "invalid_rows": 0, "new_audits": 0, "reason": safety.code,
+            }
 
         inserted = 0
         now = datetime.now(timezone.utc).isoformat()
@@ -58,5 +66,13 @@ class IndianLearnerService:
                 (row["id"], row["strategy"], diagnosis, json.dumps(calibration), 1, now),
             )
             inserted += max(0, cursor.rowcount)
+        await self.write_conn.commit()
+        await self.write_conn.execute(
+            """INSERT INTO beta_learner_calibrations
+            (candidate_json,evidence_json,status,created_at) VALUES(?,?,?,?)""",
+            (json.dumps(calibration, sort_keys=True),
+             json.dumps({"trade_count": len(rows), "win_rate": str(win_rate)}, sort_keys=True),
+             "PROMOTED", now),
+        )
         await self.write_conn.commit()
         return {"status": "COMPLETED", "stages": [8, 9, 10], "trade_count": len(rows), "invalid_rows": 0, "new_audits": inserted, "calibration": calibration}

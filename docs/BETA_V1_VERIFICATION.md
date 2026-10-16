@@ -1,7 +1,8 @@
 # Project Beta v1 Verification
 
-Verified locally on 2026-10-11. No VPS connection, upload, deployment, broker
-order, or Git push was performed.
+The original v1 boundary was verified locally on 2026-10-11. The scanner and
+risk expansion was deployed in paper-only mode on 2026-10-16; no broker order
+or Git push was performed.
 
 ## Delivered boundary
 
@@ -43,7 +44,22 @@ credential values are committed.
 
 ## Resource and deployment status
 
-Local Compose and systemd definitions cap the combined fleet for a future
-1-vCPU, 2-GB-RAM, 20-GB-SSD server and rotate container logs. These are design
-artifacts only. Server provisioning remains explicitly deferred until a new
-server is supplied and separately approved.
+Systemd caps the combined Beta fleet for a 1-vCPU, 2-GB-RAM, 20-GB-SSD server.
+The verified deployment uses `/opt/project-beta`, a dedicated `project-beta`
+account, mode-0600 environment file, mode-0640 database, and three `beta-*`
+units. Project Alpha services were not restarted or modified.
+
+## 2026-10-16 scanner and risk expansion
+
+- Scanner, Paper, and Learner use independent connections to one shared
+  `data/project_beta.db` with WAL, foreign keys, busy timeout, and versioned
+  migrations.
+- Scanner enforces the INR 250 ceiling, penny-stock evidence gates,
+  deterministic top-50 ranking, audited rejection/qualification decisions, and
+  a top-10 publication cap.
+- Paper enforces INR 1,000 all-in per trade and daily loss warning/block/stop
+  levels of INR 750/900/1,000. Emergency-stop state survives process restart.
+- Learner accepts only allowlisted finite calibration values; it cannot change
+  price, allocation, daily loss, leverage, shorting, or live-mode protections.
+- Offline end-to-end tests use three connections to one temporary SQLite file;
+  they do not call a broker or place live orders.

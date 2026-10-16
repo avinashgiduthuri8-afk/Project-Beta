@@ -3,9 +3,9 @@ Project Beta autonomous learner configuration (stages 8–10).
 
 Learner configuration explicitly declares:
   MODE = "LEARNER"
-  DB_PATH = "learner/data/beta_learner.db"
-  PAPER_DB_PATH = "paper/data/beta_paper.db"
-  SCANNER_DB_PATH = "scanner/data/beta_scanner.db"
+  DB_PATH = "data/project_beta.db"
+  PAPER_DB_PATH = "data/project_beta.db"
+  SCANNER_DB_PATH = "data/project_beta.db"
 """
 
 from __future__ import annotations
@@ -23,17 +23,17 @@ class LearnerConfig(BaseSettings):
 
     mode: str = "LEARNER"
     db_path: str = Field(
-        default="learner/data/beta_learner.db",
+        default="data/project_beta.db",
         validation_alias=AliasChoices(
             "LEARNER_DB_PATH", "learner_db_path", "LEARNING_DB_PATH"
         ),
     )
     paper_db_path: str = Field(
-        default="paper/data/beta_paper.db",
+        default="data/project_beta.db",
         validation_alias=AliasChoices("PAPER_DB_PATH", "paper_db_path"),
     )
     scanner_db_path: str = Field(
-        default="scanner/data/beta_scanner.db",
+        default="data/project_beta.db",
         validation_alias=AliasChoices("SCANNER_DB_PATH", "scanner_db_path"),
     )
     poll_interval_seconds: int = Field(

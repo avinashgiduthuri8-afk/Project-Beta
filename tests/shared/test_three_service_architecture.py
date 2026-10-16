@@ -15,14 +15,14 @@ from scanner.signals.dispatcher import SignalDispatcher
 from shared.mode_guard import ModeIsolationError, validate_execution_mode
 
 
-def test_service_order_and_isolated_databases():
+def test_service_order_and_shared_database():
     configs = (get_scanner_config(), get_paper_config(), get_learner_config())
 
     assert tuple(config.mode for config in configs) == ("SCANNER", "PAPER", "LEARNER")
     assert tuple(config.db_path for config in configs) == (
-        "scanner/data/beta_scanner.db",
-        "paper/data/beta_paper.db",
-        "learner/data/beta_learner.db",
+        "data/project_beta.db",
+        "data/project_beta.db",
+        "data/project_beta.db",
     )
     assert configs[1].scanner_db_path == configs[0].db_path
     assert configs[2].scanner_db_path == configs[0].db_path
@@ -70,4 +70,3 @@ async def test_paper_router_rejects_non_paper_payloads():
     )
     assert result["rejected"] is True
     assert "Mode mismatch" in result["reason"]
-

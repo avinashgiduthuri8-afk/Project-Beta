@@ -11,7 +11,7 @@ import aiosqlite
 from core.database import open_beta_database
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 OWNED_TABLES = (
     "beta_signals",
@@ -31,7 +31,7 @@ SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS beta_schema_version (
     singleton INTEGER PRIMARY KEY CHECK(singleton=1), version INTEGER NOT NULL
 );
-INSERT INTO beta_schema_version(singleton,version) VALUES(1,1)
+INSERT INTO beta_schema_version(singleton,version) VALUES(1,2)
 ON CONFLICT(singleton) DO UPDATE SET version=MAX(version, excluded.version);
 CREATE TABLE IF NOT EXISTS beta_signals (
     id TEXT PRIMARY KEY, symbol TEXT NOT NULL, exchange TEXT NOT NULL CHECK(exchange IN ('NSE','BSE')),
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS beta_signals (
 CREATE TABLE IF NOT EXISTS beta_quotes (
     canonical_symbol TEXT PRIMARY KEY, symbol TEXT NOT NULL, exchange TEXT NOT NULL,
     security_id TEXT, price TEXT NOT NULL, timestamp TEXT NOT NULL, source TEXT NOT NULL,
-    generation INTEGER NOT NULL
+    generation INTEGER NOT NULL, bid TEXT, ask TEXT
 );
 CREATE TABLE IF NOT EXISTS beta_paper_account (
     singleton INTEGER PRIMARY KEY CHECK(singleton=1), cash TEXT NOT NULL
@@ -106,6 +106,11 @@ class MigrationReport:
 
 async def initialize_beta_schema(conn: aiosqlite.Connection) -> None:
     await conn.executescript(SCHEMA_SQL)
+    quote_columns = set(await _columns(conn, "main", "beta_quotes"))
+    if "bid" not in quote_columns:
+        await conn.execute("ALTER TABLE beta_quotes ADD COLUMN bid TEXT")
+    if "ask" not in quote_columns:
+        await conn.execute("ALTER TABLE beta_quotes ADD COLUMN ask TEXT")
     await conn.commit()
 
 

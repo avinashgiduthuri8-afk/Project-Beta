@@ -20,6 +20,16 @@ def test_quote_freshness_is_timestamp_based():
     assert not quote.is_fresh(now + timedelta(seconds=31), timedelta(seconds=30))
 
 
+def test_quote_spread_uses_only_real_bid_and_ask():
+    now = datetime.now(timezone.utc)
+    symbol = StockSymbol.parse("NSE:RELIANCE")
+    assert MarketQuote(symbol, Decimal("100"), now, "YAHOO").spread_pct() is None
+    quote = MarketQuote(
+        symbol, Decimal("100"), now, "DHAN", bid=Decimal("99.5"), ask=Decimal("100.5")
+    )
+    assert quote.spread_pct() == Decimal("1")
+
+
 def test_market_quote_rejects_invalid_price_and_naive_time():
     symbol = StockSymbol.parse("NSE:TCS")
     for price in (Decimal("0"), Decimal("NaN")):

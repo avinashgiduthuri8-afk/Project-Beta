@@ -12,10 +12,11 @@ from market.symbols import StockSymbol
 
 @pytest.mark.asyncio
 async def test_dhan_instrument_master_keeps_cash_equities_only():
-    csv_text = """SEM_EXM_EXCH_ID,SEM_SEGMENT,SEM_INSTRUMENT_NAME,SEM_SMST_SECURITY_ID,SEM_TRADING_SYMBOL
-NSE,E,EQUITY,1333,HDFCBANK
-NSE,D,OPTION,999,BANKNIFTY
-BSE,E,EQUITY,500325,RELIANCE
+    csv_text = """SEM_EXM_EXCH_ID,SEM_SEGMENT,SEM_INSTRUMENT_NAME,SEM_SMST_SECURITY_ID,SEM_TRADING_SYMBOL,SEM_SERIES,SEM_TICK_SIZE
+NSE,E,EQUITY,1333,HDFCBANK,EQ,0.05
+NSE,D,OPTION,999,BANKNIFTY,,0.05
+BSE,E,EQUITY,500325,RELIANCE,EQ,0.05
+NSE,E,EQUITY,777,SMALLCO,SM,0.05
 """
     master = DhanInstrumentMaster(fetcher=lambda: csv_text)
     await master.refresh()
@@ -23,6 +24,7 @@ BSE,E,EQUITY,500325,RELIANCE
     assert master.resolve(StockSymbol.parse("BSE:RELIANCE")).security_id == "500325"
     with pytest.raises(KeyError):
         master.resolve(StockSymbol.parse("NSE:BANKNIFTY"))
+    assert [item.symbol.canonical for item in master.nse_universe()] == ["NSE:HDFCBANK"]
 
 
 @pytest.mark.asyncio

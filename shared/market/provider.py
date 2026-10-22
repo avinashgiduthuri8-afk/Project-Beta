@@ -11,6 +11,7 @@ from .models import MarketQuote
 from .dhan_feed import DhanMarketFeed
 from .public_client import IndianStockPublicClient
 from .symbols import StockSymbol
+from .tradingview_client import TradingViewPublicClient
 
 
 class MarketDataProvider(Protocol):
@@ -89,11 +90,79 @@ class DhanMarketDataProvider:
             if quote:
                 return quote
             await asyncio.sleep(0.05)
-        raise TimeoutError(f"No current Dhan quote for {symbol.canonical}")
+        try:
+            return await self.candle_provider.get_quote(symbol)
+        except Exception:
+            raise TimeoutError(f"No current Dhan or fallback quote for {symbol.canonical}")
 
     async def get_candles(self, symbol: StockSymbol, timeframe: str, limit: int) -> list[dict[str, Any]]:
         return await self.candle_provider.get_candles(symbol, timeframe, limit)
 
     async def close(self) -> None:
         await self.feed.stop()
+        await self.candle_provider.close()
+
+
+class TradingViewMarketDataProvider:
+    """TradingView real-time quotes and screener data with Yahoo candles; cannot place orders."""
+
+    def __init__(
+        self,
+        client: TradingViewPublicClient | None = None,
+        candle_provider: YahooMarketDataProvider | None = None,
+        ttl_seconds: float = 15.0,
+    ) -> None:
+        self.client = client or TradingViewPublicClient()
+        self.candle_provider = candle_provider or YahooMarketDataProvider()
+        self.ttl = timedelta(seconds=max(0.1, ttl_seconds))
+        self._quote_cache: dict[str, MarketQuote] = {}
+        self._locks: dict[str, asyncio.Lock] = {}
+
+    def _lock(self, key: str) -> asyncio.Lock:
+        return self._locks.setdefault(key, asyncio.Lock())
+
+    async def prefetch_quotes(self, symbols: Iterable[StockSymbol]) -> None:
+        """Batch fetch quotes from TradingView to populate cache for all watchlist symbols."""
+        sym_list = list(symbols)
+        if not sym_list:
+            return
+        try:
+            raw_quotes = await self.client.get_quotes(sym_list)
+            now = datetime.now(timezone.utc)
+            for sym in sym_list:
+                ticker = self.client.provider_ticker(sym)
+                data = raw_quotes.get(ticker)
+                if data and "last_price" in data:
+                    self._quote_cache[sym.canonical] = MarketQuote(
+                        sym, Decimal(str(data["last_price"])), now, "TRADINGVIEW", 0
+                    )
+        except Exception:
+            pass
+
+    async def get_quote(self, symbol: StockSymbol) -> MarketQuote:
+        key = symbol.canonical
+        now = datetime.now(timezone.utc)
+        cached = self._quote_cache.get(key)
+        if cached and cached.is_fresh(now, self.ttl):
+            return cached
+        async with self._lock(key):
+            now = datetime.now(timezone.utc)
+            cached = self._quote_cache.get(key)
+            if cached and cached.is_fresh(now, self.ttl):
+                return cached
+            try:
+                raw = await self.client.get_quote(symbol)
+                quote = MarketQuote(
+                    symbol, Decimal(str(raw["last_price"])), now, "TRADINGVIEW", 0
+                )
+                self._quote_cache[key] = quote
+                return quote
+            except Exception:
+                return await self.candle_provider.get_quote(symbol)
+
+    async def get_candles(self, symbol: StockSymbol, timeframe: str, limit: int) -> list[dict[str, Any]]:
+        return await self.candle_provider.get_candles(symbol, timeframe, limit)
+
+    async def close(self) -> None:
+        await self.client.close()
         await self.candle_provider.close()

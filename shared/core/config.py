@@ -25,12 +25,16 @@ class AppConfig(BaseSettings):
         default=False, validation_alias=AliasChoices("TRADING_ENABLED", "trading_enabled")
     )
     broker: Literal["PAPER"] = Field(default="PAPER", validation_alias=AliasChoices("BROKER", "broker"))
-    market_data_provider: Literal["YAHOO", "DHAN"] = Field(
+    market_data_provider: Literal["YAHOO", "DHAN", "TRADINGVIEW"] = Field(
         default="YAHOO",
         validation_alias=AliasChoices("MARKET_DATA_PROVIDER", "PUBLIC_MARKET_DATA_PROVIDER", "market_data_provider"),
     )
     dhan_client_id: str | None = Field(default=None, validation_alias=AliasChoices("DHAN_CLIENT_ID", "dhan_client_id"))
     dhan_access_token: str | None = Field(default=None, validation_alias=AliasChoices("DHAN_ACCESS_TOKEN", "dhan_access_token"))
+    tradingview_api_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("TRADINGVIEW_API_KEY", "tradingview_api_key"),
+    )
 
     db_path: str = Field(default="data/project_beta.db", validation_alias=AliasChoices("DB_PATH", "db_path"))
     scanner_db_path: str = Field(default="data/project_beta.db", validation_alias=AliasChoices("SCANNER_DB_PATH", "scanner_db_path"))

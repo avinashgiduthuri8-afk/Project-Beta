@@ -6,11 +6,11 @@ covering one explicit ten-stage workflow.
 
 | Service | Stages | Owns | Reads |
 |---|---:|---|---|
-| `beta-scanner` | 1–5 | market quotes, candles, qualified signals | Yahoo or optional Dhan market data |
+| `beta-scanner` | 1–5 | market quotes, candles, qualified signals | TradingView, Yahoo, or optional Dhan market data |
 | `beta-paper` | 6–7 | paper cash, positions, fills, journals | Scanner database (read-only) |
 | `beta-learner` | 8–10 | diagnoses, validations, promoted calibrations | Scanner and Paper databases (read-only) |
 
-Yahoo delayed public data is the keyless default. Optional Dhan credentials
+TradingView and Yahoo public endpoints provide keyless market access by default. Optional Dhan credentials
 enable market data only. There is no broker order client, live service, crypto,
 CoinDCX, Zerodha, or VPS action in v1. Live trading is deferred to a separately
 designed v2.
@@ -30,13 +30,28 @@ Copy-Item config\beta.env.example .env
 python -m pytest tests -q
 ```
 
-Run services in this order in separate terminals:
+Run all three services concurrently in a single server process with unified Telegram C2:
+
+```powershell
+python main.py
+# or
+python -m services.main
+```
+
+Alternatively, individual services can be started independently if desired:
 
 ```powershell
 python -m services.scanner.main
 python -m services.paper_bot.main
 python -m services.learner.main
 ```
+
+## Market data providers
+
+Project Beta supports multiple keyless and authenticated market data providers:
+- `MARKET_DATA_PROVIDER=TRADINGVIEW`: High-speed real-time quotes, technical indicator aggregations (RSI, ATR, EMAs), and sub-₹250 market screening via TradingView's Indian equities screener API. Runs keyless by default (no credentials required), with optional `TRADINGVIEW_API_KEY` support.
+- `MARKET_DATA_PROVIDER=YAHOO`: Default keyless public delayed market data.
+- `MARKET_DATA_PROVIDER=DHAN`: Optional Dhan real-time market data feed.
 
 The included systemd units run the three services as the unprivileged
 `project-beta` account with bounded CPU and memory. The verified paper release

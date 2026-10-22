@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 import json
+from typing import Any
 
 import aiosqlite
 
@@ -14,10 +15,17 @@ from learner.safety import CalibrationSafety
 class IndianLearnerService:
     ALLOWED_STRATEGIES = {"STE", "HDA", "VCP", "BBS", "MTB", "NR7", "PPA", "MRB"}
 
-    def __init__(self, conn: aiosqlite.Connection, min_trades: int = 3, write_conn: aiosqlite.Connection | None = None) -> None:
+    def __init__(
+        self,
+        conn: aiosqlite.Connection,
+        min_trades: int = 3,
+        write_conn: aiosqlite.Connection | None = None,
+        telegram_client: Any | None = None,
+    ) -> None:
         self.conn = conn
         self.write_conn = write_conn or conn
         self.min_trades = max(1, min_trades)
+        self.telegram_client = telegram_client
 
     @staticmethod
     def _validate(row: dict) -> tuple[bool, Decimal | None]:
@@ -75,4 +83,15 @@ class IndianLearnerService:
              "PROMOTED", now),
         )
         await self.write_conn.commit()
+        if self.telegram_client and inserted > 0:
+            try:
+                await self.telegram_client.notify_learning_calibration(
+                    strategy=calibration["strategy"],
+                    weight_multiplier=float(multiplier),
+                    threshold=float(threshold),
+                    win_rate=float(win_rate) * 100.0,
+                    trades_count=len(rows),
+                )
+            except Exception:
+                pass
         return {"status": "COMPLETED", "stages": [8, 9, 10], "trade_count": len(rows), "invalid_rows": 0, "new_audits": inserted, "calibration": calibration}

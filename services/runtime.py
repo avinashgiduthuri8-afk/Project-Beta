@@ -25,8 +25,9 @@ from market.dhan_feed import DhanMarketFeed
 from market.instruments import DhanInstrumentMaster
 from market.holidays import HolidayCalendar
 from market.news_service import NewsSentimentService
-from market.provider import DhanMarketDataProvider, YahooMarketDataProvider
+from market.provider import DhanMarketDataProvider, TradingViewMarketDataProvider, YahooMarketDataProvider
 from market.symbols import StockSymbol
+from market.tradingview_client import TradingViewPublicClient
 from services.paper_bot.indian_service import IndianPaperService
 from services.paper_bot.risk import PaperRiskPolicy
 from services.scanner.indian_service import IndianScannerService
@@ -88,6 +89,9 @@ async def run_scanner(telegram_client: TelegramClient | None = None) -> None:
         feed = DhanMarketFeed(cfg.dhan_client_id or "", cfg.dhan_access_token or "")
         await feed.start(symbols, lambda quote: asyncio.sleep(0))
         provider = DhanMarketDataProvider(feed, YahooMarketDataProvider())
+    elif cfg.market_data_provider == "TRADINGVIEW":
+        tv_client = TradingViewPublicClient(api_key=cfg.tradingview_api_key)
+        provider = TradingViewMarketDataProvider(tv_client, candle_provider=YahooMarketDataProvider())
     else:
         provider = YahooMarketDataProvider()
 
@@ -108,6 +112,8 @@ async def run_scanner(telegram_client: TelegramClient | None = None) -> None:
     )
     try:
         while True:
+            if hasattr(provider, "prefetch_quotes"):
+                await provider.prefetch_quotes(symbols)
             await scanner.poll()
             await asyncio.sleep(cfg.scanner_poll_interval)
     finally:
@@ -160,7 +166,7 @@ async def run_paper(telegram_client: TelegramClient | None = None) -> None:
         await paper_conn.close()
 
 
-async def run_learner() -> None:
+async def run_learner(telegram_client: TelegramClient | None = None) -> None:
     cfg = get_config()
     cfg.validate_v1_safety()
     await initialize_runtime_database(cfg.db_path)
@@ -168,7 +174,12 @@ async def run_learner() -> None:
     learner_conn = await open_beta_database(cfg.db_path)
     learner_store = BetaStore(learner_conn)
     await learner_store.initialize()
-    service = IndianLearnerService(paper_conn, cfg.learner_min_trades, write_conn=learner_conn)
+    service = IndianLearnerService(
+        paper_conn,
+        cfg.learner_min_trades,
+        write_conn=learner_conn,
+        telegram_client=telegram_client,
+    )
     try:
         while True:
             await service.run_cycle()
@@ -199,6 +210,7 @@ async def run_all() -> None:
     print(f"🎯 Price Range: INR {cfg.price_floor_inr:.0f} - {cfg.price_ceiling_inr:.0f}")
     print(f"📋 Watchlist: {len(symbols)} liquid NSE symbols")
     print(f"⚡ Strategies: STE, HDA, VCP, BBS, NR7")
+    print(f"📡 Market Provider: {cfg.market_data_provider}")
     print(f"📱 Telegram Bot: Connected ({telegram.chat_id})")
     print("=" * 80)
 
@@ -206,7 +218,8 @@ async def run_all() -> None:
         await asyncio.gather(
             run_scanner(telegram_client=telegram),
             run_paper(telegram_client=telegram),
-            run_learner(),
+            run_learner(telegram_client=telegram),
+            telegram.start_polling(db_path=cfg.db_path),
         )
     finally:
         await telegram.close()

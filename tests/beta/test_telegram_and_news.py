@@ -56,3 +56,36 @@ def test_news_sentiment_scoring_rules():
     status, score, flags, top = service._score_headlines([])
     assert status == "UNKNOWN"
     assert score == 0
+
+
+@pytest.mark.asyncio
+async def test_telegram_client_default_token_and_keyboards():
+    client = TelegramClient()
+    assert client.is_configured
+    assert client.bot_token == "8399759111:AAFTDH54kYhmgkYF90Vt_fssOx9JDPKy6iQ"
+    assert client.chat_id == "476738400"
+
+    # Verify interactive menu keyboards
+    kb = client._build_main_keyboard()
+    assert "inline_keyboard" in kb
+    button_texts = [btn["text"] for row in kb["inline_keyboard"] for btn in row]
+    assert "📊 Status" in button_texts
+    assert "🎯 Signals" in button_texts
+    assert "📈 Positions" in button_texts
+    assert "💼 Balance" in button_texts
+    assert "🛑 Emergency Stop" in button_texts
+
+    back_kb = client._build_back_keyboard("cb:positions")
+    assert "inline_keyboard" in back_kb
+    assert back_kb["inline_keyboard"][0][0]["text"] == "🔙 Main Menu"
+
+    # Watchlist compilation
+    watchlist_text = await client._compile_watchlist_text()
+    assert "NSE LIQUID WATCHLIST" in watchlist_text
+
+    # Learner calibration notification
+    unconfigured = TelegramClient(bot_token=None, chat_id=None, resolve_default_credentials=False)
+    assert not await unconfigured.notify_learning_calibration("STE", 1.05, 88.0, 66.7, 9)
+
+    await client.close()
+    await unconfigured.close()

@@ -46,7 +46,7 @@ updated: 2026-10-22T15:30:00+05:30
 | `ORDER_SIZE_INR` | Max ₹1,000 all-in | Execution | Strict risk boundary including Indian statutory charges |
 | `INITIAL_PAPER_CASH` | ₹15,000 | Account | Single shared cash pool |
 | `DAILY_LOSS_LIMIT` | ₹750 warn / ₹900 block / ₹1,000 stop | Risk Policy | Hard multi-tier circuit breaker surviving restarts |
-| `PORTFOLIO_CAP` | Max 3 positions, 1 per sector | Portfolio | Strict diversification and exposure cap |
+| `PORTFOLIO_CAP` | Max 15 positions | Portfolio | Expanded multi-position swing capacity |
 | `ACTIVE_STRATEGIES` | `STE, HDA, VCP, BBS, NR7` | Strategy Pool | 5 verified cash equity strategies |
 | `TELEGRAM_BOT` | `8399759111:...` | Command & Control | Single bot routing all alerts and operator commands |
 

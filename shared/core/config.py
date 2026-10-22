@@ -50,8 +50,8 @@ class AppConfig(BaseSettings):
     daily_loss_warning_inr: float = Field(default=750.0, gt=0, le=750.0)
     daily_entry_block_inr: float = Field(default=900.0, gt=0, le=900.0)
     daily_loss_limit_inr: float = Field(default=1_000.0, gt=0, le=1_000.0)
-    max_open_positions: int = Field(default=3, ge=1, le=3)
-    max_positions_per_sector: int = Field(default=1, ge=1, le=1)
+    max_open_positions: int = Field(default=3, ge=1, le=25)
+    max_positions_per_sector: int = Field(default=1, ge=1, le=10)
     max_consecutive_losses: int = Field(default=3, ge=1, le=3)
     telegram_bot_token: str | None = Field(
         default=None,

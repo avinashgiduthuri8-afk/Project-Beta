@@ -66,7 +66,7 @@
 | **Max Order Size** | ₹1,000 all-in per trade | Enforced in `_affordable_quantity()` and `PaperRiskPolicy` |
 | **Price Bounds** | ₹0.00 < Price ≤ ₹250.00 | Scanner Stage 2 gate rejects quotes outside bounds |
 | **Daily Loss Circuit Breaker** | Warning: ₹750 \| Block: ₹900 \| Stop: ₹1,000 | Persisted in `beta_paper_daily_risk`; survives server restarts |
-| **Portfolio Locks** | Max 3 open positions, 1 per sector | `PaperRiskPolicy` checks before every entry |
+| **Portfolio Locks** | Max 15 open positions (configurable up to 25) | `PaperRiskPolicy` & `AppConfig.max_open_positions` |
 | **Consecutive Losses** | Max 3 consecutive losing trades | Pauses entries upon reaching streak limit |
 | **Active Strategies** | 5 core: `STE, HDA, VCP, BBS, NR7` | Evaluated in Scanner Stage 4; score ≥ 85 required |
 | **Learner Multiplier Bound** | `[0.80x – 1.20x]` | `IndianLearnerService` clamps calibration proposals |

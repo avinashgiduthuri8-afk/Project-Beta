@@ -56,6 +56,12 @@ def test_beta_v1_rejects_unknown_market_data_provider():
         AppConfig(_env_file=None, market_data_provider="ORDER_BROKER")
 
 
+def test_beta_v1_accepts_max_open_positions_up_to_15():
+    cfg = AppConfig(_env_file=None, max_open_positions=15)
+    assert cfg.max_open_positions == 15
+    cfg.validate_v1_safety()
+
+
 @pytest.mark.parametrize(
     "overrides",
     [

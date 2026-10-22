@@ -526,6 +526,13 @@ class TelegramClient:
             except Exception as e:
                 logger.debug("Error compiling status from db: %s", e)
 
+        max_pos = 3
+        try:
+            from core.config import get_config
+            max_pos = get_config().max_open_positions
+        except Exception:
+            pass
+
         stop_label = "🔴 EMERGENCY STOPPED" if self._emergency_stop_triggered or risk_state == "EMERGENCY_STOP" else f"🟢 {risk_state}"
 
         return (
@@ -537,7 +544,7 @@ class TelegramClient:
             "• <b>Paper Trading (Stages 6–7):</b> 🟢 ACTIVE\n"
             "• <b>Learner (Stages 8–10):</b> 🟢 ACTIVE\n\n"
             f"💵 <b>Available Cash:</b> ₹{cash:,.2f}\n"
-            f"📂 <b>Open Positions:</b> {open_pos} / 3 max\n"
+            f"📂 <b>Open Positions:</b> {open_pos} / {max_pos} max\n"
             f"🎯 <b>Signals Qualified:</b> {signals_cnt}\n"
             f"🛡️ <b>Risk Engine:</b> {stop_label}\n"
             f"⚠️ <b>Daily Loss Level:</b> ₹{daily_loss:,.2f} / ₹1,000 max\n"
@@ -554,10 +561,17 @@ class TelegramClient:
         await self.edit_message_text(text, chat_id, msg_id, reply_markup=self._build_back_keyboard("cb:status"))
 
     async def _compile_positions_text(self, db_path: str) -> str:
-        if not Path(db_path).exists():
-            return "📈 <b>ACTIVE OPEN POSITIONS (0 / 3)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━\n<i>Database not yet initialized.</i>"
+        max_pos = 3
+        try:
+            from core.config import get_config
+            max_pos = get_config().max_open_positions
+        except Exception:
+            pass
 
-        lines = ["📈 <b>ACTIVE OPEN SWING POSITIONS</b>", "━━━━━━━━━━━━━━━━━━━━━━━━━"]
+        if not Path(db_path).exists():
+            return f"📈 <b>ACTIVE OPEN POSITIONS (0 / {max_pos})</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━\n<i>Database not yet initialized.</i>"
+
+        lines = [f"📈 <b>ACTIVE OPEN SWING POSITIONS</b>", "━━━━━━━━━━━━━━━━━━━━━━━━━"]
         try:
             conn = await open_beta_database(db_path, read_only=True)
             try:
@@ -565,8 +579,9 @@ class TelegramClient:
                     positions = [dict(r) for r in await cur.fetchall()]
 
                 if not positions:
-                    lines.append("<i>No open positions currently. (3 slots available)</i>")
+                    lines.append(f"<i>No open positions currently. ({max_pos} slots available)</i>")
                 else:
+                    lines[0] = f"📈 <b>ACTIVE OPEN SWING POSITIONS ({len(positions)} / {max_pos})</b>"
                     for pos in positions:
                         sym = f"{pos['exchange']}:{pos['symbol']}"
                         qty = int(pos["quantity"])

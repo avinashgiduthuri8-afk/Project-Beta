@@ -124,27 +124,29 @@ def test_hda_strategy_evaluates_and_triggers():
 
 
 def test_vcp_strategy_evaluates_and_triggers():
-    """Verify VCP triggers on contracting waves (T1 >= T2 >= T3) + Donchian breakout."""
+    """Verify VCP triggers on contracting waves (T1 >= T2 >= T3 with >=15% decay) + volume dry-up + Donchian breakout."""
     symbol = StockSymbol.parse("NSE:INFY")
     strat = VCPStrategy()
 
     candles = []
     base_price = 1500.0
     for i in range(55):
-        # Create wave 1: T1 = 40 (bars 35 to 40)
-        # Create wave 2: T2 = 20 (bars 41 to 47)
-        # Create wave 3: T3 = 10 (bars 48 to 53)
-        if 35 <= i <= 40:
+        # Create wave 1: T1 = 40 (bars 34 to 39, matching [i-20:i-14])
+        # Create wave 2: T2 = 20 (bars 40 to 46, matching [i-14:i-7], decay ratio 20/40 = 0.50 <= 0.85)
+        # Create wave 3: T3 = 10 (bars 47 to 53, matching [i-7:i], decay ratio 10/20 = 0.50 <= 0.85, volume dry-up to 50k)
+        vol = 100000
+        if 34 <= i <= 39:
             h, l = base_price + 20, base_price - 20  # range = 40
-        elif 41 <= i <= 47:
+        elif 40 <= i <= 46:
             h, l = base_price + 10, base_price - 10  # range = 20
-        elif 48 <= i <= 53:
+        elif 47 <= i <= 53:
             h, l = base_price + 5, base_price - 5    # range = 10
+            vol = 50000                              # volume dries up in final contraction
         else:
-            h, l = base_price + 15, base_price - 15
-        candles.append({"open": base_price, "high": h, "low": l, "close": base_price, "volume": 100000})
+            h, l = base_price + 12, base_price - 12
+        candles.append({"open": base_price, "high": h, "low": l, "close": base_price, "volume": vol})
 
-    # Bar 54 breaks out over 20-bar high with 2x volume
+    # Bar 54 breaks out over 20-bar high with 2.5x volume
     candles[-1]["open"] = base_price
     candles[-1]["close"] = base_price + 25.0
     candles[-1]["high"] = base_price + 26.0
@@ -156,6 +158,71 @@ def test_vcp_strategy_evaluates_and_triggers():
     assert sig.strategy_name == "VCP"
     assert sig.symbol.canonical == "NSE:INFY"
     assert sig.stop_loss < sig.entry_price < sig.take_profit
+    assert sig.metadata["t2_ratio"] <= 0.85
+    assert sig.metadata["t3_ratio"] <= 0.85
+    assert sig.metadata["t3_vol_mean"] < 1.0
+
+
+def test_vcp_strategy_rejects_flat_consolidation_without_decay():
+    """Verify VCP rejects a flat horizontal channel where range does not contract by >=15%."""
+    symbol = StockSymbol.parse("NSE:INFY")
+    strat = VCPStrategy()
+
+    candles = []
+    base_price = 1500.0
+    for i in range(55):
+        # T1 = 20, T2 = 19.5, T3 = 19.0 (ratios ~0.97 > 0.85)
+        if 35 <= i <= 40:
+            h, l = base_price + 10.0, base_price - 10.0  # 20.0
+        elif 41 <= i <= 47:
+            h, l = base_price + 9.8, base_price - 9.7    # 19.5
+        elif 48 <= i <= 53:
+            h, l = base_price + 9.5, base_price - 9.5    # 19.0
+        else:
+            h, l = base_price + 10.0, base_price - 10.0
+        candles.append({"open": base_price, "high": h, "low": l, "close": base_price, "volume": 50000})
+
+    candles[-1]["open"] = base_price
+    candles[-1]["close"] = base_price + 25.0
+    candles[-1]["high"] = base_price + 26.0
+    candles[-1]["volume"] = 250000
+
+    df = enrich_candles_df(candles)
+    sig = strat.evaluate(df, symbol)
+    assert sig is None
+
+
+def test_vcp_strategy_rejects_without_pre_breakout_volume_dry_up():
+    """Verify VCP rejects setups where volume remains elevated during the final contraction."""
+    symbol = StockSymbol.parse("NSE:INFY")
+    strat = VCPStrategy()
+
+    candles = []
+    base_price = 1500.0
+    for i in range(55):
+        # Contraction tightening holds: 40 -> 20 -> 10
+        if 35 <= i <= 40:
+            h, l = base_price + 20, base_price - 20
+            vol = 100000
+        elif 41 <= i <= 47:
+            h, l = base_price + 10, base_price - 10
+            vol = 100000
+        elif 48 <= i <= 53:
+            h, l = base_price + 5, base_price - 5
+            vol = 180000  # Elevated volume in handle (failed dry-up)
+        else:
+            h, l = base_price + 15, base_price - 15
+            vol = 100000
+        candles.append({"open": base_price, "high": h, "low": l, "close": base_price, "volume": vol})
+
+    candles[-1]["open"] = base_price
+    candles[-1]["close"] = base_price + 25.0
+    candles[-1]["high"] = base_price + 26.0
+    candles[-1]["volume"] = 250000
+
+    df = enrich_candles_df(candles)
+    sig = strat.evaluate(df, symbol)
+    assert sig is None
 
 
 def test_bbs_strategy_evaluates_and_triggers():

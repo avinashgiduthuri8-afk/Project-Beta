@@ -47,7 +47,13 @@ class VCPStrategy(BaseStockStrategy):
         t2 = np.max(highs[i - 14 : i - 7]) - np.min(lows[i - 14 : i - 7])
         t3 = np.max(highs[i - 7 : i]) - np.min(lows[i - 7 : i])
 
-        if not (t1 >= t2 >= t3 > 0):
+        # Require genuine progressive contraction (each wave contracts by at least 15%)
+        if t1 <= 0 or (t2 / t1 > 0.85) or (t3 / t2 > 0.85):
+            return None
+
+        # Pre-breakout volume dry-up: verify supply exhaustion during final contraction wave
+        t3_vol_mean = float(np.mean(rvol[i - 7 : i]))
+        if t3_vol_mean > 1.0:
             return None
 
         entry = Decimal(str(round(closes[i], 2)))
@@ -68,5 +74,13 @@ class VCPStrategy(BaseStockStrategy):
             stop_loss=stop_loss,
             take_profit=take_profit,
             score=score,
-            metadata={"t1": float(t1), "t2": float(t2), "t3": float(t3), "rvol": float(rvol[i])},
+            metadata={
+                "t1": float(t1),
+                "t2": float(t2),
+                "t3": float(t3),
+                "t2_ratio": round(float(t2 / t1), 2),
+                "t3_ratio": round(float(t3 / t2), 2),
+                "t3_vol_mean": round(t3_vol_mean, 2),
+                "rvol": float(rvol[i]),
+            },
         )

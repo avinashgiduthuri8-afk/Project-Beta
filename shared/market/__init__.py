@@ -1,5 +1,14 @@
-"""NSE/BSE market-data package for Project Beta."""
+"""Shared stock-market domain and market-data package for Project Beta."""
 
+from .metadata import (
+    Currency,
+    Exchange,
+    ExchangeMetadata,
+    IdentifierType,
+    Market,
+    QuantityPolicy,
+    get_exchange_metadata,
+)
 from .models import MarketQuote
 from .provider import DhanMarketDataProvider, MarketDataProvider, TradingViewMarketDataProvider, YahooMarketDataProvider
 from .public_client import IndianStockPublicClient, TokenBucketRateLimiter
@@ -8,9 +17,11 @@ from .symbols import StockSymbol, validate_share_quantity
 from .tradingview_client import TradingViewPublicClient
 
 __all__ = [
-    "BSE_SESSION", "DhanMarketDataProvider", "IndianStockPublicClient",
+    "BSE_SESSION", "Currency", "DhanMarketDataProvider", "Exchange",
+    "ExchangeMetadata", "IdentifierType", "IndianStockPublicClient", "Market",
     "MarketDataProvider", "MarketQuote", "MarketSession", "NSE_SESSION",
-    "StockSymbol", "TokenBucketRateLimiter", "TradingViewMarketDataProvider",
-    "TradingViewPublicClient", "YahooMarketDataProvider",
-    "is_stock_market_open", "validate_share_quantity",
+    "QuantityPolicy", "StockSymbol", "TokenBucketRateLimiter",
+    "TradingViewMarketDataProvider", "TradingViewPublicClient",
+    "YahooMarketDataProvider", "get_exchange_metadata", "is_stock_market_open",
+    "validate_share_quantity",
 ]

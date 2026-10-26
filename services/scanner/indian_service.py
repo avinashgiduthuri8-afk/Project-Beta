@@ -10,6 +10,7 @@ from typing import Any, Callable, Iterable, Mapping
 
 from core.repository.beta_store import BetaStore
 from core.repository.quote_repo import QuoteRepository
+from market.fundamentals import FundamentalData, FundamentalDataProvider
 from market.provider import MarketDataProvider
 from market.session import BSE_SESSION, NSE_SESSION
 from market.symbols import StockSymbol
@@ -17,6 +18,7 @@ from scanner.validation import MarketDataValidator
 from scanner.eligibility import EligibilityEngine
 from scanner.models import RankingEvidence, ScannerCandidate
 from scanner.ranking import CandidateRanker
+from scanner.rules import ScreeningRuleConfigError, ScreeningRuleSet
 from execution.indian_charges import IndianEquityChargeModel
 from shared.research.indicators import enrich_candles_df
 from shared.strategies.base import BaseStockStrategy
@@ -48,6 +50,8 @@ class IndianScannerService:
         eligibility_engine: EligibilityEngine | None = None,
         instruments: Mapping[str, UniverseInstrument] | None = None,
         holiday_calendar: HolidayCalendar | None = None,
+        screening_rules: ScreeningRuleSet | Mapping[str, Any] | None = None,
+        fundamental_provider: FundamentalDataProvider | None = None,
     ) -> None:
         self.provider = provider
         self.store = store
@@ -67,6 +71,13 @@ class IndianScannerService:
         self.eligibility_engine = eligibility_engine
         self.instruments = dict(instruments or {})
         self.holiday_calendar = holiday_calendar
+        if screening_rules is None or isinstance(screening_rules, ScreeningRuleSet):
+            self.screening_rules = screening_rules
+        elif isinstance(screening_rules, Mapping):
+            self.screening_rules = ScreeningRuleSet.from_mapping(screening_rules)
+        else:
+            raise ScreeningRuleConfigError("screening_rules must be a rule set or mapping")
+        self.fundamental_provider = fundamental_provider
 
     def _affordable_quantity(self, symbol: StockSymbol, price: Decimal) -> int:
         quantity = int((Decimal("1000") / price).to_integral_value(rounding=ROUND_FLOOR))
@@ -117,8 +128,8 @@ class IndianScannerService:
                 await reject(symbol, 2, "NOT_AFFORDABLE", "One whole share plus charges exceeds INR 1,000")
                 continue
 
+            instrument = self.instruments.get(symbol.canonical)
             if self.eligibility_engine is not None:
-                instrument = self.instruments.get(symbol.canonical)
                 if instrument is None:
                     await reject(symbol, 1, "INSTRUMENT_INELIGIBLE", "Instrument-master evidence is missing")
                     continue
@@ -150,6 +161,14 @@ class IndianScannerService:
             if df.empty:
                 await reject(symbol, 4, "EMPTY_INDICATORS", "Indicator enrichment produced no rows")
                 continue
+            if self.screening_rules is not None and not self.screening_rules.matches(df):
+                await reject(
+                    symbol,
+                    4,
+                    "SCREENING_RULES_NOT_MATCHED",
+                    "Candidate did not match the configured screening rules",
+                )
+                continue
 
             # Filter slow movement stocks (require dynamic ATR%)
             atr_pct = 0.0
@@ -175,13 +194,22 @@ class IndianScannerService:
                 volatility_suitability=Decimal(str(min(max(atr_pct, 0.0), 10.0))),
                 data_quality=min(Decimal("10"), Decimal(len(validated.cleaned_candles)) / Decimal("12")),
             )
+            fundamentals = None
+            if self.ranker.fundamental_weights.enabled and self.fundamental_provider is not None:
+                try:
+                    provided = await self.fundamental_provider.get_fundamentals(symbol)
+                    if isinstance(provided, FundamentalData):
+                        fundamentals = provided
+                except Exception:
+                    fundamentals = None
             candidate = ScannerCandidate(
                 symbol=symbol,
-                sector="UNKNOWN",
+                sector=instrument.sector if instrument is not None else "UNKNOWN",
                 penny_stock=quote.price < Decimal("1"),
                 evidence_timestamp=quote.timestamp,
                 evidence=evidence,
                 affordability_preview=Decimal(affordable_quantity),
+                fundamentals=fundamentals,
             )
             prepared[symbol.canonical] = (candidate, quote, df)
 
@@ -191,7 +219,7 @@ class IndianScannerService:
                 "canonical_symbol": candidate.symbol.canonical,
                 "rank": index,
                 "score": candidate.ranking_score,
-                "evidence": {key: str(value) for key, value in asdict(candidate.evidence).items()},
+                "evidence": self._ranking_evidence(candidate),
             }
             for index, candidate in enumerate(ranked, start=1)
         ])
@@ -239,6 +267,10 @@ class IndianScannerService:
             inserted = await self.store.insert_signal_once(
                 signal_id, symbol, sig.strategy_name, sig.score, final_quote.price,
                 final_quote.timestamp.isoformat(), final_quote.source,
+                stop_loss=sig.stop_loss,
+                take_profit=sig.take_profit,
+                timeframe=sig.timeframe,
+                sector=candidate.sector,
             )
             if inserted:
                 result["qualified"] += 1
@@ -268,3 +300,14 @@ class IndianScannerService:
                 break
 
         return result
+
+    def _ranking_evidence(self, candidate: ScannerCandidate) -> dict[str, Any]:
+        evidence: dict[str, Any] = {
+            key: str(value) for key, value in asdict(candidate.evidence).items()
+        }
+        if self.ranker.fundamental_weights.enabled:
+            evidence["fundamental_score"] = str(candidate.fundamental_score)
+            evidence["fundamentals"] = (
+                candidate.fundamentals.as_dict() if candidate.fundamentals is not None else None
+            )
+        return evidence

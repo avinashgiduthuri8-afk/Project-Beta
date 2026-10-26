@@ -11,7 +11,7 @@ import httpx
 from decimal import Decimal
 
 from .symbols import StockSymbol
-from .universe import NseUniverse, UniverseInstrument
+from .universe import CashEquityUniverse, NseUniverse, UniverseInstrument
 
 INSTRUMENT_URL = "https://images.dhan.co/api-data/api-scrip-master.csv"
 
@@ -68,3 +68,6 @@ class DhanInstrumentMaster:
 
     def nse_universe(self) -> tuple[UniverseInstrument, ...]:
         return NseUniverse(lambda: self._universe.values()).refresh()
+
+    def cash_equity_universe(self) -> tuple[UniverseInstrument, ...]:
+        return CashEquityUniverse(lambda: self._universe.values()).refresh()

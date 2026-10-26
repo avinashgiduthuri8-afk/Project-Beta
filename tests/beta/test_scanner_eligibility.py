@@ -47,6 +47,14 @@ def test_holiday_calendar_fails_closed_without_current_year_coverage():
     assert not calendar.is_session_day("NSE", date(2027, 10, 19))
 
 
+def test_configured_holiday_calendar_covers_nse_and_bse_independently():
+    calendar = HolidayCalendar.from_json("config/nse_holidays.json")
+    assert calendar.is_session_day("NSE", date(2026, 10, 19))
+    assert calendar.is_session_day("BSE", date(2026, 10, 19))
+    assert not calendar.is_session_day("NSE", date(2026, 10, 20))
+    assert not calendar.is_session_day("BSE", date(2026, 10, 20))
+
+
 def test_price_boundaries_and_stricter_penny_liquidity():
     now = datetime(2026, 10, 16, 5, tzinfo=timezone.utc)
     engine = EligibilityEngine(max_quote_age=timedelta(minutes=15))

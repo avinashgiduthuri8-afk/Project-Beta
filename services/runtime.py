@@ -13,6 +13,16 @@ import json
 from pathlib import Path
 import sys
 
+_ROOT = Path(__file__).resolve().parent.parent
+for _p in [
+    _ROOT,
+    _ROOT / "services",
+    _ROOT / "shared",
+    _ROOT / "shared" / "core",
+]:
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
 from core.config import get_config
 from core.database import open_beta_database
 from core.migrations import initialize_beta_schema
@@ -75,7 +85,7 @@ async def run_scanner(telegram_client: TelegramClient | None = None) -> None:
     configured_symbols = load_watchlist()
     master = DhanInstrumentMaster()
     await master.refresh()
-    allowed = {item.symbol.canonical: item for item in master.nse_universe()}
+    allowed = {item.symbol.canonical: item for item in master.cash_equity_universe()}
     instruments = {
         symbol.canonical: allowed[symbol.canonical]
         for symbol in configured_symbols
@@ -203,6 +213,13 @@ async def run_all() -> None:
         price_ceiling=cfg.price_ceiling_inr,
         watchlist_count=len(symbols),
     )
+
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
 
     print("=" * 80)
     print("🚀 PROJECT-BETA SINGLE SERVER RUNTIME ONLINE")

@@ -25,6 +25,10 @@ NSE,E,EQUITY,777,SMALLCO,SM,0.05
     with pytest.raises(KeyError):
         master.resolve(StockSymbol.parse("NSE:BANKNIFTY"))
     assert [item.symbol.canonical for item in master.nse_universe()] == ["NSE:HDFCBANK"]
+    assert [item.symbol.canonical for item in master.cash_equity_universe()] == [
+        "NSE:HDFCBANK",
+        "BSE:RELIANCE",
+    ]
 
 
 @pytest.mark.asyncio

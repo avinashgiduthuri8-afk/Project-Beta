@@ -11,7 +11,7 @@ import aiosqlite
 from core.database import open_beta_database
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 OWNED_TABLES = (
     "beta_signals",
@@ -31,12 +31,13 @@ SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS beta_schema_version (
     singleton INTEGER PRIMARY KEY CHECK(singleton=1), version INTEGER NOT NULL
 );
-INSERT INTO beta_schema_version(singleton,version) VALUES(1,2)
+INSERT INTO beta_schema_version(singleton,version) VALUES(1,3)
 ON CONFLICT(singleton) DO UPDATE SET version=MAX(version, excluded.version);
 CREATE TABLE IF NOT EXISTS beta_signals (
     id TEXT PRIMARY KEY, symbol TEXT NOT NULL, exchange TEXT NOT NULL CHECK(exchange IN ('NSE','BSE')),
     security_id TEXT, strategy TEXT NOT NULL, score INTEGER NOT NULL CHECK(score BETWEEN 0 AND 100),
     price TEXT NOT NULL, market_timestamp TEXT NOT NULL, source TEXT NOT NULL,
+    stop_loss TEXT, take_profit TEXT, timeframe TEXT, sector TEXT NOT NULL DEFAULT 'UNKNOWN',
     status TEXT NOT NULL DEFAULT 'QUALIFIED'
 );
 CREATE TABLE IF NOT EXISTS beta_quotes (
@@ -106,6 +107,16 @@ class MigrationReport:
 
 async def initialize_beta_schema(conn: aiosqlite.Connection) -> None:
     await conn.executescript(SCHEMA_SQL)
+    signal_columns = set(await _columns(conn, "main", "beta_signals"))
+    signal_column_migrations = {
+        "stop_loss": "ALTER TABLE beta_signals ADD COLUMN stop_loss TEXT",
+        "take_profit": "ALTER TABLE beta_signals ADD COLUMN take_profit TEXT",
+        "timeframe": "ALTER TABLE beta_signals ADD COLUMN timeframe TEXT",
+        "sector": "ALTER TABLE beta_signals ADD COLUMN sector TEXT NOT NULL DEFAULT 'UNKNOWN'",
+    }
+    for name, statement in signal_column_migrations.items():
+        if name not in signal_columns:
+            await conn.execute(statement)
     quote_columns = set(await _columns(conn, "main", "beta_quotes"))
     if "bid" not in quote_columns:
         await conn.execute("ALTER TABLE beta_quotes ADD COLUMN bid TEXT")

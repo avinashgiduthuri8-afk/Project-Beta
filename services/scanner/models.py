@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 
+from market.fundamentals import FundamentalData
 from market.symbols import StockSymbol
 
 
@@ -46,6 +47,8 @@ class ScannerCandidate:
     ranking_score: Decimal = Decimal("0")
     reason_codes: tuple[str, ...] = ()
     strategy_results: tuple[str, ...] = ()
+    fundamentals: FundamentalData | None = None
+    fundamental_score: Decimal = Decimal("0")
 
 
 @dataclass(frozen=True, slots=True)

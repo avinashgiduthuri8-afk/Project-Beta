@@ -69,9 +69,10 @@ async def test_offline_ten_stage_flow_and_restart_idempotency(tmp_path):
     await paper_repo.initialize_account(Decimal("10000"))
     paper = IndianPaperService(paper_repo, Decimal("1000"))
     paper_report = await paper.handle_signal({**signal, "mode": "PAPER"}, quote, now)
-    close = await paper_repo.close_position(
-        paper_report["position_id"], Decimal("110"), signal["strategy"], now
+    await QuoteRepository(scanner_conn).upsert(
+        MarketQuote(symbol, Decimal("107"), now, "FAKE_YAHOO", 0)
     )
+    exits = await paper.evaluate_open_positions(QuoteRepository(scanner_conn), now)
 
     learner = IndianLearnerService(paper_conn, min_trades=1, write_conn=learner_conn)
     learn_report = await learner.run_cycle()
@@ -81,8 +82,13 @@ async def test_offline_ten_stage_flow_and_restart_idempotency(tmp_path):
     assert learn_report["stages"] == [8, 9, 10]
     assert sorted(set(scan_report["stages"] + paper_report["stages"] + learn_report["stages"])) == list(range(1, 11))
     assert paper_report["quantity"] == int(paper_report["quantity"])
-    assert Decimal(close["net_pnl"]) < (Decimal("110") - Decimal("100")) * paper_report["quantity"]
-    assert close["exit_charges"] > 0
+    assert signal["stop_loss"] == "97.0"
+    assert signal["take_profit"] == "106.9"
+    assert signal["timeframe"] == "15m"
+    assert signal["sector"] == "UNKNOWN"
+    assert exits[0]["reason"] == "TAKE_PROFIT_HIT"
+    assert Decimal(exits[0]["net_pnl"]) < (Decimal("107") - Decimal("100")) * paper_report["quantity"]
+    assert exits[0]["exit_charges"] > 0
     assert await count(scanner_conn, "beta_signals") == 1
     assert await count(scanner_conn, "beta_positions") == 1
     assert await count(paper_conn, "beta_positions") == 1

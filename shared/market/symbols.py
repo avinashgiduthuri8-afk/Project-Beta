@@ -7,6 +7,15 @@ from decimal import Decimal, InvalidOperation
 from typing import Literal
 import re
 
+from .metadata import (
+    Currency,
+    ExchangeMetadata,
+    IdentifierType,
+    Market,
+    QuantityPolicy,
+    get_exchange_metadata,
+)
+
 _SYMBOL = re.compile(r"^[A-Z0-9][A-Z0-9&.-]{0,29}$")
 
 
@@ -27,6 +36,30 @@ class StockSymbol:
     @property
     def canonical(self) -> str:
         return f"{self.exchange}:{self.trading_symbol}"
+
+    @property
+    def metadata(self) -> ExchangeMetadata:
+        return get_exchange_metadata(self.exchange)
+
+    @property
+    def market(self) -> Market:
+        return self.metadata.market
+
+    @property
+    def timezone(self) -> str:
+        return self.metadata.timezone
+
+    @property
+    def currency(self) -> Currency:
+        return self.metadata.currency
+
+    @property
+    def identifier_type(self) -> IdentifierType:
+        return self.metadata.identifier_type
+
+    @property
+    def quantity_policy(self) -> QuantityPolicy:
+        return self.metadata.quantity_policy
 
     def __str__(self) -> str:
         return self.canonical

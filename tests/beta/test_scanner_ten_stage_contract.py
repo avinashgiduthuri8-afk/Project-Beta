@@ -43,11 +43,16 @@ async def test_scanner_runs_stages_one_to_five_and_deduplicates():
 
     first = await scanner.poll()
     second = await scanner.poll()
+    signal = await store.get_signal(first["signal_id"])
 
     assert first["stages"] == [1, 2, 3, 4, 5, 6, 7, 8]
     assert first["qualified"] == 1
     assert second["qualified"] == 0
     assert second["duplicates"] == 1
+    assert signal["stop_loss"] == "106.7"
+    assert signal["take_profit"] == "117.59"
+    assert signal["timeframe"] == "15m"
+    assert signal["sector"] == "UNKNOWN"
     await conn.close()
 
 

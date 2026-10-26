@@ -28,13 +28,22 @@ class BetaStore:
         price: Decimal,
         market_timestamp: str,
         source: str,
+        stop_loss: Decimal | None = None,
+        take_profit: Decimal | None = None,
+        timeframe: str | None = None,
+        sector: str = "UNKNOWN",
     ) -> bool:
         cursor = await self.conn.execute(
             """INSERT OR IGNORE INTO beta_signals
-            (id,symbol,exchange,security_id,strategy,score,price,market_timestamp,source)
-            VALUES (?,?,?,?,?,?,?,?,?)""",
+            (id,symbol,exchange,security_id,strategy,score,price,market_timestamp,source,
+             stop_loss,take_profit,timeframe,sector)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (signal_id, symbol.trading_symbol, symbol.exchange, symbol.security_id,
-             strategy, int(score), str(price), market_timestamp, source),
+             strategy, int(score), str(price), market_timestamp, source,
+             str(stop_loss) if stop_loss is not None else None,
+             str(take_profit) if take_profit is not None else None,
+             timeframe,
+             str(sector or "UNKNOWN").upper()),
         )
         await self.conn.commit()
         return cursor.rowcount == 1

@@ -1,99 +1,116 @@
 ---
 milestone: V1 Paper Fleet Execution & Autonomous Optimization
-version: 1.1.0
-updated: 2026-10-22T15:30:00+05:30
+version: 1.3.0
+updated: 2026-10-26T11:58:00+05:30
 ---
 
 # Roadmap — Project Beta
 
 > **Current Milestone:** V1 Paper Fleet Execution & Autonomous Optimization  
-> **Status:** 🟢 Active (Milestone 1 Core Delivered; Milestone 2 Forward Optimization Active)
+> **Status:** 🟢 Active (Priorities 1–6 Delivered; Priority 7A/7B Designed & Verified; Priority 8 Complete)
 
 ---
 
-## Must-Haves for Project Beta v1 Operational Success
+## High-Level Priority Status
 
-- [x] Deterministic 10-stage execution pipeline across Scanner (1–5), Paper (6–7), and Learner (8–10). (V1-1)
-- [x] Sub-₹250 NSE/BSE stock filtering and ₹1,000 all-in trade affordability model with full Indian charges. (V1-2)
-- [x] Daily loss circuit breakers (Warning at ₹750, Block at ₹900, Emergency Stop at ₹1,000) surviving restarts. (V1-3)
-- [x] High-speed keyless TradingView screener, batch quote collection, and Yahoo fallback. (V1-4)
-- [x] Consolidated single-server process (`python main.py`) running all engines concurrently. (V1-5)
-- [x] Interactive Telegram C2 mission control with rich cards, inline buttons, and emergency pause controls. (V1-6)
-- [ ] Accumulation of forward paper trades across the 5 approved strategies (STE, HDA, VCP, BBS, NR7). (V1-7)
-- [ ] Promotion of autonomous learner parameter calibrations based on closed paper trades. (V1-8)
-- [ ] Activation of live Dhan v2 WebSocket feed upon completion of KYC segment review. (V1-9)
-
----
-
-## Completed Phases
-
-### Phase 1: Ten-Stage Deterministic Workflow & Shared Database
-**Status:** ✅ Completed  
-**Objective:** Establish unified SQLite storage with WAL, migrations, and the 10-stage paper trading contract.  
-- [x] Plan 1.1: Deploy `open_beta_database` and schema migrations (`beta_quotes`, `beta_signals`, `beta_positions`, `beta_learner_calibrations`).
-- [x] Plan 1.2: Implement 5-strategy scanner evaluation (`STE, HDA, VCP, BBS, NR7`) with deterministic candidate ranking.
-- [x] Plan 1.3: Enforce strict paper-only execution mode in canonical `AppConfig`.
-
-### Phase 2: Indian Charges Model & Risk Policy
-**Status:** ✅ Completed  
-**Objective:** Implement realistic Indian cash-equity charges and multi-tier circuit breakers.  
-- [x] Plan 2.1: Implement `IndianEquityChargeModel` (brokerage, STT, exchange, SEBI, GST, stamp duty, slippage).
-- [x] Plan 2.2: Implement `PaperRiskPolicy` with ₹1,000 order ceiling, ₹750/₹900/₹1,000 loss gates, and max 3 positions.
-- [x] Plan 2.3: Verify emergency-stop persistence across process restarts.
-
-### Phase 3: Market Data Providers (TradingView, Yahoo, Dhan)
-**Status:** ✅ Completed  
-**Objective:** Provide resilient, keyless, and broker-connected market data feeds.  
-- [x] Plan 3.1: Build `IndianStockPublicClient` for Yahoo delayed quotes and candles.
-- [x] Plan 3.2: Implement `TradingViewPublicClient` with batch quote fetching and sub-₹250 equities screener.
-- [x] Plan 3.3: Implement `DhanMarketFeed` WebSocket client with automatic public candle provider fallback.
-
-### Phase 4: Single Server Consolidation & Telegram C2
-**Status:** ✅ Completed  
-**Objective:** Consolidate 3 separate services into a single server runtime with bidirectional Telegram controls.  
-- [x] Plan 4.1: Create unified entrypoints (`main.py` and `services/main.py`) running all engines concurrently.
-- [x] Plan 4.2: Enhance `TelegramClient` with default credentials (`8399759111`, `476738400`) and live alert dispatchers.
-- [x] Plan 4.3: Implement Telegram C2 polling loop, inline navigation keyboards, and live `/tv_scan` command.
-
----
-
-## Active & Upcoming Phases
-
-### Phase 5: Forward Paper Run & Fleet Telemetry Accumulation
-**Status:** 🔄 In Progress  
-**Objective:** Run the consolidated server continuously to accumulate forward paper trades on liquid NSE equities.  
-- [x] Plan 5.1: Initialize single server runtime with 16 liquid NSE universe stocks.
-- [ ] Plan 5.2: Monitor signal generation, affordable entries, and trailing exit ratchets.
-- [ ] Plan 5.3: Track daily P&L and risk limit compliance.
-
-### Phase 6: Learner Autonomous Calibration & Promotion
-**Status:** ⚪ Scheduled  
-**Objective:** Accumulate minimum trades (≥ 3) per strategy to trigger autonomous learning cycles.  
-- [ ] Plan 6.1: Run `IndianLearnerService` audit on closed trades.
-- [ ] Plan 6.2: Validate candidate parameters within [0.80x – 1.20x] boundaries.
-- [ ] Plan 6.3: Promote qualified calibrations to active scanner evaluation and alert Telegram operator.
-
-### Phase 7: Dhan KYC Activation & Production Cutover
-**Status:** ⚪ Scheduled (Waiting on Dhan Compliance)  
-**Objective:** Cut over real-time market data feed to Dhan WebSocket once KYC status changes `dataPlan` to Active.  
-- [ ] Plan 7.1: Verify segment activation via `https://api.dhan.co/v2/profile`.
-- [ ] Plan 7.2: Switch `MARKET_DATA_PROVIDER=DHAN` in `.env`.
-- [ ] Plan 7.3: Validate continuous tick streaming without connection drops.
-
----
-
-## Progress Summary
-
-| Phase | Description | Status | Plans Completed |
+| Priority | Component | Status | Deliverable |
 |---|---|---|---|
-| **Phase 1** | Ten-Stage Workflow & Shared DB | ✅ Completed | 3 / 3 (100%) |
-| **Phase 2** | Indian Charges & Risk Policy | ✅ Completed | 3 / 3 (100%) |
-| **Phase 3** | Market Data Ingestion & TV Provider | ✅ Completed | 3 / 3 (100%) |
-| **Phase 4** | Single Server & Telegram C2 | ✅ Completed | 3 / 3 (100%) |
-| **Phase 5** | Forward Paper Fleet Execution | 🔄 In Progress | 1 / 3 (33%) |
-| **Phase 6** | Autonomous Learner Calibration | ⚪ Scheduled | 0 / 3 (0%) |
-| **Phase 7** | Dhan KYC Activation & Feed Cutover | ⚪ Scheduled | 0 / 3 (0%) |
+| **Priority 1** | India paper-trading integrity | ✅ Complete | 10-stage execution contract, sub-₹250 filter, ₹1,000 ceiling |
+| **Priority 2** | Market-neutral metadata | ✅ Complete | Unified `StockSymbol`, tick size, lot size, market metadata |
+| **Priority 3** | Configurable scanner core | ✅ Complete | Dynamic scanner rules, penny-stock gates, ranking engine |
+| **Priority 4** | Fundamental-data and ranking | ✅ Complete | Debt/equity filters, earnings momentum, composite scoring |
+| **Priority 5** | Historical backtesting engine | ✅ Complete | Zero look-ahead replay, multi-strategy backtest runner |
+| **Priority 6** | Read-only analytics service | ✅ Complete | Signals, backtest curves, drawdown, trade statistics |
+| **Priority 7A**| Execution Readiness & Design | ✅ Complete | Design spec, API gateway, state machine, risk gates |
+| **Priority 7B**| Broker-Neutral Execution Foundation | ✅ Complete | `OrderIntent`, `BrokerOrderUpdate`, `MockBroker`, SQLite store |
+| **Priority 7C**| Forward Paper Telemetry & Gate | 🔄 In Progress | Accumulating $\ge 200$ forward paper trades via `main.py` |
+| **Priority 7D**| Live Broker Integration | ⏳ Not Started | Gated until $\ge 200$ paper trades & Profit Factor $\ge 1.30$ |
+| **Priority 8** | Strategy & Scanner Optimization | ✅ Complete | VCP contraction decay & volume dry-up, TradingView real-time feed |
 
 ---
 
-*Roadmap updated and maintained under GSD standards.*
+## Detailed Component Breakdown
+
+### Priority 1: India Paper-Trading Integrity
+**Status:** ✅ Complete  
+- [x] Deterministic 10-stage execution pipeline across Scanner (1–5), Paper (6–7), and Learner (8–10).
+- [x] Sub-₹250 NSE/BSE stock filtering and ₹1,000 all-in trade affordability model with full Indian charges.
+- [x] Daily loss circuit breakers (Warning at ₹750, Block at ₹900, Emergency Stop at ₹1,000) surviving restarts.
+
+### Priority 2: Market-Neutral Metadata
+**Status:** ✅ Complete  
+- [x] `StockSymbol` contract supporting exchange, ticker, security ID, and lot size.
+- [x] NSE/BSE trading calendar and holiday integration via `config/nse_holidays.json`.
+- [x] Market instrument master resolution and normalization.
+
+### Priority 3: Configurable Scanner Core
+**Status:** ✅ Complete  
+- [x] Dynamic scanner rule evaluation with pluggable liquidity and spread filters.
+- [x] Multi-strategy candidate qualification (`STE`, `HDA`, `VCP`, `BBS`, `NR7`).
+- [x] Audited qualification decisions and deterministic candidate ranking.
+
+### Priority 4: Fundamental-Data and Ranking Foundation
+**Status:** ✅ Complete  
+- [x] Fundamental metric extractors (P/E, debt-to-equity, quarterly revenue growth).
+- [x] Negative earnings and over-leveraged penny-stock exclusion filters.
+- [x] Composite fundamental-technical scoring model.
+
+### Priority 5: Historical Backtesting Engine
+**Status:** ✅ Complete  
+- [x] Zero look-ahead bias execution: signals generated on bar $t$, entries executed at open of bar $t+1$.
+- [x] Full Indian statutory friction applied on each simulated trade leg.
+- [x] Strategy performance metrics (win rate, profit factor, max drawdown, Sharpe ratio).
+
+### Priority 6: Read-Only Analytics Service
+**Status:** ✅ Complete  
+- [x] Unified access to scanner signals, rankings, and persisted signal history.
+- [x] Backtest performance summaries, equity curves, drawdown, and trade statistics.
+- [x] Data freshness telemetry and persisted scanner failure audits.
+- [x] Enforced `mode=ro` and `PRAGMA query_only = ON;`.
+
+### Priority 7A: Execution Readiness and Broker-Integration Design
+**Status:** ✅ Complete  
+- [x] Complete design specification delivered in `docs/superpowers/specs/2026-10-23-priority-7a-execution-readiness-design.md`.
+- [x] API & Dashboard gateway architecture specified (FastAPI / ASGI, SSE event streaming, reader pool).
+- [x] State transition matrix formalized with terminal state immutability.
+- [x] Multi-tier risk gates: ₹1,000 all-in order ceiling, 15-position cap, NSE trading hours (09:15–15:30 IST), and persistent kill-switch.
+- [x] Forward Paper Validation Gate established ($\ge 200$ paper trades, Profit Factor $\ge 1.30$).
+
+### Priority 7B: Broker-Neutral Execution Foundation
+**Status:** ✅ Complete  
+- [x] Domain contracts in `services/order_execution/contracts.py`.
+- [x] Deterministic offline `MockBroker` with monotonic fill enforcement in `services/order_execution/broker.py`.
+- [x] Isolated execution database (`data/execution.db`) and store in `services/order_execution/store.py`.
+- [x] 14 dedicated execution foundation tests passing in `tests/beta/test_execution_foundation.py`.
+
+### Priority 7C: Forward Paper Fleet Telemetry & Validation Gate
+**Status:** 🔄 In Progress  
+- [x] Run consolidated single-server runtime (`python main.py`).
+- [ ] Accumulate $\ge 200$ closed paper trades across the 5 approved strategies.
+- [ ] Monitor realized win rate, profit factor, and statutory fee drag.
+- [ ] Verify 100% reconciliation between signals, positions, orders, and journals.
+
+### Priority 7D: Live Broker Integration
+**Status:** ⏳ Scheduled (Gated)  
+- [ ] Implement broker adapter for Dhan v2 / Zerodha Kite.
+- [ ] Pre-live Canary testing with single micro-order (₹200) requiring operator Telegram 2FA confirmation.
+- [ ] Enable live execution mode after full compliance sign-off.
+
+### Priority 8: Strategy Refinement and Scanner Optimization
+**Status:** ✅ Complete  
+- [x] External repository audit and threat quarantine (`HmERro3/indian-trading-skills` Trojan dropper blocked).
+- [x] VCP contraction wave ratio decay check ($T_2 \le 0.85 \times T_1$, $T_3 \le 0.85 \times T_2$) and pre-breakout volume dry-up check in `shared/strategies/vcp.py`.
+- [x] Test coverage expansion with negative tests in `tests/beta/test_five_strategies.py`.
+- [x] Scanner diagnostics: Identified Yahoo stale quote rejections; switched default provider to `TRADINGVIEW`.
+- [x] Expanded sub-₹250 liquid cash watchlist from 16 to 31 stocks.
+
+---
+
+## Test Suite Summary
+
+- **Total Tests:** 168
+- **Passing:** 168 (100%)
+- **Failing / Errors:** 0
+- **Duration:** 4.69s
+
+*Roadmap maintained under GSD standards.*
